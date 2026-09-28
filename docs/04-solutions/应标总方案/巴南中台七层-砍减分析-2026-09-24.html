@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>巴南智能体中台 · 七层砍减分析</title>
+<style>
+:root {
+  --fs-body: 15px;
+  --fs-h1: 26px;
+  --fs-h2: 19px;
+  --fs-small: 13px;
+  --color-text: #1f2328;
+  --color-muted: #6b7280;
+  --color-bg: #ffffff;
+  --color-surface: #f7f8fa;
+  --color-border: #e3e6ea;
+  --color-accent: #1f6feb;
+  --color-keep: #1a7f37;
+  --color-mid: #9a6700;
+  --color-cut: #b5442f;
+  --ff-body: -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --space-1: 8px;
+  --space-2: 14px;
+  --space-3: 22px;
+  --space-4: 34px;
+}
+body {
+  font-family: var(--ff-body, sans-serif);
+  font-size: var(--fs-body, 15px);
+  color: var(--color-text, #1f2328);
+  background: var(--color-bg, #fff);
+  line-height: var(--lh, 1.7);
+  max-width: var(--w, 1000px);
+  margin: 0 auto;
+  padding: var(--space-4, 34px) var(--space-3, 22px);
+}
+h1 {
+  font-size: var(--fs-h1, 26px);
+  margin: 0 0 var(--space-1, 8px);
+  letter-spacing: var(--ls, -0.3px);
+}
+h2 {
+  font-size: var(--fs-h2, 19px);
+  margin: var(--space-4, 34px) 0 var(--space-2, 14px);
+  padding-left: var(--pl, 10px);
+  border-left: var(--bl, 3px solid var(--color-accent, #1f6feb));
+}
+p { margin: 0 0 var(--space-2, 14px); }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 var(--space-3, 22px);
+  font-size: var(--fs-small, 13px);
+}
+thead th {
+  background: var(--color-surface, #f7f8fa);
+  text-align: left;
+  padding: var(--space-1, 8px) var(--pt, 10px);
+  border: var(--bd, 1px solid var(--color-border, #e3e6ea));
+  font-weight: var(--fw, 600);
+  white-space: nowrap;
+}
+tbody td {
+  padding: var(--space-1, 8px) var(--pt, 10px);
+  border: var(--bd, 1px solid var(--color-border, #e3e6ea));
+  vertical-align: top;
+}
+tbody tr:nth-child(even) td { background: var(--color-surface, #f7f8fa); }
+.meta {
+  color: var(--color-muted, #6b7280);
+  font-size: var(--fs-small, 13px);
+  margin-bottom: var(--space-3, 22px);
+  padding-bottom: var(--space-2, 14px);
+  border-bottom: var(--bd, 1px solid var(--color-border, #e3e6ea));
+}
+.tag {
+  display: inline-block;
+  padding: var(--pt2, 1px 7px);
+  border-radius: var(--br, 3px);
+  font-size: var(--fs-small, 13px);
+  font-weight: var(--fw, 600);
+  white-space: nowrap;
+}
+.t-keep { color: var(--color-keep, #1a7f37); background: var(--bg-keep, #eaf5ec); }
+.t-mid { color: var(--color-mid, #9a6700); background: var(--bg-mid, #fdf5e3); }
+.t-cut { color: var(--color-cut, #b5442f); background: var(--bg-cut, #fbece8); }
+.lead {
+  background: var(--color-surface, #f7f8fa);
+  border-left: var(--bl2, 3px solid var(--color-cut, #b5442f));
+  padding: var(--space-2, 14px) var(--space-3, 22px);
+  margin: 0 0 var(--space-3, 22px);
+}
+.lead p:last-child { margin-bottom: 0; }
+.small { color: var(--color-muted, #6b7280); font-size: var(--fs-small, 13px); }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<h1>巴南智能体中台 · 七层砍减分析</h1>
+<p class="meta">依据：0922 信息科现场会转写全文（00:52:59）· 0920 售前内部会纪要 · 中台七层定义（L1–L7）　｜　编制：2026-09-24　｜　口径：内部粗估，用于相对排序，不作为对外报价</p>
+
+<div class="lead">
+<p><strong>一句话结论：砍的授权，客户在 0922 会上已经自己给了。</strong></p>
+<p>招标文件里"统一技术底座"是六大项；主任原话只要"<strong>基本管理功能</strong>……比如<strong>算力的池化</strong>、<strong>模型的纳管</strong>，这几个稍微重要一点的，先纳入到一期里面来"。六大项里他点了两项——这是最硬的口子。</p>
+<p>按客户口径收口，中台七层自研量可压掉约 <strong>2/3</strong>：全量约 275–415 人日，一期降级后约 90–125 人日，<strong>净省约 180–300 人日</strong>；叠加七层之外的三刀（影像/病理链路、驾驶舱、数据集），总省约 <strong>260–430 人日</strong>。</p>
+<p>关键动作不是"削减交付"，而是把砍掉的部分写成<strong>分期路线图</strong>——用主任自己的话背书："做浅一点效率更高……有利于第二期的推动。"</p>
+</div>
+
+<h2>一、七层逐层砍减表</h2>
+<p>每层的判断都以 0922 现场会原话为依据，不凭推测。人日为内部粗估区间。</p>
+
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>招标要求（条款）</th>
+<th>客户 0922 口径</th>
+<th>一期建议</th>
+<th>依据</th>
+<th class="num">省（人日）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L1</strong><br>容器化基础设施底座</td>
+<td>容器化部署、任务编排、资源隔离、日志监控、权限管控（条款一）</td>
+<td>陈焕提"先上简单 Docker，不上 K8S"，主任当场同意；只要给 Linux 系统，容器化我方自己做</td>
+<td><span class="tag t-mid">降级</span> 保留：Docker 容器化 + 离线镜像包 + 基础日志。<br>砍掉：K8S 多节点高可用集群、网络策略编排、统一身份认证对接、私有镜像仓库（改用离线 tar 包分发）</td>
+<td>转写 00:48:36–00:48:56；主任"有现成的集群""直接克隆过来"</td>
+<td class="num">30–45</td>
+</tr>
+<tr>
+<td><strong>L2</strong><br>算力资源池与调度</td>
+<td>GPU/CPU 池化、动态分配、优先级调度、任务熔断、异常告警（条款一）</td>
+<td><strong>点名要保</strong>——"算力的池化……先纳入到一期"</td>
+<td><span class="tag t-keep">保，缩水</span> 保留：资源池台账 + 任务队列 + 基础阈值告警。<br>砍掉：显存切分、动态弹性调度、熔断策略矩阵、多维告警分级</td>
+<td>转写 00:46:59–00:47:00</td>
+<td class="num">15–25</td>
+</tr>
+<tr>
+<td><strong>L3</strong><br>多模型统一接入管理</td>
+<td>大语言模型 + <strong>影像 AI</strong> + <strong>病理 AI</strong> 多类型纳管、注册、版本、启停、监控（条款二）</td>
+<td><strong>点名要保</strong>——"模型的纳管……先纳入到一期"</td>
+<td><span class="tag t-cut">砍一半</span> 只纳管<strong>大语言模型</strong>（注册/版本/启停/监控/台账）。<br>砍掉：影像 AI、病理 AI 模型的逐厂商协议适配。保留《模型接入标准化规范》与接口预留</td>
+<td>宫颈癌影像 AI 已当面论证走不通（CT 看不到宫颈，宫腔镜归超声不归放射 PACS）；医院无影像辅助决策系统；现有 CT 上 3 个小模型是单机、与系统完全脱离；区域影像数据存区卫健委云、不落地本地；谢总定调"<strong>还是以病历为主吧</strong>"</td>
+<td class="num">35–60</td>
+</tr>
+<tr>
+<td><strong>L4</strong><br>智能体开发与快速迭代</td>
+<td>低代码/配置化开发工具、提示词编排、工作流编排、灰度发布、版本回滚（条款三）</td>
+<td>未提及；只说要"基本管理功能"</td>
+<td><span class="tag t-cut">大幅降级</span> 保留：提示词模板管理 + 规则配置 + 简单工作流（用现成编排引擎，配置界面即可）。<br>砍掉：可视化拖拽编辑器、多智能体协同编排、灰度发布、独立调试环境。版本回滚用配置快照实现</td>
+<td>一期只交付 4–5 个具体智能体，没有"第二批开发者"，低代码平台是为未来准备的，一期投产即闲置</td>
+<td class="num">40–75</td>
+</tr>
+<tr>
+<td><strong>L5</strong><br>服务网关与能力封装</td>
+<td>统一 AI 服务网关、接口鉴权、限流、熔断、流量统计、调用链路日志（条款四）</td>
+<td>未提及</td>
+<td><span class="tag t-mid">降级</span> 保留：成熟网关开箱配置（鉴权 + 限流 + 熔断）+ 基础访问日志。<br>砍掉：流量统计报表、全链路调用日志、统一服务目录</td>
+<td>一期调用方就是院内 4–5 个智能体，流量可预估，网关的治理价值有限，用开源组件配置即可，不需要自研</td>
+<td class="num">15–25</td>
+</tr>
+<tr>
+<td><strong>L6</strong><br>数据服务能力</td>
+<td>统一数据访问接口、对接专题数据集、权限控制、越权阻断、隐私脱敏、访问审计（条款五）</td>
+<td><strong>重大利好</strong>——所有系统已接 ESB 集成平台，"接口是复用的""不需要逐个去对接""哪里还有那么原始的方式"</td>
+<td><span class="tag t-cut">大幅砍</span> 只做：ESB 取数适配层 + 数据访问审计日志。<br>砍掉：高质量专题数据集（清洗/标注/标准化/去标识化全流程）、字段级行级权限引擎、脱敏引擎、数据仓库对接、消息队列/数据视图多形式对接</td>
+<td>ESB 复用（转写 00:29:47–00:30:24）；数据集上市须走科技成果转化 + 院内科研立项 + 伦理 + 知情同意，归口科教科，主任说"<strong>下次讨论这个</strong>"</td>
+<td class="num">30–45</td>
+</tr>
+<tr>
+<td><strong>L7</strong><br>运维监控与审计</td>
+<td>集中监控、指标告警、完整审计日志（条款六）</td>
+<td><strong>主任主动降级</strong>——"驾驶舱这块这次可以先放一放"；只做 PC 端简单 BI 看板，"一天更新一次"的静态看板也行；不做大屏/拼接屏适配、不做移动端、不做病理设备对接</td>
+<td><span class="tag t-mid">砍可视化、保审计</span> 保留：审计日志（不可篡改 + 留存期）+ 基础指标告警。<br>砍掉：监控大屏、PC 监控大盘自定义视图、驾驶舱联动</td>
+<td>转写 00:27:29–00:29:13</td>
+<td class="num">18–22</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>七层小计：</strong>全量 ≈ 275–415 人日 → 一期降级 ≈ 90–125 人日，<strong>净省约 180–300 人日</strong>。</p>
+
+<h2>二、七层之外：比砍层更值钱的三刀</h2>
+<p>中台七层是"底座"，但真正吃掉预算的是底座上面那几块硬件依赖重、外部协调重的内容。这三刀优先级高于任何一层。</p>
+
+<table>
+<thead>
+<tr>
+<th>砍减项</th>
+<th>客户口径</th>
+<th>处理建议</th>
+<th class="num">省（人日）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>影像 / 病理 AI 全链路</strong><br>含病理标本数字化设备、宫颈癌影像 AI、区域远程影像嵌入</td>
+<td>宫颈癌影像 AI 已当面论证走不通；区域远程影像数据存区卫健委云、不落地本地，接口要走<strong>万达 + 区卫健委</strong>协调；谢总定调"以病历为主"；主任说他会再跟领导沟通</td>
+<td><span class="tag t-cut">整块移二期</span> 软件侧只保留病历相关。若标书含病理扫描硬件，单这一块就是几十万到百万级，且与"以病历为主"的定调直接冲突</td>
+<td class="num">30–50<br><span class="small">（不含硬件）</span></td>
+</tr>
+<tr>
+<td><strong>数据驾驶舱</strong><br>五大主题看板 + PC/大屏双端</td>
+<td>主任主动说"先放一放"；降级为 PC 端简单 BI、静态更新即可</td>
+<td><span class="tag t-cut">砍到 1–2 个主题</span> 只做与一期强相关的主题（筛查业务、AI 运行监控）+ PC 端静态看板。砍掉大屏/拼接屏、移动端、病理设备对接、指标口径管理</td>
+<td class="num">20–30<br><span class="small">（另省大屏硬件）</span></td>
+</tr>
+<tr>
+<td><strong>高质量专题数据集 + 科研立项</strong><br>含伦理审查、知情同意、数据上市挂牌</td>
+<td>桂颖丽提出；主任判断"这个是小事"、归口科教科、"<strong>下次讨论</strong>"；现场筛查数据必须签知情同意，历史病历数据可免</td>
+<td><span class="tag t-cut">一期只做"数据可用"，不做"数据可交易"</span> 一期只建满足质控/生成的最小数据集；清洗标注、科研立项、伦理、挂牌交易整体移二期</td>
+<td class="num">30–50</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>三刀小计：约 80–130 人日。</strong>叠加七层，<strong>总省约 260–430 人日</strong>。</p>
+
+<h2>三、客户已明确表态"不做"的两项（直接划出边界）</h2>
+<p>这两项不需要谈判，会上已有明确表态，写进方案边界即可。</p>
+
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>客户原话 / 理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>两癌筛查系统对接</strong></td>
+<td>目前是手写 / Excel，<strong>没上系统</strong>，归"区中心"管、不归信息科。妇产科主任要求对接，但对象不存在</td>
+</tr>
+<tr>
+<td><strong>医生签名 / 数字化认证</strong></td>
+<td>主任："认证那块我们还早……<strong>短时间内都不会往外面做</strong>，因为那是个双刃剑。"现状只做患者签，医生签用个人签名图片、医院内部认可即可</td>
+</tr>
+</tbody>
+</table>
+
+<h2>四、不能砍的红线</h2>
+<p>标书已发出，功能级不可改。以下内容可以"降级实现"，但不能整块消失——验收时会逐条核对。</p>
+
+<table>
+<thead>
+<tr>
+<th>红线</th>
+<th>为什么不能砍</th>
+<th>降级兜底方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>条款（一）～（六）的<strong>功能名称必须在</strong></td>
+<td>招标文件已发布，功能级条款不可变更；一期边界只能在"数量 / 科室 / 病种 / 点位"维度收口（0920 已定原则）</td>
+<td>全部表述为"一期交付 X 能力，二期扩展至 Y"</td>
+</tr>
+<tr>
+<td>条款（二）"支持影像 AI、病理 AI 接入"</td>
+<td>L3 砍掉具体模型适配后，字面上会缺项</td>
+<td>交付<strong>接入规范 + 接口预留</strong>，不做具体厂商模型适配，用《模型接入标准化规范》满足条款</td>
+</tr>
+<tr>
+<td>条款（三）"低代码 / 配置化开发工具"</td>
+<td>L4 砍掉可视化平台后字面缺项</td>
+<td>交付"<strong>配置化</strong>"（提示词 + 规则 + 工作流配置），不做"低代码拖拽"，用配置界面 + 文档兜住</td>
+</tr>
+<tr>
+<td>条款（五）"对接专题数据集"</td>
+<td>L6 砍掉数据集全流程后字面缺项</td>
+<td>一期只接<strong>宫颈癌最小数据集</strong>（满足生成与质控所需），不做清洗标注全流程</td>
+</tr>
+<tr>
+<td><strong>审计日志</strong>（不可篡改 + 留存期）</td>
+<td>等保测评与电子病历分级评价的硬要求，条款（六）明文</td>
+<td>不降级。这是全项目里最不能省的一项</td>
+</tr>
+<tr>
+<td>模型注册台账 +《模型接入标准化规范》</td>
+<td>主任点名要的"模型纳管"，且是明文交付物</td>
+<td>不降级</td>
+</tr>
+<tr>
+<td>病历生成 → 草稿回写闭环</td>
+<td>一期验收锚点（"草稿层不落库，医生审核后保存落未定库"是主任认可的路径）</td>
+<td>不降级。这是整个项目能不能验收的关键路径</td>
+</tr>
+<tr>
+<td>质控缺陷工单闭环</td>
+<td>一期验收锚点（发现—分派—整改—复核—销号）</td>
+<td>不降级，但规则库范围收口到宫颈癌</td>
+</tr>
+<tr>
+<td>容器化 + 内网离线部署</td>
+<td>整个交付形态的前提，也是主任点头的 Docker 方案</td>
+<td>不降级</td>
+</tr>
+</tbody>
+</table>
+
+<h2>五、砍掉之后的三个风险</h2>
+<p>砍本身不难，难在砍完之后不被追认为"没做完"。三个风险要提前布防。</p>
+
+<table>
+<thead>
+<tr>
+<th>风险</th>
+<th>影响</th>
+<th>对策</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>把"降级"说成"不做"</strong></td>
+<td>验收时按条款核对，出现缺项，直接被扣</td>
+<td>一律表述为"<strong>分期路线图</strong>"：一期交付什么、二期扩展到什么。砍掉的东西全部在二期清单里有位置，不是消失</td>
+</tr>
+<tr>
+<td><strong>客户规划口径是"开头八九十万做全院"</strong></td>
+<td>与"只做宫颈癌"正面冲突，重演 0920 的预算缺口</td>
+<td>这是本次最大的范围风险，<strong>必须书面钉死</strong>。用主任自己的话做台阶：先宫颈癌 → 妇科 → 全院，且他本人要求"做浅"</td>
+</tr>
+<tr>
+<td><strong>中台降级后主任后续要求"补全"</strong></td>
+<td>二期扯皮、追加投入无人认账</td>
+<td>在方案里为每一层写明"一期能力 / 二期扩展路径"，把降级变成合同内的分期约定，而不是缩水</td>
+</tr>
+</tbody>
+</table>
+
+<h2>六、砍之前必须书面确认的 5 件事</h2>
+<p>这五个问题的答案会直接改变砍法，没确认之前不要定稿。</p>
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>待确认</th>
+<th>为什么影响砍法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="num">1</td>
+<td>一期到底上不上 GPU 卡？"新购的这台华为的相关东西"具体是什么（昇腾算力卡？鲲鹏？）？</td>
+<td>决定 L2 要不要做池化。如果 L3 已砍掉影像/病理模型，GPU 上只剩 LLM 推理，显存切分价值大幅下降，L2 可再降一档</td>
+</tr>
+<tr>
+<td class="num">2</td>
+<td>中台一期边界 = 算力池化 + 模型纳管，能否作为交付口径书面确认？</td>
+<td>这是七层能砍 2/3 的唯一依据。口头认同不算数</td>
+</tr>
+<tr>
+<td class="num">3</td>
+<td>驾驶舱降级确认：PC 端、静态更新、不做大屏/移动端/病理设备对接？</td>
+<td>主任已口头表态，需落到书面，否则验收时"五大主题看板"会回来</td>
+</tr>
+<tr>
+<td class="num">4</td>
+<td>影像/病理 AI 及病理数字化硬件是否确认移二期？（主任需再跟领导沟通）</td>
+<td>主任说的是"我再去跟领导沟通一下"，尚未定论。这是最大的成本包</td>
+</tr>
+<tr>
+<td class="num">5</td>
+<td>数据集与科研立项走不走？（归科教科）</td>
+<td>决定 L6 是"最小数据集"还是"完整数据集工程"，两者差 30–50 人日</td>
+</tr>
+</tbody>
+</table>
+
+<h2>七、一个战略选项：把 L1/L2 交给华为</h2>
+<p>主任在会上主动提到"跟华为约一下，<strong>他那边也有一个人在跟进这个项目</strong>"，可在中台、算力、资源调配上一并沟通。这不是客套——如果成立，是本次砍减里最大的一刀。</p>
+
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>我方全包</th>
+<th>L1/L2 交给华为</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>自研量</td>
+<td>L1–L7 全做</td>
+<td>再降 60–80 人日，我方只做 L3–L7 + 上层智能体</td>
+</tr>
+<tr>
+<td>信创适配风险</td>
+<td>我方承担（业界口径成本上浮 30%–80%，且我方无昇腾经验）</td>
+<td>转移给华为，鲲鹏/昇腾天然合规</td>
+</tr>
+<tr>
+<td>政府采购节奏</td>
+<td>11–12 月才可能到位，起码 3 个月起步</td>
+<td>华为已在政府采购盘子里，底座不用等我们</td>
+</tr>
+<tr>
+<td>代价</td>
+<td>—</td>
+<td>底座利润让出；需处理"华为做底座、我们做应用"的主导权与接口边界</td>
+</tr>
+</tbody>
+</table>
+
+<p class="small">建议：先约谈摸底，不主动让。这是商务决策，需谢总定；技术侧只需把"我方做 L3–L7 与上层智能体"的边界与接口预先想清楚。</p>
+
+<p class="small">说明：文中人日为内部粗估区间，用于判断砍减的相对优先级，不构成对外报价；报价口径与产品化、利润、硬件另计，需商务复核。客户原话引自 0922 转写全文，术语可能存在 ASR 误差（卫宁/魏宁/为您、万达/万宁、内涵质控/内涵自控、ESB），以实际为准。</p>
+
+</body>
+</html>

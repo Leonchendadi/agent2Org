@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>移植观测录入 + 查房记录生成 · MVP0 原型</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#fff; --border:#e3e6eb; --border2:#cdd3dc;
+  --text:#1a1d21; --text2:#5f6672; --text3:#8b929e;
+  --primary:#185FA5; --primary-bg:#E6F1FB;
+  --teal:#0F6E56; --teal-bg:#E1F5EE;
+  --purple:#534AB7; --purple-bg:#EEEDFE;
+  --amber:#854F0B; --amber-bg:#FAEEDA;
+  --red:#A32D2D; --red-bg:#FCEBEB;
+  --gray-bg:#F1EFE8; --gray:#5F5E5A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--text); font-size:13px; line-height:1.6;
+}
+.app{max-width:1500px;margin:0 auto;padding:16px}
+
+/* 身份锚定条 */
+.identity{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:12px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.identity .tag{
+  background:var(--primary-bg);color:var(--primary);border-radius:5px;
+  padding:3px 9px;font-size:12px;font-weight:500;white-space:nowrap;
+}
+.identity .tag.warn{background:var(--red-bg);color:var(--red)}
+.identity input{
+  border:1px solid var(--border);border-radius:6px;padding:5px 9px;
+  font-size:13px;font-family:inherit;background:#fff;color:var(--text);
+}
+.identity input:focus{outline:none;border-color:var(--primary)}
+.identity label{color:var(--text2);font-size:12px}
+.identity .sep{width:1px;height:22px;background:var(--border)}
+
+.main{display:grid;grid-template-columns:400px 1fr;gap:14px;align-items:start}
+@media(max-width:1100px){.main{grid-template-columns:1fr}}
+
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;margin-bottom:12px;
+}
+.card h2{
+  font-size:13px;font-weight:500;margin-bottom:4px;
+  display:flex;align-items:center;gap:8px;
+}
+.card h2 .num{
+  width:18px;height:18px;border-radius:50%;background:var(--primary);color:#fff;
+  font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.card .hint{color:var(--text3);font-size:12px;margin-bottom:10px;line-height:1.5}
+
+.row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.row label{width:52px;color:var(--text2);font-size:12px;flex-shrink:0}
+.row select,.row input{
+  flex:1;border:1px solid var(--border);border-radius:6px;padding:5px 8px;
+  font-size:13px;font-family:inherit;background:#fff;color:var(--text);min-width:0;
+}
+.row select:focus,.row input:focus{outline:none;border-color:var(--primary)}
+.row .unit{font-size:12px;color:var(--text3);white-space:nowrap}
+
+button{
+  font-family:inherit;font-size:13px;border-radius:6px;cursor:pointer;
+  border:1px solid var(--border2);background:#fff;color:var(--text);padding:5px 12px;
+}
+button:hover{background:var(--gray-bg)}
+button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+button.primary:hover{opacity:.88;background:var(--primary)}
+button.ghost{border-style:dashed;color:var(--text2)}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{
+  background:var(--gray-bg);border:1px solid var(--border);border-radius:12px;
+  padding:3px 10px;font-size:12px;color:var(--text2);cursor:pointer;user-select:none;
+}
+.chip:hover{background:var(--primary-bg);border-color:var(--primary);color:var(--primary)}
+textarea{
+  width:100%;border:1px solid var(--border);border-radius:6px;padding:8px 10px;
+  font-size:13px;font-family:inherit;line-height:1.7;resize:vertical;background:#fff;color:var(--text);
+}
+textarea:focus{outline:none;border-color:var(--primary)}
+
+table.obs{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+table.obs th{
+  text-align:left;color:var(--text3);font-weight:400;padding:4px 5px;
+  border-bottom:1px solid var(--border);white-space:nowrap;
+}
+table.obs td{padding:4px 5px;border-bottom:1px solid #f0f2f5;white-space:nowrap}
+table.obs tr.latest{background:var(--teal-bg)}
+table.obs .del{color:var(--text3);cursor:pointer;padding:0 4px}
+table.obs .del:hover{color:var(--red)}
+
+.alert{
+  border-radius:6px;padding:8px 11px;font-size:12px;margin-top:8px;line-height:1.6;
+}
+.alert.err{background:var(--red-bg);color:var(--red);border:1px solid #f0c9c9}
+.alert.ok{background:var(--teal-bg);color:var(--teal);border:1px solid #b8e4d5}
+
+/* 三选一 */
+.triple{display:flex;gap:6px;margin-bottom:6px;align-items:flex-start}
+.triple .lbl{width:52px;color:var(--text2);font-size:12px;flex-shrink:0;padding-top:5px}
+.triple .opts{display:flex;gap:5px;flex-wrap:wrap;flex:1}
+.opt{
+  border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;
+  cursor:pointer;background:#fff;color:var(--text2);user-select:none;
+}
+.opt:hover{border-color:var(--border2)}
+.opt.on{background:var(--primary-bg);border-color:var(--primary);color:var(--primary)}
+.opt.on.abn{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.opt.on.unk{background:var(--gray-bg);border-color:var(--gray);color:var(--gray)}
+.triple input.desc{
+  width:100%;margin-top:5px;border:1px solid var(--border);border-radius:6px;
+  padding:5px 8px;font-size:12px;font-family:inherit;
+}
+
+/* 输出 */
+.output-box{
+  background:#fcfcfd;border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;font-size:13.5px;line-height:2.05;min-height:190px;
+}
+.output-box .seg{border-radius:3px;padding:1px 2px}
+.src-obs{background:var(--teal-bg);color:#04342C}
+.src-doc{background:var(--primary-bg);color:#042C53}
+.src-tpl{color:var(--text2)}
+.src-id{background:var(--purple-bg);color:#26215C}
+.src-gap{background:var(--amber-bg);color:var(--amber);border:1px dashed var(--amber)}
+
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--text2)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+.gaps{margin-top:10px}
+.gap-item{
+  background:var(--amber-bg);border:1px solid #f0d9a8;border-radius:6px;
+  padding:6px 11px;font-size:12px;color:var(--amber);margin-bottom:5px;
+}
+.gaps .none{background:var(--teal-bg);border-color:#b8e4d5;color:var(--teal)}
+
+.banner{
+  background:var(--red-bg);border:1px solid #f0c9c9;border-radius:8px;
+  padding:9px 13px;font-size:12px;color:var(--red);margin-bottom:12px;line-height:1.65;
+}
+.banner b{font-weight:500}
+
+.history-item{
+  border:1px solid var(--border);border-radius:7px;padding:8px 11px;margin-bottom:7px;
+  font-size:12px;background:#fcfcfd;
+}
+.history-item .meta{color:var(--text3);font-size:11px;margin-bottom:3px;display:flex;justify-content:space-between}
+.history-item .body{color:var(--text2);line-height:1.7;max-height:56px;overflow:hidden}
+.history-layout{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:14px;align-items:start}
+.history-list{min-width:0}
+.thumb-panel{border-left:1px solid var(--border);padding-left:14px;min-width:0}
+.thumb-panel .panel-title{font-size:12px;color:var(--text2);font-weight:500;margin-bottom:3px}
+.thumb-panel .panel-hint{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:8px}
+.thumb-timeline{border:1px solid var(--border);border-radius:8px;background:#fcfcfd;padding:8px;overflow:visible}
+.thumb-timeline svg{display:block;width:100%;min-width:0;height:auto}
+.thumb-sequence{display:flex;flex-direction:column;gap:8px;min-width:0}
+.thumb-legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px;color:var(--text3);font-size:11px}
+.thumb-legend span{white-space:nowrap}
+.thumb-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:3px;vertical-align:-1px}
+.thumb-empty{border:1px dashed var(--border2);border-radius:8px;padding:18px 12px;color:var(--text3);font-size:12px;line-height:1.7;text-align:center}
+@media(max-width:820px){.history-layout{grid-template-columns:1fr}.thumb-panel{border-left:0;border-top:1px solid var(--border);padding-left:0;padding-top:12px}}
+.ctx{
+  background:var(--purple-bg);border-radius:6px;padding:7px 11px;font-size:12px;
+  color:#26215C;margin-bottom:9px;line-height:1.65;
+}
+.ctx .yesterday{color:var(--text2);margin-top:3px;font-size:11.5px}
+.ctx .reuse{
+  margin-top:6px;background:#fff;border:1px solid var(--purple);color:var(--purple);
+  border-radius:5px;padding:3px 9px;font-size:11.5px;cursor:pointer;display:inline-block;
+}
+.stat{color:var(--text3);font-size:11.5px;margin-top:8px;text-align:right}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="identity">
+    <span class="tag">身份锚定</span>
+    <label>姓名</label><input id="id-name" value="李某" style="width:72px">
+    <label>床号</label><input id="id-bed" value="1602" style="width:56px">
+    <label>住院号</label><input id="id-mrn" value="1125877" style="width:88px">
+    <div class="sep"></div>
+    <label>查房医师</label><input id="id-doc" value="张波" style="width:72px">
+    <select id="id-title" style="border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;font-family:inherit">
+      <option>住院医师</option><option>主治医师</option>
+      <option>副主任医师</option><option selected>主任医师</option>
+    </select>
+    <div class="sep"></div>
+    <span class="tag" id="enc-tag">就诊 1886-01</span>
+    <span class="tag warn" id="his-tag">HIS 未接入</span>
+  </div>
+
+  <div class="main">
+    <div>
+      <div class="card">
+        <h2><span class="num">1</span>移植观测录入</h2>
+        <div class="hint">
+          下拉选择，不手写。血运四要素走槽位<b>确定性回填</b>，不经过模型。
+        </div>
+        <div class="row"><label>时间</label><input id="obs-time" type="text" placeholder="自动取当前时间"></div>
+        <div class="row"><label>部位</label>
+          <select id="obs-part">
+            <option>左拇指</option><option>左食指</option><option>左中指</option><option>左环指</option>
+            <option>左小指</option><option>右拇指</option><option>右食指</option><option>右中指</option>
+            <option>右环指</option><option>右小指</option><option>左手</option><option>右手</option>
+            <option>左前臂</option><option>右前臂</option><option>左小腿</option><option>右小腿</option>
+            <option>左足</option><option>右足</option>
+          </select>
+        </div>
+        <div class="row"><label>颜色</label><select id="obs-color"></select></div>
+        <div class="row"><label>皮温</label><select id="obs-temp"></select></div>
+        <div class="row"><label>张力</label><select id="obs-tension"></select></div>
+        <div class="row"><label>毛细</label><select id="obs-cap"></select></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="primary" onclick="addObs()">添加本次观测</button>
+          <button class="ghost" onclick="injectDirty()">演示：注入串位脏数据</button>
+        </div>
+        <div id="obs-msg"></div>
+        <table class="obs" id="obs-table" style="display:none">
+          <thead><tr><th>时间</th><th>部位</th><th>颜色</th><th>皮温</th><th>张力</th><th>毛细</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">2</span>今日变化（口述）</h2>
+        <div class="hint">只说今天的变化。点下方短语可快捷填入，目标是<b>输入 20 字</b>。</div>
+        <div id="ctx-box"></div>
+        <div class="chips" id="chips-subj"></div>
+        <textarea id="in-subj" rows="2" placeholder="患者诉……（主诉 / 今日感受）"></textarea>
+        <div class="chips" id="chips-gen" style="margin-top:9px"></div>
+        <textarea id="in-gen" rows="2" placeholder="一般情况：精神、食欲、睡眠、二便"></textarea>
+        <div class="chips" id="chips-wound" style="margin-top:9px"></div>
+        <textarea id="in-wound" rows="2" placeholder="伤口 / 敷料 / 引流情况"></textarea>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">3</span>查体确认（禁止默认正常）</h2>
+        <div class="hint">每一项<b>必须显式选择</b>。选「未查」则生成时标为缺口，绝不写成「正常」。</div>
+        <div class="row"><label>T</label><input id="vt-t" placeholder="36.5" style="flex:0 0 62px"><span class="unit">℃</span>
+          <label style="width:auto;margin-left:6px">P</label><input id="vt-p" placeholder="80" style="flex:0 0 56px"><span class="unit">次/分</span></div>
+        <div class="row"><label>R</label><input id="vt-r" placeholder="20" style="flex:0 0 62px"><span class="unit">次/分</span>
+          <label style="width:auto;margin-left:6px">BP</label><input id="vt-bp" placeholder="120/80" style="flex:0 0 76px"><span class="unit">mmHg</span></div>
+        <div class="triple"><div class="lbl">心肺腹</div><div class="opts" id="opt-chest"></div></div>
+        <div class="triple"><div class="lbl">余肢体</div><div class="opts" id="opt-limb"></div></div>
+      </div>
+
+      <div class="card">
+        <h2><span class="num">4</span>查房诊疗意见</h2>
+        <div class="banner" style="margin-bottom:8px">
+          <b>红线：此处只能转写医生口述的既有决定。</b><br>
+          AI 不生成任何治疗建议、不推荐用药。留空则输出缺口提示，绝不补写。
+        </div>
+        <div class="chips" id="chips-opin"></div>
+        <textarea id="in-opin" rows="3" placeholder="例如：继续予消肿、抗感染对症治疗，继续观察患指血运情况"></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="primary" onclick="generate()" style="flex:1;padding:8px">生成查房记录</button>
+          <button onclick="clearAll()">清空</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>生成的查房记录</h2>
+        <div class="hint">鼠标悬停可看每句来源。绿色＝观测表槽位回填（确定性、零幻觉），蓝色＝医生口述，紫色＝身份，灰色＝固定模板，黄框＝缺口。</div>
+        <div class="output-box" id="output"><span style="color:var(--text3)">左侧录入后点击「生成查房记录」</span></div>
+        <div class="legend">
+          <span><i style="background:var(--teal-bg);border:1px solid var(--teal)"></i>观测表槽位</span>
+          <span><i style="background:var(--primary-bg);border:1px solid var(--primary)"></i>医生口述</span>
+          <span><i style="background:var(--purple-bg);border:1px solid var(--purple)"></i>身份信息</span>
+          <span><i style="background:var(--gray-bg);border:1px solid var(--gray)"></i>固定模板</span>
+          <span><i style="background:var(--amber-bg);border:1px dashed var(--amber)"></i>缺口待确认</span>
+        </div>
+        <div class="gaps" id="gaps"></div>
+        <div class="stat" id="stat"></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button onclick="copyOut(this)">复制全文</button>
+          <button class="primary" onclick="saveRecord()">存入病程链</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>病程链（本周）</h2>
+        <div class="hint">每次生成后存入，成为明天的上下文。<b>用得越久，明天要输入的越少。</b>右侧与病程链逐条纵向对齐，只演示左拇指颜色、皮温变化。</div>
+        <div class="history-layout">
+          <div class="history-list" id="history"><span style="color:var(--text3);font-size:12px">暂无历史记录</span></div>
+          <div class="thumb-panel">
+            <div class="panel-title">左拇指血运变化</div>
+            <div class="panel-hint">每张图对应左侧一条已存病程。按住院过程自上而下排列。仅为演示模型。</div>
+            <div class="thumb-timeline" id="thumb-timeline"><div class="thumb-empty">存入至少一条包含左拇指观测的病程记录后，这里会出现连续变化图。</div></div>
+            <div class="thumb-legend">
+              <span><i style="background:#D85A30"></i>颜色</span>
+              <span><i style="background:#185FA5"></i>皮温</span>
+              <span>自上而下=时间推进</span>
+            </div>
+            <button class="ghost" onclick="seedThumbDemo()" style="margin-top:8px;width:100%">加载左拇指连续住院演示</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ENUM = {
+  color:['红润','稍紫','暗紫','紫','紫黑','黑','苍白','暗红'],
+  temp:['暖','凉','稍凉','稍暖','冰凉','冷'],
+  tension:['饱满','稍肿胀','肿胀','欠饱满','稍干瘪','干瘪'],
+  cap:['好','不明显','稍慢','差','无','慢','快']
+};
+const CROSS_BAN = {
+  color:['暖','凉','冷','热','稍暖','稍凉','冰凉'],
+  temp:['红润','稍紫','暗紫','紫','紫黑','黑','苍白','暗红','饱满','干瘪'],
+  tension:['暖','凉','冷','稍暖','稍凉','冰凉'],
+  cap:['饱满','稍肿胀','肿胀','欠饱满','干瘪','暖','凉']
+};
+const FIELD_CN = {color:'颜色',temp:'皮温',tension:'张力',cap:'毛细血管反应'};
+
+const PHRASES = {
+  subj:['伤口疼痛较前缓解','患指末端感觉麻木','无畏寒、发热','无恶心、呕吐','无胸闷、气促','疼痛较昨日明显减轻'],
+  gen:['精神、食欲可','大小便正常','睡眠可','一般情况好','神志清楚，精神可'],
+  wound:['伤口对合良好','手术伤口少许渗血','敷料干燥清洁','无明显渗液','未拆线','引流管固定在位、通畅'],
+  opin:['继续予消肿、抗感染对症治疗','继续观察患指血运情况','注意创面护理','余治疗方案同前','继续予解痉、改善循环等对症处理','密切观察患肢远端血运情况']
+};
+
+let obsList = [];
+let lastSegments = [];
+const LS_KEY = 'mvp0_rounds_chain';
+let thumbDemoRows = [];
+const COLOR_STYLE = {
+  '红润':'#D85A30','稍紫':'#A36A7C','暗紫':'#6F4D83','紫':'#735A9B',
+  '紫黑':'#4B3B5C','黑':'#2C2C2A','苍白':'#D7D2C7','暗红':'#993C1D'
+};
+const TEMP_STYLE = {
+  '暖':{level:.86,color:'#D85A30'},'稍暖':{level:.68,color:'#BA7517'},
+  '凉':{level:.42,color:'#378ADD'},'稍凉':{level:.28,color:'#185FA5'},
+  '冷':{level:.14,color:'#0C447C'},'冰凉':{level:.05,color:'#042C53'}
+};
+
+function fillSelect(id, arr, sel){
+  const el = document.getElementById(id);
+  el.innerHTML = arr.map(v=>`<option${v===sel?' selected':''}>${v}</option>`).join('');
+}
+function buildTriple(boxId, key){
+  const box = document.getElementById(boxId);
+  box.innerHTML = ['正常','异常','未查'].map(t=>
+    `<span class="opt" data-k="${key}" data-v="${t}">${t}</span>`
+  ).join('') + `<input class="desc" id="desc-${key}" style="display:none" placeholder="请描述异常所见">`;
+  box.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+    box.querySelectorAll('.opt').forEach(x=>{x.className='opt'});
+    o.className = 'opt on' + (o.dataset.v==='异常'?' abn':o.dataset.v==='未查'?' unk':'');
+    const d = document.getElementById('desc-'+key);
+    d.style.display = o.dataset.v==='异常' ? 'block' : 'none';
+  });
+}
+function getTriple(key){
+  const box = document.getElementById('opt-'+key);
+  const on = box.querySelector('.opt.on');
+  if(!on) return {v:null};
+  return {v:on.dataset.v, desc:on.dataset.v==='异常'?(document.getElementById('desc-'+key).value||''):''};
+}
+
+function nowStr(){
+  const d = new Date();
+  const p = n => String(n).padStart(2,'0');
+  return `${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function addObs(){
+  const rec = {
+    time: document.getElementById('obs-time').value || nowStr(),
+    part: document.getElementById('obs-part').value,
+    color: document.getElementById('obs-color').value,
+    temp: document.getElementById('obs-temp').value,
+    tension: document.getElementById('obs-tension').value,
+    cap: document.getElementById('obs-cap').value
+  };
+  const errs = validateObs(rec);
+  const msg = document.getElementById('obs-msg');
+  if(errs.length){
+    msg.innerHTML = `<div class="alert err"><b>已拦截，未写入</b><br>${errs.join('<br>')}</div>`;
+    return;
+  }
+  obsList.push(rec);
+  document.getElementById('obs-time').value = '';
+  msg.innerHTML = `<div class="alert ok">已记录：${rec.part}　${rec.color}／${rec.temp}／${rec.tension}／${rec.cap}</div>`;
+  renderObs();
+}
+
+function validateObs(r){
+  const errs = [];
+  for(const k of ['color','temp','tension','cap']){
+    if(!ENUM[k].includes(r[k])) errs.push(`「${FIELD_CN[k]}」取值「${r[k]}」不在枚举白名单内`);
+    if(CROSS_BAN[k].includes(r[k])) errs.push(`「${FIELD_CN[k]}」出现「${r[k]}」，属于其他字段的取值 —— 疑似录入串位`);
+  }
+  return errs;
+}
+
+function injectDirty(){
+  const bad = {time:nowStr(), part:'左小指', color:'暖', temp:'红润', tension:'凉', cap:'饱满'};
+  const errs = [
+    `「颜色」取值「暖」属于皮温字段 —— 疑似录入串位`,
+    `「皮温」取值「红润」属于颜色字段 —— 疑似录入串位`,
+    `「皮肤张力」取值「凉」属于皮温字段 —— 疑似录入串位`,
+    `「毛细血管反应」取值「饱满」属于皮肤张力字段 —— 疑似录入串位`
+  ];
+  document.getElementById('obs-msg').innerHTML =
+    `<div class="alert err"><b>脏数据已拦截，未写入</b>（这正是槽位层必须加的闸）<br>${errs.join('<br>')}</div>`;
+}
+
+function renderObs(){
+  const t = document.getElementById('obs-table');
+  if(!obsList.length){ t.style.display='none'; return; }
+  t.style.display='table';
+  const sorted = obsList.slice().sort((a,b)=>b.time.localeCompare(a.time));
+  t.querySelector('tbody').innerHTML = sorted.map((r,i)=>
+    `<tr class="${i===0?'latest':''}"><td>${r.time}</td><td>${r.part}</td><td>${r.color}</td>
+     <td>${r.temp}</td><td>${r.tension}</td><td>${r.cap}</td>
+     <td><span class="del" onclick="delObs('${r.time}','${r.part}')">×</span></td></tr>`
+  ).join('');
+}
+function delObs(time, part){
+  obsList = obsList.filter(r=>!(r.time===time && r.part===part));
+  renderObs();
+}
+
+function renderChips(){
+  [['chips-subj','subj'],['chips-gen','gen'],['chips-wound','wound'],['chips-opin','opin']]
+  .forEach(([boxId,key])=>{
+    document.getElementById(boxId).innerHTML =
+      PHRASES[key].map(p=>`<span class="chip" onclick="addPhrase('in-${key}','${p}')">${p}</span>`).join('');
+  });
+}
+function addPhrase(targetId, text){
+  const el = document.getElementById(targetId);
+  const v = el.value.trim();
+  if(v && !v.endsWith('，') && !v.endsWith('。')) el.value = v + '，';
+  el.value += text;
+  el.focus();
+}
+
+function buildSpecialExam(obs){
+  if(!obs) return null;
+  const p = obs.part;
+  const isFinger = p.includes('指');
+  const segs = [];
+  const tensionTxt = obs.tension==='饱满' ? (isFinger?'指腹饱满':'饱满') : (isFinger?`指腹${obs.tension}`:obs.tension);
+  segs.push({t:`${p}${tensionTxt}`, s:'obs'});
+  segs.push({t:'，', s:'tpl'});
+  segs.push({t:`颜色${obs.color}`, s:'obs'});
+  segs.push({t:'，', s:'tpl'});
+  const tempTxt = isFinger ? `皮温${obs.temp}` : `${p}皮温${obs.temp}`;
+  segs.push({t:tempTxt, s:'obs'});
+  segs.push({t:'，', s:'tpl'});
+  const capTxt = obs.cap==='好' ? '毛细血管反应良好' : (obs.cap==='无' ? '毛细血管反应消失' : `毛细血管反应${obs.cap}`);
+  segs.push({t:capTxt, s:'obs'});
+  return segs;
+}
+
+function generate(){
+  const name = document.getElementById('id-name').value.trim() || '【未填写】';
+  const doc  = document.getElementById('id-doc').value.trim() || '【未填写】';
+  const title= document.getElementById('id-title').value;
+  const subj = document.getElementById('in-subj').value.trim();
+  const gen  = document.getElementById('in-gen').value.trim();
+  const wound= document.getElementById('in-wound').value.trim();
+  const opin = document.getElementById('in-opin').value.trim();
+  const chest= getTriple('chest');
+  const limb = getTriple('limb');
+
+  const vt = [];
+  const t=document.getElementById('vt-t').value.trim();
+  const p_=document.getElementById('vt-p').value.trim();
+  const r_=document.getElementById('vt-r').value.trim();
+  const bp=document.getElementById('vt-bp').value.trim();
+  if(t) vt.push(`T:${t}℃`); if(p_) vt.push(`P:${p_}次/分`);
+  if(r_) vt.push(`R:${r_}次/分`); if(bp) vt.push(`BP:${bp}mmHg`);
+
+  const gaps = [];
+  const S = [];
+  const push=(t,s)=>{ if(t) S.push({t,s}); };
+
+  push('今日','tpl');
+  push(doc,'id');
+  push(title + '查房，','tpl');
+  push('患者诉','tpl');
+  if(subj) push(subj,'doc'); else { push('【待补充：今日主诉】','gap'); gaps.push('今日主诉未填写'); }
+  push('。','tpl');
+  if(gen) push(gen,'doc'); else { push('【待补充：一般情况】','gap'); gaps.push('一般情况未填写（精神/食欲/睡眠/二便）'); }
+  push('。','tpl');
+  push('亲自问病查体：','tpl');
+  if(vt.length) push(vt.join('，'),'doc');
+  else { push('【待确认：生命体征】','gap'); gaps.push('生命体征未录入（T/P/R/BP）'); }
+  push('。','tpl');
+
+  if(chest.v==='正常') push('心肺腹查体未见明显异常','doc');
+  else if(chest.v==='异常'){ if(chest.desc) push(chest.desc,'doc'); else { push('【待补充：心肺腹异常描述】','gap'); gaps.push('心肺腹已选「异常」但未填写描述'); } }
+  else { push('【待确认：心肺腹查体】','gap'); gaps.push('心肺腹查体未查 —— 未查不能写成「正常」'); }
+  push('。','tpl');
+
+  push('专科查体：','tpl');
+  const latest = obsList.slice().sort((a,b)=>b.time.localeCompare(a.time))[0];
+  if(latest){
+    const segs = buildSpecialExam(latest);
+    segs.forEach(x=>push(x.t, x.s));
+    push('。','tpl');
+    if(wound){ push(wound,'doc'); push('。','tpl'); }
+    else { push('【待补充：伤口/敷料情况】','gap'); gaps.push('伤口或敷料情况未填写'); }
+  }else{
+    push('【待录入：移植观测】','gap');
+    gaps.push('今日尚未录入移植观测 —— 专科查体的血运部分无法生成');
+    if(wound){ push(wound,'doc'); push('。','tpl'); }
+  }
+
+  if(limb.v==='正常') push('余肢体查体未见明显异常','doc');
+  else if(limb.v==='异常'){ if(limb.desc) push(limb.desc,'doc'); else { push('【待补充：余肢体异常描述】','gap'); gaps.push('余肢体已选「异常」但未填写描述'); } }
+  else { push('【待确认：余肢体查体】','gap'); gaps.push('余肢体未查 —— 未查不能写成「正常」'); }
+  push('。','tpl');
+
+  push(doc,'id');
+  push(title,'id');
+  push('查看病人并病情评估指出：','tpl');
+  if(opin) push(opin,'doc');
+  else { push('【待补充：查房诊疗意见（AI 不生成，需医生口述）】','gap'); gaps.push('诊疗意见未填写 —— AI 不生成任何治疗建议'); }
+
+  lastSegments = S;
+  renderOutput(S, gaps, {subj, gen, wound, opin, latest});
+}
+
+function renderOutput(S, gaps, meta){
+  const box = document.getElementById('output');
+  box.innerHTML = S.map(x=>{
+    const cls = {obs:'src-obs',doc:'src-doc',tpl:'src-tpl',id:'src-id',gap:'src-gap'}[x.s];
+    const src = {obs:'来源：移植观测表（槽位确定性回填）',doc:'来源：医生口述',tpl:'来源：固定模板',
+                 id:'来源：身份锚定',gap:'缺口：需医生补充，AI 不填充'}[x.s];
+    return `<span class="seg ${cls}" title="${src}">${escapeHtml(x.t)}</span>`;
+  }).join('');
+
+  const g = document.getElementById('gaps');
+  g.innerHTML = gaps.length
+    ? `<div style="font-size:12px;color:var(--text2);margin-bottom:6px">缺口清单（共 ${gaps.length} 项，均<b>可见</b>且可阻断回写）</div>`
+      + gaps.map(x=>`<div class="gap-item">${escapeHtml(x)}</div>`).join('')
+    : `<div class="gap-item none">无缺口，全部内容均有出处</div>`;
+
+  const chars = S.map(x=>x.t).join('').replace(/【[^】]*】/g,'').length;
+  const inputChars = (meta.subj+meta.gen+meta.wound+meta.opin).length;
+  document.getElementById('stat').textContent =
+    `医生本次输入 ${inputChars} 字　→　生成 ${chars} 字${inputChars?`（放大 ${(chars/inputChars).toFixed(1)} 倍）`:''}${meta.latest?'　·　专科查体取自观测表 '+meta.latest.time:''}`;
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function copyOut(btn){
+  if(!lastSegments.length) return;
+  const txt = lastSegments.map(x=>x.t).join('');
+  navigator.clipboard.writeText(txt).then(()=>{
+    const old = btn.textContent;
+    btn.textContent='已复制'; setTimeout(()=>btn.textContent=old,1200);
+  }).catch(()=>{
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); ta.remove();
+    const old = btn.textContent;
+    btn.textContent='已复制'; setTimeout(()=>btn.textContent=old,1200);
+  });
+}
+
+function loadHistory(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch(e){ return []; }
+}
+function renderHistory(){
+  const h = loadHistory();
+  const box = document.getElementById('history');
+  if(!h.length){ box.innerHTML = '<span style="color:var(--text3);font-size:12px">暂无历史记录</span>'; renderThumbTimeline([]); return; }
+  box.innerHTML = h.slice().reverse().map((r,i)=>
+    `<div class="history-item"><div class="meta"><span>${r.time}　${r.title}</span>
+     <span style="cursor:pointer;color:var(--red)" onclick="delHistory(${h.length-1-i})">删除</span></div>
+     <div class="body">${escapeHtml(r.text)}</div></div>`
+  ).join('');
+  renderThumbTimeline(h);
+}
+
+function getThumbRows(history){
+  return history.map((r,i)=>{
+    const o = r.obs;
+    if(!o || o.part !== '左拇指') return null;
+    return {index:i+1,time:r.time, color:o.color, temp:o.temp, text:r.text};
+  }).filter(Boolean);
+}
+
+function shortTime(value){
+  const m = String(value).match(/(\\d{1,2})[月\\/-](\\d{1,2})|^(\\d{1,2})[\\/-](\\d{1,2})/);
+  if(m) return `${m[1]||m[3]}/${m[2]||m[4]}`;
+  return String(value).slice(0,8);
+}
+
+function thumbSvg(row){
+  const thumbColor = COLOR_STYLE[row.color] || '#D85A30';
+  const temp = TEMP_STYLE[row.temp] || {level:.5,color:'#185FA5'};
+  const tempHeight = Math.max(7, Math.round(temp.level * 55));
+  const dateLabel = shortTime(row.time);
+  return `<svg viewBox="0 0 174 154" role="img" aria-label="${dateLabel} 左拇指颜色 ${row.color} 皮温 ${row.temp}" xmlns="http://www.w3.org/2000/svg">
+    <title>${dateLabel}｜左拇指｜颜色：${row.color}｜皮温：${row.temp}</title>
+    <rect x=".5" y=".5" width="173" height="153" rx="8" fill="#fff" stroke="#e3e6eb"/>
+    <text x="10" y="16" fill="#5f6672" font-size="10">${dateLabel}</text>
+    <text x="10" y="31" fill="#8b929e" font-size="10">左拇指</text>
+    <path d="M27 119 C31 104 41 91 57 84 L76 74 C85 69 94 72 97 80 C100 88 96 95 88 101 L78 108 C72 112 69 119 68 127 L27 127 Z" fill="#f1efe8" stroke="#888780" stroke-width="1"/>
+    <path d="M77 105 C69 96 64 83 64 67 L64 47 C64 38 69 32 76 32 C83 32 87 37 87 45 L86 63 L93 58 C99 54 106 56 109 62 C111 68 108 74 103 80 L91 97 C87 103 84 106 77 105 Z" fill="${thumbColor}" stroke="#4a3a35" stroke-width="1"/>
+    <path d="M68 47 C68 40 71 36 76 36 C81 36 83 40 83 46 L82 67" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="2"/>
+    <text x="10" y="143" fill="${thumbColor}" font-size="10">颜色 ${row.color}</text>
+    <rect x="138" y="78" width="12" height="49" rx="6" fill="#e6f1fb" stroke="#185fa5" stroke-width="1"/>
+    <rect x="141" y="${127-tempHeight}" width="6" height="${tempHeight}" rx="3" fill="${temp.color}"/>
+    <circle cx="144" cy="130" r="7" fill="${temp.color}" stroke="#185fa5" stroke-width="1"/>
+    <text x="132" y="68" fill="#185fa5" font-size="10">皮温</text>
+    <text x="132" y="143" fill="${temp.color}" font-size="10">${row.temp}</text>
+  </svg>`;
+}
+
+function renderThumbTimeline(history){
+  const wrap = document.getElementById('thumb-timeline');
+  if(!wrap) return;
+  const rows = getThumbRows(history);
+  thumbDemoRows = rows;
+  if(!rows.length){
+    wrap.innerHTML = '<div class="thumb-empty">存入至少一条包含左拇指观测的病程记录后，这里会出现连续变化图。</div>';
+    return;
+  }
+  wrap.innerHTML = `<div class="thumb-sequence">${rows.map(thumbSvg).join('')}</div>`;
+}
+
+function delHistory(i){
+  const h = loadHistory(); h.splice(i,1);
+  localStorage.setItem(LS_KEY, JSON.stringify(h));
+  renderHistory(); renderCtx();
+}
+function saveRecord(){
+  if(!lastSegments.length) return;
+  const txt = lastSegments.map(x=>x.t).join('');
+  const h = loadHistory();
+  const leftThumbObs = obsList.filter(o=>o.part==='左拇指').sort((a,b)=>b.time.localeCompare(a.time))[0] || null;
+  h.push({time:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),
+          title:document.getElementById('id-title').value, text:txt,
+          obs:leftThumbObs});
+  localStorage.setItem(LS_KEY, JSON.stringify(h));
+  renderHistory(); renderCtx();
+}
+
+function seedThumbDemo(){
+  const demo = [
+    {time:'09/01 08:10',title:'主治医师',color:'稍紫',temp:'稍凉',text:'第1日查房：左拇指指腹稍肿胀，颜色稍紫，皮温稍凉，继续观察。'},
+    {time:'09/02 08:20',title:'主治医师',color:'稍紫',temp:'凉',text:'第2日查房：左拇指指腹饱满，颜色稍紫，皮温凉，伤口敷料干燥。'},
+    {time:'09/03 08:05',title:'副主任医师',color:'暗红',temp:'稍暖',text:'第3日查房：左拇指指腹饱满，颜色暗红，皮温稍暖，血运较前改善。'},
+    {time:'09/04 08:15',title:'主任医师',color:'红润',temp:'暖',text:'第4日查房：左拇指指腹饱满，颜色红润，皮温暖，毛细血管反应好。'}
+  ].map(r=>({...r,obs:{time:r.time,part:'左拇指',color:r.color,temp:r.temp,tension:'饱满',cap:'好'}}));
+  localStorage.setItem(LS_KEY, JSON.stringify(demo));
+  renderHistory(); renderCtx();
+}
+
+function renderCtx(){
+  const h = loadHistory();
+  const box = document.getElementById('ctx-box');
+  if(!h.length){ box.innerHTML=''; return; }
+  const last = h[h.length-1];
+  const brief = last.text.replace(/【[^】]*】/g,'').slice(0,60);
+  box.innerHTML = `<div class="ctx">已加载病程链 ${h.length} 条，上一次（${last.time}）：
+    <div class="yesterday">${escapeHtml(brief)}…</div>
+    <span class="reuse" onclick="reuseLast()">沿用昨日一般情况</span></div>`;
+}
+function reuseLast(){
+  const h = loadHistory();
+  if(!h.length) return;
+  const el = document.getElementById('in-gen');
+  el.value = '精神、食欲、睡眠可，大小便正常';
+  el.focus();
+}
+
+function clearAll(){
+  obsList=[]; lastSegments=[];
+  ['in-subj','in-gen','in-wound','in-opin','vt-t','vt-p','vt-r','vt-bp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('output').innerHTML='<span style="color:var(--text3)">左侧录入后点击「生成查房记录」</span>';
+  document.getElementById('gaps').innerHTML='';
+  document.getElementById('stat').textContent='';
+  document.getElementById('obs-msg').innerHTML='';
+  renderObs();
+}
+
+fillSelect('obs-color', ENUM.color, '红润');
+fillSelect('obs-temp', ENUM.temp, '暖');
+fillSelect('obs-tension', ENUM.tension, '饱满');
+fillSelect('obs-cap', ENUM.cap, '好');
+buildTriple('opt-chest','chest');
+buildTriple('opt-limb','limb');
+renderChips();
+renderHistory();
+renderCtx();
+</script>
+</body>
+</html>

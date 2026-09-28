@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大模型服务与应用平台全景整理 · 2026-09</title>
+<style>
+  :root{
+    --ink:#2D2A32; --ink-2:#5A5560;
+    --paper:#FAF7F2; --card:#FFFFFF;
+    --red:#B03050; --red-soft:#F6E3E8;
+    --purple:#8E7CC3; --purple-soft:#EFEAF7;
+    --line:#E8E2D9;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    line-height:1.65; padding:32px 16px;}
+  .wrap{max-width:1080px; margin:0 auto;}
+  header{border-left:6px solid var(--red); padding-left:18px; margin-bottom:8px;}
+  h1{font-size:26px; letter-spacing:.5px;}
+  .meta{color:var(--ink-2); font-size:13px; margin-top:6px;}
+  nav{margin:18px 0 26px; display:flex; gap:10px; flex-wrap:wrap;}
+  nav a{text-decoration:none; font-size:13px; padding:6px 14px; border-radius:999px;
+    background:var(--purple-soft); color:#5D4B8C;}
+  nav a:hover{background:var(--purple); color:#fff;}
+  h2{font-size:19px; margin:34px 0 12px; padding-bottom:8px; border-bottom:2px solid var(--line);
+    display:flex; align-items:center; gap:8px;}
+  h2 .tag{font-size:12px; font-weight:normal; color:#fff; padding:2px 10px; border-radius:999px;}
+  .tag-open{background:var(--purple);}
+  .tag-closed{background:var(--red);}
+  .tag-mixed{background:#9B8B7A;}
+  table{width:100%; border-collapse:collapse; background:var(--card); font-size:13.5px;
+    border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:10px;}
+  th{background:#F1ECE4; text-align:left; padding:10px 12px; font-size:13px; color:#4A4440;
+    border-bottom:2px solid var(--line); white-space:nowrap;}
+  td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#FBF4F6;}
+  td.pname{font-weight:bold; white-space:nowrap;}
+  .os{display:inline-block; font-size:12px; padding:1px 8px; border-radius:4px; white-space:nowrap;}
+  .os-open{background:var(--purple-soft); color:#5D4B8C;}
+  .os-closed{background:var(--red-soft); color:#8E2440;}
+  .os-mixed{background:#F0EBE4; color:#7A6A58;}
+  .os-third{background:#EDEAF2; color:#5D5470;}
+  .muted{color:var(--ink-2); font-size:12.5px;}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin:14px 0;}
+  .card{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--purple);
+    border-radius:10px; padding:14px 16px; font-size:13.5px;}
+  .card b{color:var(--red);}
+  .note{background:var(--purple-soft); border-radius:10px; padding:14px 18px; font-size:13.5px; margin:12px 0;}
+  .note b{color:#5D4B8C;}
+  footer{margin-top:40px; color:var(--ink-2); font-size:12px; border-top:1px solid var(--line); padding-top:14px;}
+  code{background:#F1ECE4; padding:1px 6px; border-radius:4px; font-size:12.5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>大模型服务与应用平台全景整理</h1>
+  <div class="meta">信息快照：2026 年 9 月 16 日 · 基于公开网络搜索整理 · 价格为各官方列表价（美元/百万 Token 或元/百万词元），变动频繁以官网为准</div>
+</header>
+
+<nav>
+  <a href="#maas">聚合 · MaaS · 部署平台</a>
+  <a href="#agent">Agent 应用平台</a>
+  <a href="#trend">开源 vs 闭源趋势</a>
+  <a href="#pick">选型速查</a>
+  <a href="#login">需登录补充项</a>
+</nav>
+
+<!-- ================= MaaS ================= -->
+<h2 id="maas">一、聚合平台 · MaaS · 本地部署（自己不造模型，负责"分发与推理"）</h2>
+<table>
+  <tr><th style="width:150px">平台名称</th><th style="width:130px">属性</th><th style="width:250px">覆盖模型</th><th>核心特点与典型应用场景</th></tr>
+  <tr>
+    <td class="pname">OpenRouter</td>
+    <td><span class="os os-third">聚合网关</span></td>
+    <td>400+ 模型（GPT/Claude/Gemini/开源全系）</td>
+    <td><b>特点：</b>一个 Key + OpenAI 兼容协议调全球模型，供应商宕机自动回退，价格透明可比价。<br><b>场景：</b>多模型对比、海外模型接入、个人/中小团队快速验证。</td>
+  </tr>
+  <tr>
+    <td class="pname">Hugging Face</td>
+    <td><span class="os os-open">开源生态中心</span></td>
+    <td>数十万开源模型托管 + Inference API</td>
+    <td><b>特点：</b>开源模型"GitHub"，2026 春报告显示其 41% 大模型下载来自中国模型。<br><b>场景：</b>模型分发、微调数据集、Demo（Spaces）、研究。</td>
+  </tr>
+  <tr>
+    <td class="pname">硅基流动 SiliconFlow</td>
+    <td><span class="os os-third">推理云</span></td>
+    <td>DeepSeek / Qwen / GLM / Kimi 等国产开源全系</td>
+    <td><b>特点：</b>国产开源权重推理深度调优，OpenAI SDK 兼容，国内直连免梯子，有免费额度。<br><b>场景：</b>国内团队调国产开源模型、低成本生产 API。</td>
+  </tr>
+  <tr>
+    <td class="pname">阿里云百炼</td>
+    <td><span class="os os-third">云 MaaS</span></td>
+    <td>Qwen 全系 + 第三方模型</td>
+    <td><b>特点：</b>企业级能力完善（权限/配额/审计），与函数计算、钉钉生态打通。<br><b>场景：</b>企业级 AI 应用、RAG 知识库。</td>
+  </tr>
+  <tr>
+    <td class="pname">火山方舟</td>
+    <td><span class="os os-third">云 MaaS</span></td>
+    <td>豆包全系 + 多模态</td>
+    <td><b>特点：</b>字节生态协同，方舟 CLI 可接入 Claude Code/Cursor/TRAE。<br><b>场景：</b>字节系业务集成、多模态应用。</td>
+  </tr>
+  <tr>
+    <td class="pname">百度千帆</td>
+    <td><span class="os os-third">云 MaaS</span></td>
+    <td>ERNIE 系 + 第三方</td>
+    <td><b>特点：</b>等保认证、RAG 产品化程度高、政务云渠道。<br><b>场景：</b>政务/金融合规项目。</td>
+  </tr>
+  <tr>
+    <td class="pname">Groq</td>
+    <td><span class="os os-third">推理云（LPU）</span></td>
+    <td>开源模型托管</td>
+    <td><b>特点：</b>自研 LPU 芯片，1000+ tokens/s 极速响应。<br><b>场景：</b>实时语音、流式交互、低延迟演示。</td>
+  </tr>
+  <tr>
+    <td class="pname">Together / Fireworks / DeepInfra</td>
+    <td><span class="os os-third">推理云</span></td>
+    <td>开源权重 Serverless 托管</td>
+    <td><b>特点：</b>同模型在不同托管商价差可达 10 倍，按 SKU 比价后接入；Batch API 五折。<br><b>场景：</b>开源模型规模化托管、批量离线处理。</td>
+  </tr>
+  <tr>
+    <td class="pname">Ollama / vLLM / LM Studio</td>
+    <td><span class="os os-open">本地部署工具（开源）</span></td>
+    <td>任意开源权重（GGUF/Safetensors）</td>
+    <td><b>特点：</b>本地/私有化运行，数据不出域；vLLM 面向高并发服务，Ollama 面向个人一键运行。<br><b>场景：</b>内网私有化（如医院 RAG）、离线环境、个人本地推理。</td>
+  </tr>
+  <tr>
+    <td class="pname">魔搭 ModelScope</td>
+    <td><span class="os os-open">开源社区</span></td>
+    <td>阿里系 + 国内厂商模型首发地</td>
+    <td><b>特点：</b>国内"魔搭社区"，新开源模型（Step/Qwen/GLM 等）常在此首发，配套免费算力体验。<br><b>场景：</b>国内下载开源模型、Notebook 试玩。</td>
+  </tr>
+</table>
+
+<!-- ================= Agent 应用平台 ================= -->
+<h2 id="agent">二、Agent 应用开发 / 编排平台（造"智能体"的脚手架）</h2>
+
+<h3 style="font-size:15px; margin:14px 0 8px; color:#5D4B8C;">2.1 开源代码框架（Python / TS，控制力最强）</h3>
+<table>
+  <tr><th style="width:170px">平台名称</th><th style="width:130px">开源/闭源属性</th><th style="width:250px">对接模型</th><th>核心特点与典型应用场景</th></tr>
+  <tr>
+    <td class="pname">LangGraph<br><span class="muted">LangChain 生态</span></td>
+    <td><span class="os os-open">开源</span><br><span class="muted">MIT</span></td>
+    <td>模型无关（GPT / Claude / Gemini / 国产开源全系）</td>
+    <td><b>特点：</b>状态图（StateGraph）编排标杆，90k+ Stars，原生多 Agent + 检查点记忆 + 人类在环中断，配 LangSmith 可观测；学习曲线较陡（2-4 周）。<br><b>场景：</b>生产级复杂 Agent、长程任务、多 Agent 协作系统。</td>
+  </tr>
+  <tr>
+    <td class="pname">Microsoft Agent Framework<br><span class="muted">原 AutoGen + Semantic Kernel 合并</span></td>
+    <td><span class="os os-open">开源</span><br><span class="muted">MIT</span></td>
+    <td>Azure OpenAI 优先，模型无关</td>
+    <td><b>特点：</b>2026-04 GA，原生 MCP + A2A 双协议，Python/.NET 对等支持；对话式多 Agent 编排是祖传强项。<br><b>场景：</b>微软/Azure/.NET 技术栈企业、多 Agent 研究与编排。</td>
+  </tr>
+  <tr>
+    <td class="pname">Claude Agent SDK</td>
+    <td><span class="os os-open">SDK 开源（MIT）</span><br><span class="muted">模型闭源</span></td>
+    <td>Claude 全系</td>
+    <td><b>特点：</b>MCP 集成最深，支持 5 层子代理嵌套，Computer Use 能力独家。<br><b>场景：</b>Anthropic 系的编程、研究、后台自动化 Agent。</td>
+  </tr>
+  <tr>
+    <td class="pname">OpenAI Agents SDK / AgentKit</td>
+    <td><span class="os os-open">SDK 开源（MIT）</span><br><span class="muted">模型闭源</span></td>
+    <td>GPT 全系</td>
+    <td><b>特点：</b>2026-03 GA，自带 Guardrails 与沙箱运行时，评测任务成功率最高（约 93%）；但锁定 OpenAI 生态。<br><b>场景：</b>OpenAI 优先团队的快速原型与 Computer Use 工作负载。</td>
+  </tr>
+  <tr>
+    <td class="pname">Google ADK 2.0</td>
+    <td><span class="os os-open">开源</span><br><span class="muted">Apache 2.0</span></td>
+    <td>Gemini 优先，模型无关</td>
+    <td><b>特点：</b>唯一同时提供 Python / TS / Java / Go 四语言 SDK 的框架，原生 A2A 协议。<br><b>场景：</b>GCP / Java / Go 团队、Vertex AI 企业部署。</td>
+  </tr>
+  <tr>
+    <td class="pname">CrewAI / Pydantic AI / Mastra</td>
+    <td><span class="os os-open">开源</span><br><span class="muted">均为 MIT</span></td>
+    <td>模型无关</td>
+    <td><b>特点：</b>CrewAI 主打角色化多 Agent 组队（原型最快）；Pydantic AI 类型安全 Python；Mastra 是 TypeScript 首选（周下载约 30 万）。<br><b>场景：</b>角色化团队协作原型、类型安全工程、Web 集成 Agent。</td>
+  </tr>
+</table>
+
+<h3 style="font-size:15px; margin:18px 0 8px; color:#5D4B8C;">2.2 开源低代码 / 自托管平台（可视化编排，私有化友好）</h3>
+<table>
+  <tr><th style="width:170px">平台名称</th><th style="width:130px">开源/闭源属性</th><th style="width:250px">对接模型</th><th>核心特点与典型应用场景</th></tr>
+  <tr>
+    <td class="pname">Dify</td>
+    <td><span class="os os-mixed">开源（修改版 Apache 2.0）</span><br><span class="muted">多租户 SaaS 需商业授权</span></td>
+    <td>数百种（OpenAI / Claude / Qwen / DeepSeek / 本地模型）</td>
+    <td><b>特点：</b>开源 LLM 应用平台领跑者（75k+ Stars、5 万+ 企业用户、C 轮 1.8 亿美元），v1.14 原生支持 MCP、RAG 管线完整，1-3 天上手。<br><b>场景：</b>企业知识库问答、客服、Agentic Workflow、私有化 LLMOps——<b>医院内网类项目首选之一</b>。</td>
+  </tr>
+  <tr>
+    <td class="pname">n8n</td>
+    <td><span class="os os-mixed">Fair-code</span><br><span class="muted">Sustainable Use License，自用免费</span></td>
+    <td>各大模型 + LangChain 节点</td>
+    <td><b>特点：</b>"开发者版 Zapier"，500+ 集成节点，AI Agent 作为流程节点嵌入；可完全自托管，数据不出域。<br><b>场景：</b>把 AI 接进现有业务流程（表单→审批→生成→通知），对内网合规行业（金融/医疗）友好。</td>
+  </tr>
+  <tr>
+    <td class="pname">Astron Agent<br><span class="muted">科大讯飞开源</span></td>
+    <td><span class="os os-open">开源</span><br><span class="muted">Apache 2.0；Docker Compose + Helm 双制品</span></td>
+    <td>OpenAI 兼容接口（实测已接本地 vLLM + Qwen3.8-27B-AWQ-INT4）</td>
+    <td><b>特点：</b>企业级 Agentic Workflow 平台（v1.1.2，约 48 万行代码，Java/Python/Go/TS 多语言微服务）：企业→空间→智能体三级多租户模型、可视化工作流编排、OIDC 单点登录（Casdoor）、应用市场、知识库与插件体系。<br><b>场景：</b>医院/政企内网私有化智能体平台底座——<b>本项目已有线下实测，约束见下方实测清单</b>。</td>
+  </tr>
+  <tr>
+    <td class="pname">FastGPT / RAGFlow</td>
+    <td><span class="os os-mixed">开源（均有附加条款）</span></td>
+    <td>主流模型 + 本地模型</td>
+    <td><b>特点：</b>FastGPT 深耕企业知识库问答（混合检索 + 重排开箱即用）；RAGFlow 主打深度文档解析（表格/扫描件/版面还原）。<br><b>场景：</b>知识库 RAG 应用、文档密集型问答。</td>
+  </tr>
+</table>
+
+<div class="note">
+  <b>Astron Agent 实测约束（2026-09 线下部署实测，非官方文档口径）：</b>
+  ① <b>一个控制台只能服务一个组织</b>——Casdoor 应用与组织一对一绑定，应用迁到新组织后原全局管理员直接失去控制台登录权，名下资产变孤儿；控制台按 OIDC <code>sub</code> 建档，换认证源等于换账号体系；<br>
+  ② <b>模型按空间隔离</b>——模型必须归属当前空间或用户，跨空间不可复用，多空间需重复配置；创建模型时 API Key 须 RSA 公钥加密后提交；<br>
+  ③ <b>发布快照机制</b>——编辑态 ≠ 运行态，改完必须显式点「发布」才生效；应用市场"可见 ≠ 可用"，未加入空间的用户能打开、一发消息即返回兜底话术；<br>
+  ④ <b>模型接入兼容性坑</b>——平台流式解析只识别 <code>reasoning_content</code>，而 vLLM 默认把思考过程放在 <code>reasoning</code> 字段，会导致输出为空，需在推理侧关闭思考模式规避；<br>
+  ⑤ <b>错误可见性差</b>——平台用"抱歉，我暂时无法回答"兜底话术掩盖真实错误（模型缺失、空间越权等），排障成本极高；<br>
+  ⑥ 实测已通过：OIDC 登录、三级权限与邀请制加人（免短信/邮箱验证码）、可视化编排与发布上架、多轮对话上下文；<b>未验证</b>：知识库/RAG（服务在跑但未接 RAGFlow）、代码沙箱、决策/循环/Agent 节点、RPA 与 MCP 插件、可观测（OTLP/Langfuse 未启用）。<br>
+  <span class="muted">完整证据与 27 条踩坑见项目内 HANDOVER-astron.MD 及交付手册。</span>
+</div>
+
+<h3 style="font-size:15px; margin:18px 0 8px; color:#5D4B8C;">2.3 闭源 / 商业托管平台（省心但有锁定）</h3>
+<table>
+  <tr><th style="width:170px">平台名称</th><th style="width:130px">开源/闭源属性</th><th style="width:250px">对接模型</th><th>核心特点与典型应用场景</th></tr>
+  <tr>
+    <td class="pname">腾讯元器 / 腾讯云 ADP</td>
+    <td><span class="os os-closed">闭源</span></td>
+    <td>混元全系 + DeepSeek 等</td>
+    <td><b>特点：</b>原生打通微信/企微/腾讯会议，覆盖构建-评测-分发-管控全环节，支持私有化与混合云部署。<br><b>场景：</b>微信生态企业、政企智能体。</td>
+  </tr>
+  <tr>
+    <td class="pname">阿里百炼 Agent / 百度千帆 AppBuilder / 火山 HiAgent</td>
+    <td><span class="os os-closed">闭源云 MaaS+Agent</span></td>
+    <td>Qwen 全系 / ERNIE 系 / 豆包系</td>
+    <td><b>特点：</b>百炼与钉钉打通；千帆走"RAG + 知识增强"，等保合规、政务渠道强；HiAgent 主打 Agent DevOps 与企业私有化工作站。<br><b>场景：</b>对应云生态内的企业级 Agent、政务/国企知识密集型项目。</td>
+  </tr>
+  <tr>
+    <td class="pname">Microsoft Copilot Studio / Salesforce Agentforce</td>
+    <td><span class="os os-closed">闭源</span></td>
+    <td>GPT 系 / Atlas Reasoning Engine</td>
+    <td><b>特点：</b>分别深度绑定 M365（Teams/SharePoint/Outlook）与 Salesforce CRM，治理与权限沿用原有体系；Agentforce 按对话计费（$2/次）。<br><b>场景：</b>微软办公生态、销售/客服 CRM 自动化。</td>
+  </tr>
+  <tr>
+    <td class="pname">Vertex AI Agent Builder / AWS Bedrock AgentCore</td>
+    <td><span class="os os-closed">闭源云</span></td>
+    <td>Gemini / 多模型托管</td>
+    <td><b>特点：</b>公有云企业级 Agent 底座：RAG、记忆、合规、SLA 一站打包。<br><b>场景：</b>已在 GCP / AWS 的中大型企业。</td>
+  </tr>
+  <tr>
+    <td class="pname">Manus / Lindy / Relevance AI</td>
+    <td><span class="os os-closed">闭源 SaaS</span></td>
+    <td>多模型编排</td>
+    <td><b>特点：</b>Manus 主打全自主任务执行；Lindy 面向业务人员（3000+ 集成，1 小时上线）；Relevance 主打角色化多 Agent 团队。<br><b>场景：</b>通用任务托管、SMB 运营自动化、销售/市场复合流程。</td>
+  </tr>
+</table>
+
+<div class="note">
+  <b>Agent 平台选型三条经验（2026 调研共识）：</b>
+  ① 92% 的企业 Agent 项目停在 Demo 阶段，真正商业化率不足 5%——选平台时<b>可观测性、评测与回滚能力</b>比功能数量更重要；
+  ② 单模型 Agent 成本劣势达 4-5 倍，<b>多模型调度</b>已是生存必需；
+  ③ MCP 已成事实标准（十大框架全部支持），A2A 协议原生落地于 Microsoft Agent Framework 与 Google ADK——新项目上平台前先确认 MCP 支持情况。
+</div>
+
+<!-- ================= 趋势 ================= -->
+<h2 id="trend">三、开源 vs 闭源：2026 下半场的五个判断</h2>
+<div class="cards">
+  <div class="card"><b>① 差距约 6 个月且在收窄。</b>开源权重第一梯队（Kimi K3、GLM-5.3、DeepSeek V4）综合指数已压过 GPT-5.6 Sol；闭源旗舰（Claude Fable 5.1、GPT-6 Astra）仍守住最前沿推理与 Agent 上限。</div>
+  <div class="card"><b>② 开源模型吞吐占比过半。</b>OpenRouter 数据：开源模型处理的词元占比从 1 月 34% 升至 6 月 65%；中国日均词元调用量 175 万亿、全球第一。</div>
+  <div class="card"><b>③ "开源"多为"开放权重"。</b>真正的 OSI 干净许可：Qwen/Mistral/Gemma 4/MiniMax M3（Apache 2.0）、DeepSeek V4/GLM-Flash/Phi-4（MIT）；Llama 社区许可有 7 亿 MAU 与欧盟限制；GLM-5.3、Kimi K3 为自定义许可——商用前逐个读许可。</div>
+  <div class="card"><b>④ 分层开源矩阵成型。</b>万亿级 MoE 承接集团业务；10B 级稠密/全模态主攻 PC 与终端；2B～8B 轻量模型主攻端侧与办公自动化——"智能密度"取代参数规模成为竞争标尺。</div>
+  <div class="card"><b>⑤ 价格战白热化。</b>Qwen3.8-Flash 1 元/百万词元、星火多语言版 1.6 元、混元 Hy4 6 元；国际侧 GLM-5.3-Flash $0.075/M（促销价）已低于 DeepSeek 全时段价格。</div>
+</div>
+
+<!-- ================= 选型 ================= -->
+<h2 id="pick">四、选型速查（按身份/场景）</h2>
+<table>
+  <tr><th style="width:200px">你是谁 / 什么场景</th><th>推荐组合</th></tr>
+  <tr><td class="pname">私有化 / 信创 / 内网（如医院 RAG）</td><td>DeepSeek V4（MIT）+ Qwen3.8（Apache 2.0）+ bge 检索套件，llama.cpp/vLLM 部署</td></tr>
+  <tr><td class="pname">企业 Agent 私有化（内网/医疗）</td><td>Dify 或 FastGPT（自托管）+ n8n（业务流程编排）+ 本地开源模型</td></tr>
+  <tr><td class="pname">零代码快速做 Agent</td><td>Astron Agent（讯飞开源，自托管）/ 腾讯元器（支持私有化部署）</td></tr>
+</table>
+
+<!-- ================= 登录备注 ================= -->
+<h2 id="login">五、需浏览器登录进一步核实的项（可选）</h2>
+<div class="note">
+  <b>本次整理全部来自公开搜索，无需登录即可完成。</b>以下信息如需逐项核实到官网一手数据，建议启动 browser-use：<br>
+  1. <b>OpenAI / Anthropic / Google 官网定价页</b>——对自动化访问有 Cloudflare 拦截或需账号登录，列表价可能与聚合平台显示有出入；<br>
+  2. <b>Kimi K3、GLM-5.3 的自定义许可条款全文</b>——需登录对应开放平台查看协议原文；<br>
+  3. <b>微信公众号文章全文</b>（部分国产模型测评源为 ima.qq.com 分享页）——可能需微信扫码；<br>
+  4. <b>X（Twitter）上 xAI / Meta 的发布公告原文</b>——需 X 账号登录。<br>
+  其余平台（Hugging Face、魔搭、GitHub、各家开源仓库）均可匿名访问，无需浏览器登录。
+</div>
+
+<footer>
+  数据来源：WebSearch 公开检索（felloai.com、teamday.ai、itproexpert.com、llm-stats.com、morphllm.com、datanorth.ai、alicelabs.ai、vellum.ai、thecrunch.io、datacamp.com、jimmysong.io、掘金、凤凰网科技、腾讯云开发者社区、CSDN、SegmentFault、中国经济网、百度百科"开源大模型"词条等），检索时间 2026-09-16。<br>
+  说明：模型版本迭代极快（近期约 1～2 个月一代），本报告为时点快照，引用价格与版本请以各官网当日为准。
+</footer>
+
+</div>
+</body>
+</html>

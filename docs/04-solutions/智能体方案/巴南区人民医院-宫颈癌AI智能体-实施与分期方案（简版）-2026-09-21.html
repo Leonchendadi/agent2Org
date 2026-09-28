@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>巴南区人民医院 · 宫颈癌 AI 专科智能体及数据驾驶舱一体化建设项目 — 实施与分期方案（简版）</title>
+<style>
+  :root{
+    --ink:#2E2A26;
+    --ink-2:#6B6157;
+    --ink-3:#948B80;
+    --paper:#FAF7F2;
+    --card:#FFFFFF;
+    --line:#E7E0D6;
+    --red:#B23A2E;
+    --red-soft:#F6E7E3;
+    --purple:#6E5AA8;
+    --purple-soft:#EFEAF8;
+    --sand:#F3EDE3;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",-apple-system,sans-serif;
+    font-size:13.5px;
+    line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+  }
+  .sheet{
+    max-width:896px;
+    margin:0 auto;
+    padding:30px 34px 26px;
+    background:var(--paper);
+  }
+  /* ---------- header ---------- */
+  .head{
+    border-top:4px solid var(--red);
+    padding-top:14px;
+  }
+  .eyebrow{
+    font-size:11.5px;
+    letter-spacing:.16em;
+    color:var(--red);
+    font-weight:700;
+  }
+  h1{
+    font-size:23px;
+    line-height:1.42;
+    margin:8px 0 6px;
+    letter-spacing:.01em;
+  }
+  h1 small{
+    display:block;
+    font-size:13px;
+    color:var(--ink-2);
+    font-weight:400;
+    letter-spacing:.02em;
+    margin-top:6px;
+  }
+  .headline{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:14px 0 0;
+  }
+  .pill{
+    font-size:12px;
+    font-weight:700;
+    padding:4px 11px;
+    border-radius:999px;
+    background:var(--red-soft);
+    color:var(--red);
+  }
+  .pill.alt{background:var(--purple-soft);color:var(--purple);}
+  .pill.grey{background:var(--sand);color:var(--ink-2);}
+  .meta{
+    margin-top:14px;
+    padding-top:10px;
+    border-top:1px dashed var(--line);
+    display:flex;
+    gap:22px;
+    flex-wrap:wrap;
+    font-size:11.5px;
+    color:var(--ink-3);
+  }
+  .meta b{color:var(--ink-2);font-weight:600;}
+  /* ---------- section ---------- */
+  section{margin-top:24px;}
+  h2{
+    font-size:14.5px;
+    margin:0 0 12px;
+    padding-left:11px;
+    border-left:4px solid var(--red);
+    line-height:1.35;
+  }
+  h2 span{
+    font-size:11.5px;
+    color:var(--ink-3);
+    font-weight:400;
+    margin-left:8px;
+    letter-spacing:.04em;
+  }
+  /* ---------- cards ---------- */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 13px;
+    box-shadow:0 1px 2px rgba(46,42,38,.04);
+  }
+  .card h3{
+    font-size:12.5px;
+    margin:0 0 6px;
+    color:var(--red);
+    letter-spacing:.02em;
+  }
+  .card p{margin:0;font-size:12px;color:var(--ink-2);line-height:1.7;}
+  .card.oneline h3{color:var(--ink);}
+  .card.oneline{border-left:3px solid var(--red);}
+  .num{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+    background:var(--red);
+    width:17px;height:17px;line-height:17px;
+    text-align:center;border-radius:5px;
+    margin-right:6px;
+  }
+  /* ---------- table ---------- */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+    font-size:12px;
+  }
+  th{
+    background:var(--sand);
+    color:var(--ink);
+    text-align:left;
+    font-size:11.5px;
+    font-weight:700;
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    letter-spacing:.02em;
+  }
+  td{
+    padding:8px 10px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+    color:var(--ink-2);
+    line-height:1.68;
+  }
+  tr:last-child td{border-bottom:none;}
+  td.k{color:var(--ink);font-weight:600;}
+  td .tag{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:700;
+    padding:1px 7px;
+    border-radius:4px;
+    background:var(--purple-soft);
+    color:var(--purple);
+    margin-right:5px;
+  }
+  tr.hl td{background:#FDFBF7;}
+  /* ---------- callout ---------- */
+  .note{
+    background:var(--sand);
+    border:1px solid var(--line);
+    border-left:3px solid var(--purple);
+    border-radius:8px;
+    padding:11px 13px;
+    font-size:11.8px;
+    color:var(--ink-2);
+    line-height:1.7;
+  }
+  .note b{color:var(--ink);}
+  ul.tick{margin:0;padding-left:0;list-style:none;}
+  ul.tick li{
+    position:relative;
+    padding-left:17px;
+    font-size:12px;
+    color:var(--ink-2);
+    margin-bottom:5px;
+    line-height:1.68;
+  }
+  ul.tick li:before{
+    content:"";
+    position:absolute;
+    left:0;top:7px;
+    width:7px;height:7px;
+    border-radius:2px;
+    background:var(--red);
+    opacity:.82;
+  }
+  footer{
+    margin-top:24px;
+    padding-top:10px;
+    border-top:1px dashed var(--line);
+    font-size:10.8px;
+    color:var(--ink-3);
+    line-height:1.65;
+  }
+  .pb{break-after:page;page-break-after:always;}
+  @media print{
+    body{background:#fff;font-size:10.6pt;}
+    .sheet{max-width:none;padding:0;}
+    .card,table{box-shadow:none;}
+    section{margin-top:14px;}
+    h1{font-size:17pt;}
+    h2{font-size:11.4pt;}
+  }
+  @page{size:A4;margin:14mm 12mm;}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- ============ 第一页 ============ -->
+  <div class="head">
+    <div class="eyebrow">巴南区人民医院 · 宫颈癌诊疗综合场景</div>
+    <h1>宫颈癌 AI 专科智能体及数据驾驶舱一体化建设项目
+      <small>实施与分期方案（简版）</small>
+    </h1>
+    <div class="headline">
+      <span class="pill">单病种闭环先行</span>
+      <span class="pill alt">分期落地 · 一期见效</span>
+      <span class="pill grey">利旧现有硬件 · 不改动原系统</span>
+    </div>
+    <div class="meta">
+      <div><b>编制单位</b>　圣高迪（重庆）数字科技控股有限公司</div>
+      <div><b>版本</b>　V1.0（摘要版）</div>
+      <div><b>日期</b>　2026 年 9 月</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>一、方案要点<span>为什么这样组织建设</span></h2>
+    <div class="grid3">
+      <div class="card">
+        <h3>① 一条线打通，胜过全面平铺</h3>
+        <p>以宫颈癌一个病种为主线，把筛查、诊断、治疗、质控、随访串成完整链路。临床先用起来、效果先看得见，再横向扩展。</p>
+      </div>
+      <div class="card">
+        <h3>② 底座一次建成，能力反复复用</h3>
+        <p>AI 智能体中台与上层业务解耦。后续新增专科、新增智能体，只需配置与调优，不重复建设底层运行环境。</p>
+      </div>
+      <div class="card">
+        <h3>③ 只对接、不改造</h3>
+        <p>利旧院内现有服务器与业务系统，通过接口完成数据双向流转，不改动原有系统数据库与主体架构，临床业务不中断。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>二、建设内容<span>五大板块 · 一个底座、五类智能体、一套数据集、一块驾驶舱、一套病理数字化设备</span></h2>
+    <div class="grid3">
+      <div class="card"><h3>AI 智能体中台</h3><p>统一技术底座：模型纳管、算力池化、智能体编排、服务网关、数据服务、运维监控。</p></div>
+      <div class="card"><h3>病历生成智能体</h3><p>多源数据聚合成事实账本，AI 生成病历初稿，医师逐项确认后以草稿状态回写院内系统。</p></div>
+      <div class="card"><h3>病历质控智能体</h3><p>书写过程实时提示 + 归档病历事后批量筛查，缺陷「发现—分派—整改—复核—销号」闭环。</p></div>
+      <div class="card"><h3>超声报告语音生成</h3><p>医师口述自动转写并生成结构化报告，报告内容与对话、指令自动分离，医师确认后回写草稿区。</p></div>
+      <div class="card"><h3>体检指引与报告解读</h3><p>筛查前置指引、异常结果就诊指引、筛查报告结构化解析与通俗化解读，全部经医师逐条确认。</p></div>
+      <div class="card"><h3>一体化分层随访</h3><p>五类人群自动分层，周期与必查项目自动匹配，提醒、处置、复核、销号全流程闭环。</p></div>
+      <div class="card"><h3>高质量专题数据集</h3><p>多模态数据汇聚、清洗、标准化、去标识化，构建院内宫颈癌专题数据集，支撑科研与模型迭代。</p></div>
+      <div class="card"><h3>数据驾驶舱</h3><p>筛查、诊疗、AI 运行监控、医疗质量质控、数据集与科研五大主题看板，PC 与大屏双端。</p></div>
+      <div class="card"><h3>病理标本数字化设备</h3><p>数字切片扫描与宫颈细胞图像处理：现有扫描仪利旧对接，配套新增高通量扫描设备；TCT 与 DNA 倍体双联智能筛查，结果回传病理信息管理系统。</p></div>
+    </div>
+    <div class="note" style="margin-top:11px;">
+      <b>人机协同红线（全部 AI 功能共同遵守）：</b>AI 严格定位为临床辅助工具，输出内容必须经院内医护人员逐项审核确认；<b>不自动归档、不自动签名、不直接对外推送患者</b>；诊断与治疗建议不生成，图像判读不参与（属医疗器械监管范围）。
+    </div>
+  </section>
+  </div>
+
+  <!-- ============ 第二页 ============ -->
+  <div class="sheet">
+  <section style="margin-top:0;">
+    <h2>三、分期实施路径<span>每一期都有可见产出物，逐期加深</span></h2>
+    <table>
+      <thead>
+        <tr><th style="width:74px;">阶段</th><th style="width:120px;">周期</th><th>建设重心</th><th style="width:196px;">阶段产出</th></tr>
+      </thead>
+      <tbody>
+        <tr class="hl">
+          <td class="k">一期<br /><span style="font-weight:400;font-size:11px;color:var(--red);">（本期）</span></td>
+          <td>启动后 6 个月内形成可验收节点</td>
+          <td>宫颈癌单病种全链路闭环。中台底座建成，病历生成、病历质控、超声报告、体检解读四个智能体形成最小可用闭环，随访链路与驾驶舱核心主题同步上线。范围收敛到可在真实临床环境验证的形态。</td>
+          <td>中台可运行（模型纳管 + 监控）；病历生成→校验→确认→草稿回写全链路可演示；质控缺陷闭环可运转；阴超报告生成闭环；驾驶舱核心主题看板可用。</td>
+        </tr>
+        <tr>
+          <td class="k">二期</td>
+          <td>6 – 18 个月</td>
+          <td>在已建成底座上横向扩展：病种由宫颈癌扩展至其他妇科肿瘤及院方指定专科；超声报告由单一诊室扩展至更多检查类型；随访与体检链路完整覆盖；专题数据集扩容与模型迭代。</td>
+          <td>新增病种/诊室上线；数据集新版本；指标口径与看板完善。</td>
+        </tr>
+        <tr>
+          <td class="k">三期</td>
+          <td>18 个月以上</td>
+          <td>全域专科 AI 能力复用，向区域内下级医疗机构延伸（远程会诊、筛查协同），形成区域专科能力输出。</td>
+          <td>区域协同能力；区域数据与质量监管视图。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>四、一期建设聚焦范围<span>按模块收口，边界清晰可验收</span></h2>
+    <table>
+      <thead>
+        <tr><th style="width:150px;">模块</th><th>一期聚焦范围</th><th style="width:230px;">一期验收物</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="k">统一技术底座</td>
+          <td>多模型统一接入管理、智能体开发与快速迭代、服务网关与能力封装、数据服务能力、运维监控，全部容器化交付、内网离线部署。</td>
+          <td>中台可运行；模型注册台账；监控大盘与审计日志；《模型接入标准化规范》。</td>
+        </tr>
+        <tr>
+          <td class="k">专病范围</td>
+          <td>宫颈癌单一病种。专科知识库、规则库、术语库按宫颈癌构建，机制完整、可扩展。</td>
+          <td>宫颈癌专病知识/规则/术语库 V1.0（可视化维护、版本可回滚）。</td>
+        </tr>
+        <tr>
+          <td class="k">病历生成</td>
+          <td>宫颈癌专病病历模板首批针对妇科现场沟通确定范围，追求流程闭环与机制完整，不追求模板数量一次性铺满。</td>
+          <td>生成→独立校验→医师逐项确认→草稿回写 全链路可演示；痕迹与版本回溯可查。</td>
+        </tr>
+        <tr>
+          <td class="k">病历质控</td>
+          <td>宫颈癌专科质控规则库；书写过程实时提示 + 归档病历事后批量筛查双模式。</td>
+          <td>七大质控维度规则可配置；缺陷工单闭环（发现—分派—整改—复核—销号）可运转；质控指标输出至驾驶舱。</td>
+        </tr>
+        <tr>
+          <td class="k">超声报告语音生成</td>
+          <td>阴超单诊室先行，形成口述到报告回写的完整闭环；后续按诊室逐个接入。</td>
+          <td>口述→整段转写→内容分离→结构化报告→医师确认→草稿回写 闭环可演示；专科热词表可维护。</td>
+        </tr>
+        <tr>
+          <td class="k">体检指引与报告解读</td>
+          <td>宫颈癌相关受检者的筛查指引、异常结果就诊指引、筛查报告结构化解析与通俗化解读。</td>
+          <td>指引与解读文本产出；医师逐条确认与分发留痕；知识库与规则表可维护。</td>
+        </tr>
+        <tr>
+          <td class="k">一体化分层随访</td>
+          <td>宫颈癌相关人群的专科随访链路：自动分层、周期与必查项目匹配、提醒、处置登记、复核销号。</td>
+          <td>分层结果待确认池→生效；随访闭环流程可运转；随访完成率、失访率、逾期统计输出。</td>
+        </tr>
+        <tr>
+          <td class="k">数据驾驶舱</td>
+          <td>与一期强相关的主题先行：筛查业务、AI 应用运行监控、医疗质量质控；PC 端与大屏双端。</td>
+          <td>三个主题看板可用；多维度筛选与下钻；指标口径管理可维护。</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>五、一期验收锚点与环境边界</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>一期可验收节点（锚点）</h3>
+        <ul class="tick">
+          <li>宫颈癌专病病历模板走通，病历生成成功回写院内系统（草稿态）</li>
+          <li>病历质控缺陷工单完成一次完整闭环流转</li>
+          <li>阴超诊室口述报告闭环产出并回写（草稿态）</li>
+          <li>驾驶舱核心主题看板出数并完成一次指标核对</li>
+          <li>随访管理初步闭环</li>
+          <li>中台具备新增模型、新增智能体的配置化上线能力</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>环境与责任边界（需与院方书面确认）</h3>
+        <ul class="tick">
+          <li>本项目不含 GPU 服务器及算力硬件采购，算力基于院方现有服务器资源统一纳管</li>
+          <li>部署环境适配国产化算力（鲲鹏 CPU + 昇腾），需院方提供适配与测试环境</li>
+          <li>大屏显示硬件利旧院方现有设备，本项目交付驾驶舱软件功能</li>
+          <li>语音采集使用医用级音频采集设备，需明确提供方</li>
+          <li>院内业务系统取数一期只考虑与集成平台对接，回写接口由院方协调原厂商配合开通</li>
+          <li>硬件与接口条件不满足导致的工期顺延，不计入我方工期责任</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>六、实施与保障承诺</h2>
+    <div class="grid4">
+      <div class="card oneline"><h3>交付形态</h3><p>全容器镜像交付，纳入院内私有镜像仓库统一管理；一键部署、一键升级、一键回滚；内网无外网环境离线交付。</p></div>
+      <div class="card oneline"><h3>质保服务</h3><p>不低于 3 年完整免费质保，含缺陷修复、系统调优、版本升级、远程技术支持；质保期内模板库、术语文库、质控规则、专科热词表常规维护包含在内。</p></div>
+      <div class="card oneline"><h3>培训服务</h3><p>面向临床、病理、超声、质控、信息科五类角色开展业务操作与系统运维培训，提供教材与操作视频并组织考核。</p></div>
+      <div class="card oneline"><h3>文档交付</h3><p>需求规格说明书、系统部署手册、运维手册、接口文档与字段映射表、测试报告、用户操作手册。</p></div>
+    </div>
+  </section>
+
+  <footer>
+    本文件为技术方案摘要版，用于业务沟通与技术交流。文中标注为设计目标的指标均在试点期以科室真实数据实测标定后转为验收指标；接口范围、数据权限边界与合规条款以院方书面授权为准。分期阶段划分与各期聚焦范围以双方现场确认的会议纪要为准。
+  </footer>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>影子写手 · 链路设计说明（一页纸）</title>
+<style>
+@page{size:A4 portrait;margin:10mm}
+*{box-sizing:border-box}
+body{margin:0;background:#FAFAF8;color:#2C2C2A;
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:11.5px;line-height:1.5}
+.page{max-width:820px;margin:0 auto;background:#fff;padding:16px 20px 24px;
+  border:1px solid #E5E3DC;border-radius:8px}
+h1{font-size:18px;font-weight:600;margin:0 0 2px}
+.sub{color:#5F5E5A;font-size:11px;margin:0 0 10px}
+h2{font-size:13px;font-weight:600;margin:16px 0 6px;padding-top:8px;
+  border-top:1px solid #E5E3DC}
+h2:first-of-type{border-top:none;padding-top:0}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;vertical-align:top;padding:5px 7px;
+  border-bottom:1px solid #EFEDE6}
+th{background:#F1EFE8;color:#5F5E5A;font-weight:600;font-size:11px;
+  white-space:nowrap}
+td.k{white-space:nowrap;font-weight:600;color:#0F6E56}
+tr:last-child td{border-bottom:none}
+code{background:#F1EFE8;padding:0 3px;border-radius:3px;
+  font-family:ui-monospace,Consolas,monospace;font-size:10.5px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
+.chip{background:#E1F5EE;color:#0F6E56;font-size:10.5px;padding:1px 8px;
+  border-radius:4px}
+.chip.g{background:#F1EFE8;color:#5F5E5A}
+.chip.w{background:#FAEEDA;color:#854F0B}
+ol,ul{margin:4px 0;padding-left:18px}
+li{margin-bottom:3px}
+.warn{background:#FCEBEB;border-left:3px solid #A32D2D;padding:7px 10px;
+  margin:8px 0;font-size:11px}
+.warn b{color:#A32D2D}
+.note{background:#FAEEDA;border-left:3px solid #854F0B;padding:7px 10px;
+  margin:8px 0;font-size:11px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>影子写手 · 链路设计说明</h1>
+<p class="sub">断指再植专病试点 · HIS 旁路部署 · 院内私有化</p>
+<div class="meta">
+  <span class="chip">状态：头脑风暴版，含待核实假设</span>
+  <span class="chip g">部署：院内私有化，不出院区</span>
+  <span class="chip g">文书最高状态：copy_ready，签署在 HIS 内完成</span>
+  <span class="chip w">接口与伦理为预设置信，需客户书面确认</span>
+</div>
+
+<h2>一、链路逐环节接口约定与失败处理</h2>
+<table>
+<colgroup><col style="width:11%"><col style="width:53%"><col style="width:36%"></colgroup>
+<thead><tr><th>环节</th><th>接口约定</th><th>失败处理</th></tr></thead>
+<tbody>
+
+<tr><td class="k">① 身份锚定</td>
+<td><b>输入</b>：医生在应用内选定 <code>patient_id</code> + <code>encounter_id</code> + <code>document_type</code><br>
+<b>输出</b>：<code>session_id</code>，后续所有取数、生成、回写均绑定此 ID</td>
+<td>三者任一缺失 → <b>阻断</b>，禁止进入取数与采集环节。这是防止多患者病历同场的第一道闸</td></tr>
+
+<tr><td class="k">② HIS 接口取数</td>
+<td><b>协议</b>：院内只读接口，HTTPS + 院方网关鉴权<br>
+<b>输入</b>：<code>patient_id</code>、<code>encounter_id</code>、字段白名单（按需，禁止批量同步）<br>
+<b>输出</b>：JSON 字段集，每条附 <code>status: preliminary | verified</code> 与采集时间</td>
+<td>超时 → 重试 1 次；仍失败 → 降级为手工粘贴模式，该来源事实标 <code>unverified</code>，<b>且不得作为 conflict 判定锚</b></td></tr>
+
+<tr><td class="k">③ 语音采集 + ASR</td>
+<td><b>输入</b>：音频（wav/mp3），设备占位（录音笔 / 领夹麦，选型待定）<br>
+<b>处理</b>：院内部署 ASR，音频不出院区；场景1 需说话人分离<br>
+<b>输出</b>：转写文本 + 时间戳 + 说话人标签<br>
+<b>存证</b>：原始音频与转写文本、时间戳<b>一并留存</b></td>
+<td>ASR 不可用 → 阻断语音链路，改文本输入；片段置信度低于阈值 → 标红待人工确认。<br>
+<b>硬规则：转写中抽出的数值一律进"待确认"池，不直接进槽位</b></td></tr>
+
+<tr><td class="k">④ 图像采集</td>
+<td><b>输入</b>：伤口照片 / 检查报告图片<br>
+<b>处理</b>：仅建立与患者的关联；<b>影像本体不进推理链</b><br>
+<b>输出</b>：图像引用 + 医生或报告提供的文字描述</td>
+<td>无法关联患者 → 拒绝入库。<br>
+<b>边界：禁止由模型读影像并产出诊断性描述</b></td></tr>
+
+<tr><td class="k">⑤ 三源归一 → 事实账本</td>
+<td><b>输出</b>：<code>fact[]</code>，每条含 <code>fact_id</code>、<code>content</code>、<code>source_type</code>、<code>evidence_level(A/B/C)</code>、<code>fact_status</code>、原文切片、时间戳<br>
+<code>source_type</code>：patient_statement / family_statement / physician_exam / original_report / physician_assessment / performed_action / plan_or_order / pending_result<br>
+<code>fact_status</code>：confirmed_present / confirmed_absent / not_asked / unknown / not_examined / pending_report / not_applicable / conflict / awaiting_physician_confirmation<br>
+<b>证据等级</b>：A=HIS 系统记录，B=医师陈述，C=患者陈述</td>
+<td>无法判定 source_type → 默认最低等级 C 并标 <code>awaiting_physician_confirmation</code>，禁止升格使用</td></tr>
+
+<tr><td class="k">⑥ 缺口检测与补问</td>
+<td><b>输入</b>：文书类型必填项清单 + 当前 <code>fact[]</code><br>
+<b>输出</b>：每轮 3–7 个中性问题，<b>不提供候选答案</b>，允许回答"不详 / 未查 / 待回报"</td>
+<td><b>最多两轮</b>。两轮后仍有关键缺口 → 停止生成，状态保持 <code>needs_review</code>，禁止 <code>copy_ready</code></td></tr>
+
+<tr><td class="k">⑦ 生成 agent</td>
+<td><b>输入</b>：达标 <code>fact[]</code> + 文书模板 + 规范上下文<br>
+<b>输出</b>：草稿正文，<b>每句映射 fact_id</b>；生命体征、检验值、剂量<b>走槽位回填，不经模型生成</b></td>
+<td>任一数值无处可填 → 输出 <code>[待补充]</code> 占位，<b>严禁自行填充</b></td></tr>
+
+<tr><td class="k">⑧ 校验 agent</td>
+<td><b>输入</b>：草稿正文 + <code>fact[]</code>；<b>不含生成过程的对话历史（上下文隔离）</b><br>
+<b>输出</b>：校验报告——无源陈述、conflict、诊断强度升级、左右侧/时间线/单位一致性</td>
+<td>发现任一无源陈述或 conflict → 回退至 ⑨，<b>禁止回写</b></td></tr>
+
+<tr><td class="k">⑨ 医生逐句确认</td>
+<td><b>输入</b>：草稿 + 校验报告<br>
+<b>输出</b>：逐句勾选确认记录（含病史来源、查体、报告、诊断、计划、高风险事件）</td>
+<td>无源句子<b>不可勾选</b>；不得用一次性笼统确认替代逐项；存在未确认项 → 状态保持 <code>needs_review</code></td></tr>
+
+<tr><td class="k">⑩ 回写 / 阻断</td>
+<td><b>协议</b>：院方可写接口，<b>仅写草稿区</b><br>
+<b>输出</b>：草稿文本 + 状态标记 <code>draft</code>（非 <code>signed</code>）<br>
+<b>审计</b>：取数、生成、回写全链路留痕，保存周期按院方要求</td>
+<td>存在 conflict、缺口未解决、或未逐句确认 → <b>禁止回写</b>，走阻断出口</td></tr>
+
+</tbody>
+</table>
+
+<h2>二、不可妥协的硬约束</h2>
+<div class="grid2">
+<ol>
+<li>数值不经过模型，走槽位回填</li>
+<li>模型永远看不到其他患者的真实病历</li>
+<li>不自动提交 HIS，最高状态只到 <code>copy_ready</code></li>
+<li>不产出诊断与治疗建议，触发即停止文书流程</li>
+</ol>
+<ol start="5">
+<li>患者陈述永不能升格为查体结果或诊断</li>
+<li>ASR 与 LLM 均本地部署，不调用外部接口</li>
+<li>未提及不得改写为"无 / 否认 / 正常"</li>
+<li>生成与校验必须上下文隔离，不得自审</li>
+</ol>
+</div>
+
+<div class="warn"><b>最容易出事故的一处：</b>全身体格检查占入院记录 52% 篇幅（实测 857 字符，68 份方差仅 70），是逐字复制的固定模板。
+若由模型自动生成"巩膜无黄染、双侧瞳孔等大等圆"而医生并未实际检查，即为凭空生成查体记录。
+<b>该段落必须走结构化勾选表单，逐项选择 正常 / 异常描述 / 未查，禁止默认全部正常。</b></div>
+
+<h2>三、待客户确认项</h2>
+<table>
+<colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+<thead><tr><th>事项</th><th>需要确认的内容</th></tr></thead>
+<tbody>
+<tr><td class="k">HIS 接口</td><td>只读 / 可写权限范围；可取数据项（检验、医嘱、护理生命体征、PACS、报告）；实时性；审计字段要求</td></tr>
+<tr><td class="k">回写边界</td><td>草稿区的写入权限与状态标记方式；医生在 HIS 内修改后能否读回（关系到事实账本与正式病历是否一致）</td></tr>
+<tr><td class="k">录音合规</td><td>医患录音的伦理与医务处书面意见；原始音频留存策略与加密要求</td></tr>
+<tr><td class="k">ASR 部署</td><td>院内 GPU 资源归属；方言（白话 / 壮语口音）适配需求；是否需说话人分离</td></tr>
+<tr><td class="k">硬件选型</td><td>录音笔 / 领夹麦；导入式还是实时流式；是否需多通道（场景1 医患分离）</td></tr>
+</tbody>
+</table>
+
+<div class="note"><b>说明：</b>本页为头脑风暴阶段的设计基线，篇幅数据来自 85 份真实脱敏病例实测（<code>calc_corpus_stats.py</code> 可重跑），
+接口与合规条款均为预设，需客户书面确认后方可进入开发。</div>
+
+</div>
+</body>
+</html>

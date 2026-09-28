@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Octop 部署方式与容器化可行性评估</title>
+<style>
+  :root{
+    --ink:#2D2A32; --ink-2:#5A5560;
+    --paper:#FAF7F2; --card:#FFFFFF;
+    --red:#B03050; --red-soft:#F6E3E8;
+    --purple:#8E7CC3; --purple-soft:#EFEAF7;
+    --green:#4E7A5E; --green-soft:#E6F0E8;
+    --line:#E8E2D9;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    line-height:1.65; padding:32px 16px;}
+  .wrap{max-width:1080px; margin:0 auto;}
+  header{border-left:6px solid var(--red); padding-left:18px; margin-bottom:8px;}
+  h1{font-size:26px; letter-spacing:.5px;}
+  .meta{color:var(--ink-2); font-size:13px; margin-top:6px;}
+  nav{margin:18px 0 26px; display:flex; gap:10px; flex-wrap:wrap;}
+  nav a{text-decoration:none; font-size:13px; padding:6px 14px; border-radius:999px;
+    background:var(--purple-soft); color:#5D4B8C;}
+  nav a:hover{background:var(--purple); color:#fff;}
+  h2{font-size:19px; margin:34px 0 12px; padding-bottom:8px; border-bottom:2px solid var(--line);
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  h2 .tag{font-size:12px; font-weight:normal; color:#fff; padding:2px 10px; border-radius:999px;}
+  .tag-official{background:var(--purple);}
+  .tag-risk{background:var(--red);}
+  .tag-field{background:#9B8B7A;}
+  .tag-ok{background:var(--green);}
+  h3{font-size:15px; margin:20px 0 8px; color:#4A4440;}
+  p{margin-bottom:10px;}
+  table{width:100%; border-collapse:collapse; background:var(--card); font-size:13.5px;
+    border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:10px;}
+  th{background:#F1ECE4; text-align:left; padding:10px 12px; font-size:13px; color:#4A4440;
+    border-bottom:2px solid var(--line); white-space:nowrap;}
+  td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#FBF4F6;}
+  td.pname{font-weight:bold; white-space:nowrap;}
+  .pill{display:inline-block; font-size:12px; padding:1px 8px; border-radius:4px; white-space:nowrap;}
+  .p-ok{background:var(--green-soft); color:var(--green);}
+  .p-no{background:var(--red-soft); color:#8E2440;}
+  .p-mid{background:#F0EBE4; color:#7A6A58;}
+  .muted{color:var(--ink-2); font-size:12.5px;}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin:14px 0;}
+  .card{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--purple);
+    border-radius:10px; padding:14px 16px; font-size:13.5px;}
+  .card b{color:var(--red);}
+  .card.warn{border-left-color:var(--red);}
+  .card.good{border-left-color:var(--green);}
+  .note{background:var(--purple-soft); border-radius:10px; padding:14px 18px; font-size:13.5px; margin:12px 0;}
+  .note b{color:#5D4B8C;}
+  .note.red{background:var(--red-soft);}
+  .note.red b{color:var(--red);}
+  .note.green{background:var(--green-soft);}
+  .note.green b{color:var(--green);}
+  pre{background:#2D2A32; color:#EDEAF2; border-radius:10px; padding:14px 16px;
+    font-size:12.5px; line-height:1.6; overflow-x:auto; margin:10px 0;
+    font-family:"Cascadia Mono",Consolas,monospace;}
+  pre .c{color:#9B94A8;}
+  code{font-family:"Cascadia Mono",Consolas,monospace; font-size:12.5px;
+    background:#F1ECE4; padding:1px 5px; border-radius:4px;}
+  ol,ul{margin:0 0 12px 20px; font-size:13.5px;}
+  li{margin-bottom:5px;}
+  footer{margin-top:40px; color:var(--ink-2); font-size:12px; border-top:1px solid var(--line); padding-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Octop 部署方式与容器化可行性评估</h1>
+  <div class="meta">对象：<code>github.com/TencentCloud/Octop</code> · 版本 1.0.0 · MIT · Python 3.12+ · 评估日期 2026-09-18 · 源码已浅克隆至 <code>_ref/Octop</code></div>
+</header>
+
+<nav>
+  <a href="#verdict">结论</a>
+  <a href="#what">项目构成</a>
+  <a href="#deploy">五种部署方式</a>
+  <a href="#docker">容器化现状</a>
+  <a href="#p0">上游 P0 缺陷</a>
+  <a href="#gap">五个缺口</a>
+  <a href="#ops">运维细节</a>
+  <a href="#plan">落地建议</a>
+  <a href="#verify">验证清单</a>
+</nav>
+
+<h2 id="verdict">结论 <span class="tag tag-ok">能容器化</span></h2>
+
+<div class="cards">
+  <div class="card good"><b>能，而且官方已做好</b><br>多阶段 Dockerfile + 3 套 compose + 入口自动初始化 + HEALTHCHECK 齐全，官方镜像已发布到 GHCR。这不是社区凑的 Dockerfile。</div>
+  <div class="card warn"><b>但它面向家用/小团队</b><br>官方容器化目标是"一台机器、一个人管"，不是医院生产环境。直接照抄会踩 5 个坑，其中 2 个是等保/安全评审必问项。</div>
+  <div class="card warn"><b>不能水平扩展</b><br>单进程架构 + 进程内调度 + IM 长连接 + 本地文件 workspace。K8s 里只能 <code>replicas: 1</code>，扩容只能纵向。</div>
+  <div class="card"><b>官方镜像只支持 amd64</b><br>鲲鹏/昇腾/ARM 宿主拉不动，需自行 buildx 交叉构建。压缩体积 655MB / 16 层。</div>
+  <div class="card warn"><b>附带一个上游 P0 缺陷</b><br>官方容器<b>配 PostgreSQL 会崩溃循环</b>——首次启动正常，之后每次重启都失败退出。本次读源码发现，上游 issue 无记录。详见下文。</div>
+</div>
+
+<div class="note green">
+<b>一句话：</b>容器化本身没有技术障碍，Octop 是"为自托管而生"的项目，Docker 是一等公民。真正的风险不在"能不能装进容器"，而在<b>PG 模式崩溃循环、单副本约束、容器内 root 运行、ARM 缺位、离线交付</b>这几件事——除 ARM 外都可在 1–3 人日内补齐，不是架构死结。
+</div>
+
+<h2 id="what">项目构成 <span class="tag tag-official">已核实</span></h2>
+
+<table>
+  <tr><th>维度</th><th>事实</th></tr>
+  <tr><td class="pname">定位</td><td>自托管多用户、多智能体 AI 助手平台（Web 控制台 + CLI + IM 集成 + 定时任务）</td></tr>
+  <tr><td class="pname">后端</td><td>Python 3.12+ / FastAPI + uvicorn / APScheduler / Argon2 + JWT</td></tr>
+  <tr><td class="pname">前端</td><td>React 18 + TypeScript + Vite + Ant Design，构建产物打进 wheel（<code>src/octop/dashboard/</code>）</td></tr>
+  <tr><td class="pname">进程模型</td><td><b>单进程</b>。一个 <code>octop run</code> 同时提供 HTTP API、Web 控制台、IM 通道、定时任务。Web/IM/cron 全部经进程内唯一的 <code>HarnessProcessor</code> 路由</td></tr>
+  <tr><td class="pname">外部中间件</td><td><b>无</b>。不用 MQ、不用 Redis、不用外部调度器</td></tr>
+  <tr><td class="pname">状态存储</td><td>默认 SQLite（WAL）；可选 PostgreSQL（需 pgvector 扩展）。另加 <code>~/.octop/agents/&lt;id&gt;/</code> 文件型 workspace、secrets、logs</td></tr>
+  <tr><td class="pname">模型接入</td><td>OpenAI 兼容 API、DashScope、Ollama 及其他预设 —— 可指向院内私有推理服务</td></tr>
+  <tr><td class="pname">IM 通道</td><td>飞书 / 钉钉 / QQ / Discord / 企业微信，均为长连接机器人</td></tr>
+  <tr><td class="pname">活跃度</td><td>3.5k star / 368 fork / 240 open issues；仓库 2026-07-08 创建，最后推送 2026-09-18（当日）；v1.0.0 刚发布</td></tr>
+</table>
+
+<div class="note red">
+<b>成熟度提醒：</b>项目创建至今约 2 个月，v1.0.0 刚发布，240 个未关 issue。MIT 许可，<b>无任何商业支持承诺</b>。医院项目通常要 3–5 年维保——这一条必须让商务侧去确认腾讯是否提供商业支持渠道（官网 octop.cloud），否则技术再顺也只是"能跑"，不是"能交付"。
+</div>
+
+<h2 id="deploy">五种部署方式 <span class="tag tag-official">官方文档</span></h2>
+
+<table>
+  <tr><th>方式</th><th>命令 / 载体</th><th>适用场景</th><th>容器化相关度</th></tr>
+  <tr><td class="pname">远程一键脚本</td><td><code>curl …/install.sh | bash</code><br>Windows <code>irm …/install.ps1 | iex</code></td><td>个人机、家庭 NAS</td><td><span class="pill p-mid">无关</span> 在 <code>~/.octop/venv</code> 建隔离 venv，不碰系统 Python</td></tr>
+  <tr><td class="pname">本地脚本</td><td><code>bash scripts/install.sh</code> / <code>scripts\install.bat</code></td><td>离线可控安装</td><td><span class="pill p-mid">无关</span></td></tr>
+  <tr><td class="pname">PyPI</td><td><code>pip install octop</code>（可选 <code>[browser]</code>）</td><td>已有 Python 环境</td><td><span class="pill p-mid">可作镜像基础</span></td></tr>
+  <tr><td class="pname">Docker</td><td><code>docker compose -f docker/docker-compose.yml up -d</code><br>官方镜像 <code>ghcr.io/tencentcloud/octop:1.0.0</code></td><td>自托管生产（官方标注"生产推荐"）</td><td><span class="pill p-ok">主路径</span></td></tr>
+  <tr><td class="pname">桌面 App</td><td>GitHub Releases：Windows .exe / macOS .dmg / Linux .tar.gz / FnOS .fpk</td><td>终端用户单机</td><td><span class="pill p-mid">可选</span> FnOS 包内部仍是拉 Docker 镜像</td></tr>
+</table>
+
+<p class="muted">系统服务化：<code>octop service start</code> 可注册 systemd / launchd / Windows 服务。升级：<code>octop update</code> 只替换程序本体，保留 <code>~/.octop/</code> 下的库、workspace 与密钥。</p>
+
+<h2 id="docker">容器化现状 <span class="tag tag-official">源码核实</span></h2>
+
+<h3>已具备的资产（<code>docker/</code> 目录）</h3>
+<table>
+  <tr><th>文件</th><th>作用</th><th>评估</th></tr>
+  <tr><td class="pname">Dockerfile</td><td>两阶段：<code>node:20-slim</code> 构建前端 → <code>python:3.12-slim</code> 运行时；uv 按 lock 装依赖；带 <code>--extra browser</code></td><td><span class="pill p-ok">规范</span> 分层缓存、BuildKit cache mount、国内镜像源 build-arg 都有</td></tr>
+  <tr><td class="pname">docker_build.sh</td><td>开 BuildKit 构建，支持 PIP/NPM/APT 镜像源加速</td><td><span class="pill p-ok">可用</span></td></tr>
+  <tr><td class="pname">docker-compose.yml</td><td>单服务 + 端口 8088 + 数据卷 + 全量环境变量透传</td><td><span class="pill p-ok">可用</span> 但 bind mount 用 <code>~/.octop</code> 有坑，见下</td></tr>
+  <tr><td class="pname">docker-compose.postgres.yml</td><td><code>pgvector/pgvector:pg16</code> + 自动建 vector 扩展 + healthcheck</td><td><span class="pill p-ok">可用</span> 医院场景建议直接启用</td></tr>
+  <tr><td class="pname">docker-compose.mobile.yml</td><td>远程手机/安卓容器能力</td><td><span class="pill p-no">建议弃用</span> 需 <code>privileged: true</code> + 挂 <code>/var/run/docker.sock</code> + <code>/dev/binderfs</code></td></tr>
+  <tr><td class="pname">docker-entrypoint.sh</td><td>首次启动自动 <code>octop init</code>；未给密码则生成 16 位随机强密码写入 <code>credential.txt</code>(600)；密码被策略拒绝自动回退随机</td><td><span class="pill p-ok">设计不错</span> 但凭据明文落盘</td></tr>
+  <tr><td class="pname">HEALTHCHECK</td><td>30s 间隔探 <code>/api/health</code>，start-period 90s，3 次重试</td><td><span class="pill p-ok">可直接接 K8s</span></td></tr>
+  <tr><td class="pname">docker-publish.yml</td><td>打 v* tag 时构建并推送 GHCR + Docker Hub</td><td><span class="pill p-mid">仅 amd64</span> <code>platforms: linux/amd64</code> 写死</td></tr>
+</table>
+
+<h3>官方镜像实际发布情况（已查 GHCR registry）</h3>
+<pre><span class="c"># 可用标签</span>
+ghcr.io/tencentcloud/octop:  0.9.30  0.9.31  0.9.32  0.9.33  0.9.34  0.9.35  1.0.0  latest
+<span class="c"># manifest 平台</span>
+linux/amd64        <span class="c">← 只有这一个</span>
+<span class="c"># 体积</span>
+压缩层合计 654.6 MB / 16 层，最大单层 372.4 MB
+解压后落盘预估 1.5–2.0 GB</pre>
+
+<h2 id="p0">上游 P0 缺陷：PostgreSQL 模式下容器崩溃循环 <span class="tag tag-risk">本次发现</span></h2>
+
+<div class="note red">
+<b>结论先行：</b>官方 compose 明确宣传可以切 PostgreSQL（<code>OCTOP_DATABASE_DRIVER=postgresql</code> / <code>OCTOP_DATABASE_URL</code>），但<b>照着配下去，容器只能启动一次，之后每次重启都会失败退出并被反复拉起</b>。上游 issue 中无相关记录。
+</div>
+
+<h3>触发链条（源码逐行核对）</h3>
+<pre><span class="c"># docker/docker-entrypoint.sh:23</span>
+DB_FILE="${OCTOP_HOME}/octop.db"
+<span class="c"># docker/docker-entrypoint.sh:47 —— 唯一判据是「SQLite 文件不存在」</span>
+if [ ! -f "$DB_FILE" ]; then
+    ...
+    if ! octop init --yes --admin-username ... ; then
+        DEFAULT_PASSWORD="$(octop_random_password)"
+        octop init --yes --admin-username ...   <span class="c">← 没有 if 保护</span>
+    fi
+fi</pre>
+
+<ol>
+  <li><b>PostgreSQL 模式下永远不会生成 <code>octop.db</code></b>。<code>src/octop/infra/db/factory.py</code> 的 <code>open_database()</code> 在 PG 分支直接 <code>return PostgresPool(...)</code>，不落任何 SQLite 文件；<code>docker-entrypoint.sh</code> 里 <code>octop.db</code> 只在这一处被引用。</li>
+  <li>于是 <code>[ ! -f "$DB_FILE" ]</code> <b>永远为真</b>，每次容器启动都会执行 <code>octop init</code>。</li>
+  <li><code>src/octop/cli/commands/init.py</code> 开头就检查 <code>~/.octop</code> 是否为空，非空即 <code>raise SystemExit(1)</code>：<br><code>error: ~/.octop already exists and is not empty. Use --force to reset.</code></li>
+  <li>入口脚本把这次失败误判为"密码太弱"，换随机密码重试一次；<b>第二次失败没有被 <code>if</code> 保护</b>，配合 <code>set -euo pipefail</code> 直接终止脚本，容器退出。</li>
+  <li><code>restart: unless-stopped</code> 反复拉起 → <b>崩溃循环</b>，且每次都会用新随机密码重写 <code>credential.txt</code>。</li>
+</ol>
+
+<div class="note">
+<b>为什么这个坑特别毒：</b>首次启动一切正常（目录为空，init 成功，能登录、能用），验收时看不出问题。<b>第一次断电、升级、迁移之后就再也起不来</b>——正好落在医院项目的运维期。
+</div>
+
+<h3>三种应对</h3>
+<table>
+  <tr><th>方案</th><th>做法</th><th>代价</th></tr>
+  <tr><td class="pname">用默认 SQLite</td><td>不配 <code>OCTOP_DATABASE_*</code>，走官方默认路径</td><td><span class="pill p-mid">可用</span> 但单写者 + WAL 锁竞争，多用户并发不理想</td></tr>
+  <tr><td class="pname">改初始化判据</td><td>替换入口脚本，用自建标记文件判断是否已初始化，并把"目录已有数据"识别为已初始化</td><td><span class="pill p-ok">推荐</span> 已在本项目 <code>octop-deploy/docker-entrypoint-root.sh</code> 中实现，顺带解决非 root 运行</td></tr>
+  <tr><td class="pname">向上游提 issue / PR</td><td>判据改成 <code>config.json</code> 存在或 <code>OCTOP_DATABASE_URL</code> 非空时走另一条分支</td><td>响应时间不可控，MIT 项目无 SLA</td></tr>
+</table>
+
+<h2 id="gap">五个缺口 <span class="tag tag-risk">必须补</span></h2>
+
+<h3>1. 容器内以 root 运行 <span class="pill p-no">安全评审必问</span></h3>
+<p>Dockerfile <b>全文没有 <code>USER</code> 指令</b>，容器以 uid 0 启动。后果有两层：</p>
+<ul>
+  <li>宿主绑定的 <code>~/.octop</code> 目录会被 root 改写所有权，宿主普通用户后续读写、备份、迁移都会碰到权限问题；</li>
+  <li>Agent 具备 shell 执行能力，<b>在容器内即 root 权限</b>，配合挂载的宿主目录，等于把宿主对应路径的写权限交出去。</li>
+</ul>
+<p class="muted">代价：修这条很便宜（加 useradd + USER + 宿主 chown），但不修在等保/渗透测试环节会被直接记问题项。</p>
+
+<h3>2. Playwright Chromium 未预装 <span class="pill p-no">功能缺位</span></h3>
+<p>Dockerfile 只通过 <code>uv sync --extra browser</code> 装了 playwright 的 <b>Python 包</b>，<b>没有执行 <code>playwright install chromium</code></b>。官方 FnOS 文档也明写"Playwright Chromium 不预装，需要远程浏览器时在控制台按需安装"。</p>
+<p>后果：镜像内置的浏览器自动化能力（<code>harness-browser</code>）在容器里开箱即用会失败，且安装脚本（<code>scripts/install.sh</code>）里的 Chromium 下载逻辑对容器路径不生效。同时 <code>PLAYWRIGHT_BROWSERS_PATH</code> 被写死在 <code>/root/.cache/ms-playwright</code>，一旦改非 root 运行，这个路径不可读，必须一起改。</p>
+
+<h3>3. 不能水平扩展（多副本） <span class="pill p-no">架构约束</span></h3>
+<table>
+  <tr><th>约束点</th><th>多副本时的后果</th></tr>
+  <tr><td>进程内 APScheduler</td><td>定时任务在多副本上重复触发</td></tr>
+  <tr><td>进程内唯一 HarnessProcessor</td><td>Web/IM/cron 状态不共享，请求落到不同副本行为不一致</td></tr>
+  <tr><td>IM 长连接（飞书/钉钉/QQ/Discord/企微）</td><td>多副本争抢同一 bot 连接，消息随机丢或重复</td></tr>
+  <tr><td>Agent workspace 是本地文件系统</td><td>不同副本看到的 workspace 不同，记忆/技能错乱</td></tr>
+  <tr><td>SQLite 默认单写者</td><td>即使换 PG，上面三条依然存在</td></tr>
+</table>
+<div class="note red">
+<b>结论：</b>只能 <b>1 副本 + 纵向扩容</b>。K8s 部署必须设 <code>replicas: 1</code>、更新策略 <code>Recreate</code>（不能 RollingUpdate，否则双实例重叠写）、PVC <code>ReadWriteOnce</code>。这也意味着<b>没有高可用</b>——单点故障只能靠重启恢复（好在设计上重启可从控制面库重建状态）。
+</div>
+
+<h3>4. 官方镜像只有 amd64 <span class="pill p-mid">信创/鲲鹏场景</span></h3>
+<p>CI 里 <code>platforms: linux/amd64</code> 写死。鲲鹏、Apple Silicon、部分信创服务器都是 arm64，拉不到官方镜像，必须自行构建。已实测依赖树在 aarch64 上的可行性：</p>
+
+<table>
+  <tr><th>依赖类别</th><th>实测结果</th><th>结论</th></tr>
+  <tr><td class="pname">纯 Python 包</td><td>188 个（占 78%）</td><td><span class="pill p-ok">任意架构可用</span></td></tr>
+  <tr><td class="pname">C 扩展包</td><td>41 个已有 aarch64 预编译 wheel（cryptography / psycopg-binary / pillow / pydantic-core / onnxruntime / pymupdf 等）</td><td><span class="pill p-ok">直接装</span></td></tr>
+  <tr><td class="pname">无 aarch64 wheel</td><td>11 个，其中 5 个是 pyobjc-*（macOS 专用，Linux 不装）；其余 5 个（oss2 / esdk-obs-python / aliyun-python-sdk-core / antlr4-python3-runtime / crcmod）为纯 Python sdist，<code>uv sync</code> 直接从源码装；<code>evdev</code> 是 C 扩展但只属于 desktop extra，容器不装</td><td><span class="pill p-ok">无阻塞</span></td></tr>
+  <tr><td class="pname">Playwright Chromium</td><td>官方 CDN 上确认存在 <code>chromium-linux-arm64.zip</code>（pinned 版本 1.61.0 对应 rev 1228，实测 196 MB 可下载）；更早的 rev 1091 无 arm64，说明支持是近期才补齐的</td><td><span class="pill p-ok">可用</span></td></tr>
+  <tr><td class="pname">前端构建</td><td><code>node:20-slim</code> 有 arm64 版本，vite/esbuild 有 arm64 二进制</td><td><span class="pill p-ok">可用</span></td></tr>
+</table>
+
+<div class="note green">
+<b>结论：arm64 镜像可以构建，Dockerfile 几乎不用改。</b>主要成本在验证而非改造：需要一台 arm64 构建机（或 buildx + QEMU，但 QEMU 模拟构建极慢，前端 vite 阶段容易 OOM，建议用真机）。工作量估算 <b>1–2 人日</b>。
+</div>
+
+<h3>5. 鲲鹏与昇腾要分开看 <span class="pill p-mid">容易被混为一谈</span></h3>
+<table>
+  <tr><th></th><th>鲲鹏（Kunpeng 920）</th><th>昇腾（Ascend NPU）</th></tr>
+  <tr><td class="pname">性质</td><td>ARM64 CPU</td><td>NPU 加速卡</td></tr>
+  <tr><td class="pname">与 Octop 容器的关系</td><td><b>强耦合</b>。容器共享宿主内核，容器内进程直接跑在宿主 CPU 上，镜像内所有二进制必须是 aarch64</td><td><b>零耦合</b>。Octop 代码里没有任何 CANN/Ascend 集成，模型接入走 OpenAI 兼容 HTTP</td></tr>
+  <tr><td class="pname">需要做什么</td><td>构建 arm64 镜像</td><td>Octop 侧什么都不用做</td></tr>
+  <tr><td class="pname">宿主依赖</td><td>仅需 Docker/容器运行时支持 aarch64</td><td>宿主装 HDK（driver + firmware）、装 Ascend Docker Runtime、容器加 <code>--runtime=ascend</code> 并挂载 <code>/dev/davinci*</code>、<code>/dev/davinci_manager</code>、<code>/dev/hisi_hdc</code>、<code>/dev/devmm_svm</code>、<code>/usr/local/Ascend/driver</code>——<b>这些全部属于推理服务容器，不属于 Octop</b></td></tr>
+</table>
+
+<div class="note red">
+<b>交付口径：</b>昇腾 NPU 的算力属于<b>推理平台</b>交付项，不属于 Octop 交付项。正确形态是两个容器：Octop（CPU，普通容器，无需特权）+ 推理服务（MindIE / vLLM-Ascend，需 NPU 直通）。<b>不要为了省事把两者塞进同一个容器</b>——那会把 CANN 版本与内核的强绑定风险带进应用层，升级一次模型就要动 Octop。
+</div>
+
+<div class="note">
+<b>还需向客户澄清的三件事（直接影响报价）：</b><br>
+① 客户要的是<b>鲲鹏 CPU 信创</b>（国产化替代）还是<b>昇腾 NPU 推理</b>（本地大模型），还是两者都要？三者工作量差一个量级。<br>
+② 宿主操作系统是什么？如果是 openEuler，默认容器引擎可能是 <b>iSulad</b>（华为自研）而非 Docker，<code>docker compose</code> 方案不通用，需改造成本 <b>2–3 人日</b>。<br>
+③ 昇腾的 HDK/CANN 与内核、固件三者版本强绑定，谁负责这台机器的驱动运维？这是长期成本，不是一次性交付。
+</div>
+
+<h2 id="ops">其余运维细节 <span class="tag tag-field">踩坑清单</span></h2>
+
+<table>
+  <tr><th>#</th><th>问题</th><th>处理</th></tr>
+  <tr><td>1</td><td>compose 里数据卷写 <code>${OCTOP_DATA:-~/.octop}:/data/.octop</code>，波浪号在不同 Compose 版本/平台展开行为不一致</td><td>改成绝对路径，别依赖 <code>~</code></td></tr>
+  <tr><td>2</td><td>初始管理员密码明文落在数据卷 <code>credential.txt</code></td><td>首登后改密并删除该文件；等保视角属敏感信息落盘</td></tr>
+  <tr><td>3</td><td>内网/离线：镜像在 GHCR，医院内网通常拉不到；构建需 npm + PyPI + uv 联网</td><td>有网机器 <code>docker build</code> → <code>docker save</code> → 内网 <code>docker load</code>；或直接用官方镜像导出。CHANGELOG 显示官方已删掉离线部署脚本</td></tr>
+  <tr><td>4</td><td>SQLite 默认路径在数据卷，多用户并发写有 WAL 锁竞争</td><td>医院场景直接上 PostgreSQL + pgvector，官方 compose 已备好</td></tr>
+  <tr><td>5</td><td>Docker 沙箱 backend（Agent 隔离执行）需挂 <code>docker.sock</code></td><td>等于把宿主 Docker 交给容器，医院环境不要开</td></tr>
+  <tr><td>6</td><td>移动端/远程手机能力需 <code>privileged</code> + <code>/dev/binderfs</code></td><td>不要开</td></tr>
+  <tr><td>7</td><td>启动时后台自动尝试 apt/yum 装 bubblewrap（<code>octop/infra/utils/bwrap.py</code>）</td><td>失败不致命但会有告警日志；只读根文件系统下会持续报 warning</td></tr>
+  <tr><td>8</td><td>构建内存：前端 vite 打包吃内存</td><td>构建机 &lt;4G 时传 <code>--build-arg NODE_MAX_OLD_SPACE_SIZE=1024</code>（Dockerfile 已支持）</td></tr>
+  <tr><td>9</td><td>运行资源</td><td>建议 ≥4C8G；含嵌入模型缓存、文档解析、Chromium 时给到 16G 更稳</td></tr>
+  <tr><td>10</td><td>HTTPS</td><td>内置 ACME/TLS 支持（<code>acme</code>/<code>josepy</code> 依赖 + tls 模块），内网建议前置 nginx 做 TLS 与 IP 白名单，比自签省事</td></tr>
+</table>
+
+<h2 id="plan">落地建议 <span class="tag tag-field">可直接执行</span></h2>
+
+<div class="note">
+<b>推荐形态：</b>官方镜像 + 单副本 + 外置 PostgreSQL(pgvector) + 非 root 运行 + 前置 nginx。所需文件已生成在 <code>octop-deploy/</code> 目录（Dockerfile、root 入口脚本、compose、env 模板）。
+</div>
+
+<pre><span class="c"># 1) 拉取官方镜像（有网机器）</span>
+docker pull ghcr.io/tencentcloud/octop:1.0.0
+
+<span class="c"># 2) 叠加加固层（补 Chromium + 非 root + 修 P0 初始化判据）</span>
+cd octop-deploy && docker build -t octop-hospital:1.0.0 .
+
+<span class="c"># 3) 离线导出 / 内网导入</span>
+docker save octop-hospital:1.0.0 pgvector/pgvector:pg16 | gzip > octop-offline.tar.gz
+<span class="c"># 内网：</span> gunzip -c octop-offline.tar.gz | docker load
+
+<span class="c"># 4) 宿主准备（非 root 运行的前置条件）</span>
+sudo mkdir -p /srv/octop/data && sudo chown -R 10001:10001 /srv/octop/data
+
+<span class="c"># 5) 起服务</span>
+cp .env.example .env   <span class="c"># 填 OCTOP_DATA / POSTGRES_PASSWORD / OCTOP_DEFAULT_PASSWORD</span>
+docker compose up -d</pre>
+
+<div class="note green">
+<b>已生成的交付件：</b><code>octop-deploy/</code> 目录（Dockerfile 加固层、修好初始化判据的入口脚本、compose、pgvector 初始化 SQL、env 模板、说明文档）。入口脚本语法与 compose 配置已校验通过；<b>镜像构建与容器启动尚未实测</b>（本机 Docker daemon 未运行）。
+</div>
+
+<h3>LLM 走内网</h3>
+<p>把 Provider 配成 OpenAI 兼容端点指向院内推理服务（如已调研的昇腾 + DeepSeek-V4-Flash），或直接用 Ollama 预设。这样数据不出院内网，是医院项目能过审的前提。</p>
+
+<h3>要提前说清的交付边界</h3>
+<ul>
+  <li><b>无高可用</b>：单副本，故障即中断，恢复依赖容器重启 + 数据卷完整。若客户要求 HA，需要额外 3–5 人日做双活改造（且改造点在上游 harness 栈，非本项目可控）。</li>
+  <li><b>无 arm64 官方镜像</b>：依赖树已实测无阻塞，主要是构建与验证成本，1–2 人日；若宿主是 openEuler + iSulad 再加 2–3 人日。</li>
+  <li><b>无商业支持</b>：MIT 开源，问题响应靠社区。医院 3–5 年维保要求需商务侧先确认。</li>
+  <li><b>上游依赖未开源</b>：<code>harness-agent</code> / <code>harness-gateway</code> / <code>harness-memory</code> / <code>harness-browser</code> 官方称"正在准备开源"，仓库链接待发布。目前只能通过 PyPI 包使用，<b>遇到深层问题无法自行定位到源码</b>——这是最大的技术风险。</li>
+  <li><b>P0 缺陷需自行背补丁</b>：PG 初始化判据的修复在上游合入前由本项目维护。每次升级官方镜像都要重打一次加固层，属长期维护成本，建议记入运维人日。</li>
+</ul>
+
+<h2 id="verify">验证清单 <span class="tag tag-field">待执行</span></h2>
+<p class="muted">本机 Docker daemon 当前未运行，以下动作尚未实测，需启动 Docker Desktop 后执行。</p>
+<pre><span class="c"># 构建是否通过（约 10–20 分钟，需联网）</span>
+bash docker/docker_build.sh octop:verify
+
+<span class="c"># 起容器并确认首次初始化</span>
+docker run -d --name octop-verify -p 8088:8088 \
+  -v octop-verify-data:/data/.octop -e HOME=/data octop:verify
+docker logs -f octop-verify          <span class="c"># 看 entrypoint 初始化日志</span>
+docker exec octop-verify cat /data/.octop/credential.txt
+
+<span class="c"># 健康检查</span>
+curl -f http://localhost:8088/api/health
+
+<span class="c"># 验证五个缺口</span>
+docker exec octop-verify id                     <span class="c"># 期望 uid=0 → 确认 root 问题</span>
+docker exec octop-verify python -m playwright --version
+docker exec octop-verify ls /root/.cache/ms-playwright   <span class="c"># 期望不存在 → 确认 Chromium 缺位</span>
+
+<span class="c"># ★ 验证 P0：PG 模式下重启是否崩溃循环</span>
+docker compose -f docker/docker-compose.postgres.yml up -d
+OCTOP_DATABASE_URL=postgresql://octop:octop@host.docker.internal:5432/octop \
+  docker compose -f docker/docker-compose.yml up -d
+docker restart octop &amp;&amp; sleep 20 &amp;&amp; docker ps -a --filter name=octop
+<span class="c"># 预期（官方镜像）：Exited / Restarting，日志含 "already exists and is not empty"</span>
+<span class="c"># 预期（本包镜像）：Up，日志含「已初始化（标记文件存在），跳过 init」</span></pre>
+
+<footer>
+依据：<code>_ref/Octop</code>（2026-09-18 浅克隆 main）+ GHCR registry manifest 实测 + 官方 README / README_CN / docker/README_CN / docker/Dockerfile / docker-entrypoint.sh / docs/architecture.md / pyproject.toml / src/octop/cli/commands/init.py / src/octop/infra/db/factory.py。<br>
+P0 缺陷（PG 模式崩溃循环）为本次读源码发现，已核对上游 issue 无相关记录，尚未实机复现。<br>
+arm64 可行性为实测：uv.lock 全量依赖逐个查 PyPI wheel 覆盖（241 个包）+ Playwright CDN 探测（rev 1228 的 chromium-linux-arm64.zip 实测 196 MB 可下载）。<br>
+未经实测项：镜像构建、容器启动、PG 重启验证、arm64 交叉构建 —— 均需 Docker daemon 运行后验证。<br>
+生成物：<code>octop-deploy/</code>（加固部署包，脚本语法与 compose 配置已校验通过）。
+</footer>
+
+</div>
+</body>
+</html>

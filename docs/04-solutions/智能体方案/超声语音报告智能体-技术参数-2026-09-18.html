@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>超声语音报告生成智能体 · 技术参数说明书（技术交流稿）</title>
+<style>
+:root{
+  --paper:#FFFFFF; --canvas:#F5F5F1;
+  --ink:#222220; --muted:#686761; --hint:#8C8A83;
+  --line:#DEDCD4; --line-strong:#BEBBB2;
+  --mint:#E1F5EE; --mint-2:#B8E7D5; --green:#0F6E56; --green-2:#1D9E75;
+  --amber:#FAEEDA; --amber-line:#F0D89B; --amber-ink:#854F0B;
+  --red:#FCEBEB; --red-line:#F1C5C5; --red-ink:#A32D2D;
+  --blue:#E6F1FB; --blue-line:#B8D4F0; --blue-ink:#185FA5;
+  --purple:#EEEDFE; --purple-ink:#534AB7;
+  --serif:"Noto Serif SC","Songti SC","STSong",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,Consolas,"Cascadia Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--sans);
+  font-size:13.5px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;background:var(--paper);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+
+/* ---------- 封面 ---------- */
+.cover{padding:52px 56px 40px;border-bottom:3px solid var(--green);background:#FCFCFA}
+.cover .kicker{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--green);font-weight:600;margin-bottom:18px}
+.cover h1{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:-.02em;
+  line-height:1.25;margin:0 0 10px;max-width:820px}
+.cover .sub{font-size:15px;color:var(--muted);max-width:780px;margin:0 0 26px;line-height:1.7}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.meta div{background:var(--paper);padding:11px 14px}
+.meta dt{font-size:11px;color:var(--hint);letter-spacing:.05em;margin:0 0 3px}
+.meta dd{margin:0;font-size:13px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
+.chip{font-size:11.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);
+  background:var(--paper);color:var(--muted)}
+.chip.g{background:var(--mint);border-color:var(--mint-2);color:var(--green)}
+.chip.a{background:var(--amber);border-color:var(--amber-line);color:var(--amber-ink)}
+.chip.r{background:var(--red);border-color:var(--red-line);color:var(--red-ink)}
+
+/* ---------- 布局 ---------- */
+.body{display:grid;grid-template-columns:216px minmax(0,1fr);gap:0}
+.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  padding:28px 18px 28px 24px;border-right:1px solid var(--line);background:#FCFCFA}
+.toc .t{font-size:11px;letter-spacing:.14em;color:var(--hint);font-weight:600;margin-bottom:12px}
+.toc a{display:block;font-size:12.5px;color:var(--muted);text-decoration:none;
+  padding:4px 8px;border-radius:5px;border-left:2px solid transparent;line-height:1.45}
+.toc a:hover{background:var(--mint);color:var(--green)}
+.toc a.on{color:var(--green);font-weight:600;border-left-color:var(--green-2);background:var(--mint)}
+.content{padding:36px 52px 64px;min-width:0}
+
+h2{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.015em;
+  margin:52px 0 6px;padding-top:22px;border-top:1px solid var(--line);line-height:1.35}
+h2:first-child{margin-top:0;padding-top:0;border-top:none}
+h2 .no{color:var(--green);margin-right:9px}
+h3{font-size:15.5px;font-weight:600;margin:30px 0 8px}
+h4{font-size:13.5px;font-weight:600;margin:20px 0 6px;color:var(--ink)}
+p{margin:0 0 11px}
+.lede{font-size:14px;color:var(--muted);margin-bottom:20px;max-width:760px}
+ul,ol{margin:8px 0 14px;padding-left:20px}
+li{margin-bottom:5px}
+code{font-family:var(--mono);font-size:12px;background:#F1EFE8;padding:1px 5px;border-radius:4px;
+  color:#3D3C38}
+
+/* ---------- 表格 ---------- */
+table{width:100%;border-collapse:collapse;margin:14px 0 18px;font-size:12.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{background:#F1EFE8;color:#4A4944;font-weight:600;font-size:12px;white-space:nowrap}
+td.k{font-weight:600;color:var(--green);white-space:nowrap}
+td.no{color:var(--hint);font-variant-numeric:tabular-nums;white-space:nowrap;width:34px}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#FBFBF8}
+.tbl-note{font-size:11.5px;color:var(--hint);margin:-12px 0 20px;line-height:1.6}
+.tw{overflow-x:auto}
+
+/* ---------- 组件 ---------- */
+.callout{border-left:3px solid var(--green);background:var(--mint);padding:12px 16px;
+  border-radius:0 8px 8px 0;margin:14px 0 18px;font-size:13px}
+.callout.amber{border-left-color:var(--amber-ink);background:var(--amber)}
+.callout.red{border-left-color:var(--red-ink);background:var(--red)}
+.callout.blue{border-left-color:var(--blue-ink);background:var(--blue)}
+.callout b{font-weight:600}
+.callout p:last-child{margin-bottom:0}
+.callout .h{display:block;font-weight:600;margin-bottom:4px;font-size:12.5px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:16px 0 20px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--paper)}
+.card .eyebrow{font-size:10.5px;letter-spacing:.09em;color:var(--hint);margin-bottom:6px}
+.card h4{margin:0 0 6px;font-size:14px}
+.card p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.65}
+.card.g{background:var(--mint);border-color:var(--mint-2)}
+.card.a{background:var(--amber);border-color:var(--amber-line)}
+.card.r{background:var(--red);border-color:var(--red-line)}
+
+/* 架构分层 */
+.arch{margin:20px 0 8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.layer{display:grid;grid-template-columns:118px minmax(0,1fr);border-bottom:1px solid var(--line)}
+.layer:last-child{border-bottom:none}
+.layer .lab{padding:13px 14px;background:#F1EFE8;font-size:11.5px;font-weight:600;
+  color:#4A4944;display:flex;align-items:center;letter-spacing:.02em}
+.layer .bd{padding:12px 16px}
+.layer .bd .t{font-size:13px;font-weight:600;margin-bottom:5px}
+.layer .bd .d{font-size:12.5px;color:var(--muted);line-height:1.7}
+.layer .bd .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{font-size:11px;padding:2px 7px;border-radius:4px;background:#F1EFE8;color:#5F5E5A}
+.tag.g{background:var(--mint);color:var(--green)}
+.tag.b{background:var(--blue);color:var(--blue-ink)}
+.tag.a{background:var(--amber);color:var(--amber-ink)}
+.tag.p{background:var(--purple);color:var(--purple-ink)}
+.layer.zm .lab{background:#F1EFE8;color:#3D3C38}
+.layer.zm{background:#FCFCFA}
+.layer.llm .lab{background:var(--mint);color:var(--green)}
+.layer.llm{background:#FAFEFC}
+.layer.gate .lab{background:var(--red);color:var(--red-ink)}
+.layer.gate{background:#FFFCFC}
+
+/* 闸门 */
+.gates{counter-reset:g;margin:18px 0}
+.gate{border:1px solid var(--line);border-left:3px solid var(--green-2);border-radius:0 10px 10px 0;
+  padding:13px 16px 13px 18px;margin-bottom:9px;background:#FCFCFA;position:relative}
+.gate:before{counter-increment:g;content:"闸 " counter(g);position:absolute;left:-1px;top:-1px;
+  font-size:10px;font-weight:600;letter-spacing:.06em;background:var(--green-2);color:#fff;
+  padding:2px 7px;border-radius:0 0 6px 0}
+.gate h4{margin:12px 0 5px}
+.gate p{font-size:12.5px;color:var(--muted);margin:0 0 5px}
+.gate .stop{color:var(--red-ink);font-weight:600}
+
+/* 指标条 */
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin:16px 0 20px}
+.kpi div{border-left:3px solid var(--green);background:var(--mint);padding:11px 13px;border-radius:0 9px 9px 0}
+.kpi div.a{border-left-color:var(--amber-ink);background:var(--amber)}
+.kpi .n{font-size:19px;font-weight:600;color:var(--green);letter-spacing:-.02em;line-height:1.2}
+.kpi div.a .n{color:var(--amber-ink)}
+.kpi .l{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+
+.foot{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:11.5px;color:var(--hint);line-height:1.8}
+.foot b{color:var(--muted)}
+
+@media(max-width:900px){
+  .body{grid-template-columns:1fr}
+  .toc{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:4px;padding:14px 18px}
+  .toc .t{width:100%}
+  .toc a{border-left:none;background:#F1EFE8}
+  .content{padding:26px 20px 48px}
+  .cover{padding:32px 20px 26px}
+  .cover h1{font-size:25px}
+  .layer{grid-template-columns:1fr}
+  .layer .lab{border-bottom:1px solid var(--line)}
+}
+@media print{
+  body{background:#fff;font-size:10.5px}
+  .wrap{border:none;max-width:none}
+  .toc{display:none}
+  .body{grid-template-columns:1fr}
+  .content{padding:0 8mm}
+  .cover{padding:0 8mm 14px}
+  h2{page-break-after:avoid;font-size:17px;margin-top:26px}
+  h3,h4{page-break-after:avoid}
+  table,.arch,.callout,.gate,.card{page-break-inside:avoid}
+  @page{size:A4;margin:12mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ 封面 ============ -->
+<header class="cover">
+  <div class="kicker">Technical Specification · Module 07</div>
+  <h1>超声语音报告生成智能体<br>技术参数说明书</h1>
+  <p class="sub">重庆市巴南区人民医院宫颈癌诊疗综合场景 AI 智能体及数据驾驶舱一体化建设项目<br>
+  对应招标文件「七、超声语音报告生成智能体应用」</p>
+  <dl class="meta">
+    <div><dt>文档版本</dt><dd>V1.0 · 技术交流稿</dd></div>
+    <div><dt>编制日期</dt><dd>2026-09-18</dd></div>
+    <div><dt>交付形态</dt><dd>自研产品 · 院内私有化部署</dd></div>
+    <div><dt>文档用途</dt><dd>信息科技术交流 / 接口与资源澄清</dd></div>
+  </dl>
+  <div class="chips">
+    <span class="chip g">全栈院内私有化，音频不出院</span>
+    <span class="chip g">不替代医师诊断</span>
+    <span class="chip g">仅回写报告草稿区</span>
+    <span class="chip a">图像不进推理链</span>
+    <span class="chip a">一期不做实时流式与说话人分离</span>
+    <span class="chip r">本文件含 5 项阻塞待确认 · 3 项已闭环</span>
+  </div>
+</header>
+
+<div class="body">
+
+<!-- ============ 目录 ============ -->
+<nav class="toc">
+  <div class="t">目录</div>
+  <a href="#s1">一、模块定位与需求溯源</a>
+  <a href="#s2">二、总体技术架构</a>
+  <a href="#s3">三、功能技术参数</a>
+  <a href="#s4">四、六道安全闸门</a>
+  <a href="#s5">五、接口技术参数</a>
+  <a href="#s6">六、部署架构与资源要求</a>
+  <a href="#s7">七、性能指标与验收口径</a>
+  <a href="#s8">八、安全合规与权限体系</a>
+  <a href="#s9">九、交付物与质保</a>
+  <a href="#s10">十、待信息科确认事项</a>
+  <a href="#s11">十一、与中台及其他模块的关系</a>
+</nav>
+
+<!-- ============ 正文 ============ -->
+<main class="content">
+
+<!-- ---------- 一 ---------- -->
+<h2 id="s1"><span class="no">一</span>模块定位与需求溯源</h2>
+
+<p class="lede">本模块解决一件事：超声科医生在检查过程中口述，系统实时生成一份结构化、可复核、可溯源的报告草稿，医生确认后回写院内系统。<b>系统不做诊断，不读图像，不自动签发。</b></p>
+
+<h3>1.1 招标条款响应总览</h3>
+<p>招标文件「七」共三项条款，拆解为 22 条可验证要求，逐条响应如下。偏离项已显式标注，不做隐性回避。</p>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:26%"><col style="width:47%"><col style="width:20%"></colgroup>
+<thead><tr><th>#</th><th>招标要求</th><th>技术响应</th><th>结论</th></tr></thead>
+<tbody>
+<tr><td class="no">1</td><td>支持医用麦克风语音采集</td><td>支持 USB 医用麦克风、3.5mm 领夹麦、网络麦三种接入；采样 16kHz/16bit 单通道，可扩双通道。设备型号由现场勘察后与科室共同确定（见 §10）</td><td class="k">满足</td></tr>
+<tr><td class="no">2</td><td>具备诊室环境降噪</td><td>内置声学前端：稳态噪声抑制、回声消除、自动增益。降噪在本地完成，不送云端</td><td class="k">满足</td></tr>
+<tr><td class="no">3</td><td>支持语音快捷指令</td><td>支持脚踏开关、键盘热键、语音指令词三种方式（另起一段／删除上句／回读报告／提交草稿）</td><td class="k">满足</td></tr>
+<tr><td class="no">4</td><td>自动区分报告内容与非报告内容</td><td>语义分类 + 声学特征双通道判别，区分报告正文／操作指令／医患对话／环境杂音。判非报告内容仅留存，不入正文</td><td class="k">满足</td></tr>
+<tr><td class="no">5</td><td>可自动提取测值</td><td>抽取数值 + 单位 + 维度（长径／横径／前后径）＋ 部位，一律进「待确认池」，医生确认后方进槽位</td><td class="k">满足</td></tr>
+<tr><td class="no">6</td><td>调用多部位标准化模板</td><td>部位模板库，按检查部位自动挂载。模板骨架为确定性填充，描述段为受控生成</td><td class="k">满足</td></tr>
+<tr><td class="no">7</td><td>将口语转化为规范医学表述</td><td>受控生成：仅对已确认事实做语言组织，每句可回溯至口述片段或设备测值</td><td class="k">满足</td></tr>
+<tr><td class="no">8</td><td>支持 BI-RADS 等分级输出</td><td>分级走枚举白名单（BI-RADS／TI-RADS／LI-RADS／O-RADS 按部位挂载），仅接受白名单取值；分级与所见描述做一致性校验</td><td class="k">满足</td></tr>
+<tr><td class="no">9</td><td>可绑定超声截图</td><td>从超声工作站按检查序号抓取静态图并与报告绑定。<b>图像仅作展示引用，不进入推理链</b></td><td class="k">满足</td></tr>
+<tr><td class="no">10</td><td>具备报告质控校验</td><td>规则库 + 实时／提交前双模式校验，覆盖必填项、测值范围、左右侧一致性、分级匹配、单位与术语规范</td><td class="k">满足</td></tr>
+<tr><td class="no">11</td><td>版本回溯</td><td>每次生成与修改留快照，支持 diff 与回滚，保留完整版本链</td><td class="k">满足</td></tr>
+<tr><td class="no">12</td><td>原始录音留存</td><td>原始音频、转写文本、时间戳一并留存，留存周期按院方要求配置</td><td class="k">满足</td></tr>
+<tr><td class="no">13</td><td>支持 HL7 接口</td><td>支持 HL7 v2.x（ADT／ORM／ORU）消息对接，具体消息类型与字段映射以院方接口规范为准</td><td class="k">满足</td></tr>
+<tr><td class="no">14</td><td>支持 DICOM 接口</td><td>支持 DICOM C-STORE／C-FIND／Modality Worklist；结构化报告按 DICOM SR 输出。<b>实际可写范围取决于超声工作站型号，见 §10 阻塞项 B1</b></td><td class="k">条件满足</td></tr>
+<tr><td class="no">15</td><td>院内私有化部署</td><td>全栈部署于院内，模型、服务、存储均在院内网；无任何外部 API 调用</td><td class="k">满足</td></tr>
+<tr><td class="no">16</td><td>三级账号权限</td><td>医生（本人报告）／审核医生（本科室）／系统管理员（配置与审计），权限粒度到操作与字段</td><td class="k">满足</td></tr>
+<tr><td class="no">17</td><td>全操作审计</td><td>采集、转写、生成、修改、审核、回写、导出全链路留痕，日志不可篡改</td><td class="k">满足</td></tr>
+<tr><td class="no">18</td><td>符合医疗数据安全要求</td><td>数据分级分类、传输加密、存储加密、最小权限、去标识化导出审批</td><td class="k">满足</td></tr>
+<tr><td class="no">19</td><td>支持多工作站并发</td><td>服务无状态设计，支持横向扩展；并发能力取决于中台资源池配置</td><td class="k">满足</td></tr>
+<tr><td class="no">20</td><td>仅作为报告辅助工具，不替代医师诊断</td><td>产品硬约束：不产出诊断结论、不推荐分级、不生成治疗建议。触发即停止生成流程</td><td class="k">满足</td></tr>
+<tr><td class="no">21</td><td>报告需医生审核确认后方可生效</td><td>系统最高状态为「可复核草稿」，签发在院内系统内完成，AI 永不触发签发动作</td><td class="k">满足</td></tr>
+<tr><td class="no">22</td><td>医生口述检查内容即可<b>实时</b>生成结构化报告</td><td><b>一期采用检查结束后一次性生成</b>：整段录音批量转写 + 生成，形成可审草稿。不含「边扫边口述边出稿」的流式形态</td><td style="color:var(--amber-ink);font-weight:600">部分偏离</td></tr>
+</tbody>
+</table>
+</div>
+<p class="tbl-note">「条件满足」指技术上具备能力，但最终实现程度取决于院内既有系统的开放程度，已在 §10 列为阻塞待确认项。</p>
+
+<div class="callout amber">
+  <span class="h">关于第 22 条的偏离说明（需当面确认口径）</span>
+  <p>招标「七（一）」表述为「医生口述检查内容即可<b>实时</b>生成结构化报告」，严格读法可理解为流式实时出稿；而「七（三）」表述为「<b>口述完成后</b>输出报告」。<b>本方案以「七（三）」为依据，一期按检查结束后一次性生成交付。</b></p>
+  <p style="margin-top:6px">这一条的读法差异会直接影响工作量与技术风险，<b>建议技术交流时当面确认</b>。若甲方坚持流式口径，需重新评估工期与算力配置——实时流式对降噪、增量识别、低延迟推理的要求显著更高，且在多机同室环境下更难保证声源归属准确。</p>
+</div>
+
+<h3>1.2 系统定位与三条底线</h3>
+
+<div class="cards">
+  <div class="card g">
+    <div class="eyebrow">底线 01</div>
+    <h4>不替代医师诊断</h4>
+    <p>系统只做语音到结构化文本的转换与规范表述。不输出诊断意见、不做鉴别诊断、不推荐分级。分级由医生口述，系统只做白名单校验与一致性告警。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">底线 02</div>
+    <h4>数值不经过语言模型</h4>
+    <p>测值、单位、分级、部位全部走确定性槽位回填。语言模型只负责把已确认事实组织成医生可读的句子，不接触、不生成任何数值。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">底线 03</div>
+    <h4>AI 只到草稿，签名属于医生</h4>
+    <p>系统最高状态为「可复核草稿」，仅回写院内系统的草稿区。报告的审核、修改、签发在院内系统内由医生完成，系统不代签。</p>
+  </div>
+</div>
+
+<div class="callout red">
+  <span class="h">明确的边界外声明（本项目不做）</span>
+  <p><b>不做超声图像 AI 识别。</b>本模块不读取超声图像做病灶检出、自动测量或良恶性判断。这类功能属于医疗器械监管范畴（通常需 NMPA 二类／三类证），与招标文件「七」的要求范围不一致，本项目不包含。</p>
+  <p style="margin-top:6px"><b>不做诊断性结论生成。</b>系统不生成「考虑……可能」「建议……检查」类诊断推理文字，除非该表述由医生口述且经医生确认。</p>
+</div>
+
+<div class="callout amber">
+  <span class="h">一期能力边界（可演进，非永久排除）</span>
+  <p><b>不做实时流式（边扫边出稿）。</b>一期采用检查结束后一次性生成。依据是招标「七（三）口述完成后输出报告」；但「七（一）实时生成」的严格读法可能被理解为流式，详见 §1.1 第 22 条偏离说明。<b>建议技术交流时当面确认口径。</b>流式列为二期演进项。</p>
+  <p style="margin-top:6px"><b>不做说话人分离。</b>一期不区分医生语音与患者／他人语音。因此多机同室的声源隔离<b>只能依靠硬件与工位绑定，不能依靠算法</b>，见 §3.3.1。这也意味着 A6 的现场勘察结论对方案成立与否更为关键。</p>
+</div>
+
+<!-- ---------- 二 ---------- -->
+<h2 id="s2"><span class="no">二</span>总体技术架构</h2>
+
+<p class="lede">架构分七层，核心设计是<b>把「不能容错的内容」和「需要语言组织的内容」彻底分开</b>：前者走模板与槽位，后者才交给模型。两者之间由校验层隔离。</p>
+
+<div class="arch">
+
+  <div class="layer">
+    <div class="lab">采集层</div>
+    <div class="bd">
+      <div class="t">音频采集与声学前端</div>
+      <div class="d">医用麦克风／领夹麦拾音 → 本地声学前端（降噪、去回声、自动增益）→ 16kHz 单声道音频流。脚踏开关与热键信号同层接入。</div>
+      <div class="tags"><span class="tag">16kHz / 16bit</span><span class="tag">稳态噪声抑制</span><span class="tag">本地处理</span></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="lab">识别层</div>
+    <div class="bd">
+      <div class="t">院内语音识别（ASR）</div>
+      <div class="d">本地部署中文医疗 ASR，挂载超声术语热词表（解剖部位、分级词汇、常用描述）。<b>一期采用整段批处理</b>：检查全程录音，结束后统一转写，输出转写文本 + 时间戳 + 逐片段置信度。音频全程不出院。</div>
+      <div class="tags"><span class="tag g">院内本地推理</span><span class="tag">医疗热词表</span><span class="tag">整段批处理</span><span class="tag">逐片段置信度</span></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="lab">解析层</div>
+    <div class="bd">
+      <div class="t">语义分离与槽位抽取</div>
+      <div class="d">判别报告内容／非报告内容；从报告内容中抽取部位、测值、分级、描述四类槽位；所有抽取结果进入「待确认池」，不直接生效。</div>
+      <div class="tags"><span class="tag b">内容判别</span><span class="tag b">槽位抽取</span><span class="tag a">待确认池</span></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="lab">事实层</div>
+    <div class="bd">
+      <div class="t">本次超声事实账本</div>
+      <div class="d">每条事实含 fact_id、来源类型、确认状态、时间戳、原始口述切片。冲突保留为 conflict，不由模型抹平。事实账本是后续所有生成动作的唯一输入。</div>
+      <div class="tags"><span class="tag p">fact_id 可溯源</span><span class="tag">来源分级</span><span class="tag">冲突保留</span></div>
+    </div>
+  </div>
+
+  <div class="layer zm">
+    <div class="lab">零模型区</div>
+    <div class="bd">
+      <div class="t">模板引擎 + 确定性槽位回填</div>
+      <div class="d">报告骨架、必填项、测值、单位、分级枚举、左右侧标记，全部由模板与槽位确定性填充。<b>这一段不经过任何语言模型。</b></div>
+      <div class="tags"><span class="tag">模板骨架</span><span class="tag">测值槽位</span><span class="tag">枚举白名单</span><span class="tag">零幻觉</span></div>
+    </div>
+  </div>
+
+  <div class="layer llm">
+    <div class="lab">受控生成区</div>
+    <div class="bd">
+      <div class="t">受控语言组织</div>
+      <div class="d">只对已确认事实做语言组织，把口语转为规范医学表述。每句映射事实 ID，无法映射的句子不允许产出。</div>
+      <div class="tags"><span class="tag g">句级溯源</span><span class="tag g">不接受新事实</span></div>
+    </div>
+  </div>
+
+  <div class="layer gate">
+    <div class="lab">校验层</div>
+    <div class="bd">
+      <div class="t">独立校验 + 医生确认 + 草稿回写</div>
+      <div class="d">校验模块不带生成过程的上下文，独立检查无源陈述、左右侧／部位一致性、单位与量级、分级与描述匹配。医生逐项确认后，仅回写院内系统草稿区。</div>
+      <div class="tags"><span class="tag r">上下文隔离</span><span class="tag r">缺一不可</span><span class="tag r">仅写草稿</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="callout blue">
+  <span class="h">横切能力（贯穿全部层级）</span>
+  <p>权限管控 · 全操作审计 · 版本快照 · 原始音频留存 · 系统监控告警。这五项不归属单一层，但每一层都必须调用，缺失任一项即视为未完成交付。</p>
+</div>
+
+<!-- ---------- 三 ---------- -->
+<h2 id="s3"><span class="no">三</span>功能技术参数</h2>
+
+<h3>3.1 语音采集与声学前端</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:22%"><col style="width:48%"><col style="width:30%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">采样规格</td><td>16 kHz / 16 bit / 单声道，可扩双声道</td><td>语音识别标准采样，无需更高采样率</td></tr>
+<tr><td class="k">接入方式</td><td>USB 医用麦克风／3.5mm 领夹麦／网络麦克风</td><td>具体型号现场勘察后确定</td></tr>
+<tr><td class="k">有效拾音距离</td><td>桌面麦 0.3–1.5 m；吊装麦 1–3 m</td><td>需结合诊室布局与探头的实际位置确定</td></tr>
+<tr><td class="k">声源隔离</td><td>近场定向拾音 + 工位绑定；多机同室场景必须启用</td><td><b>若存在一室多机同时检查，吊装麦／全向麦方案作废</b>，见 §3.3 与 §10 阻塞项 A6</td></tr>
+<tr><td class="k">采集窗口控制</td><td>支持脚踏／按键开关控制采集起止</td><td>一期用于划定有效采集区间；确定性声源闸门，不依赖算法判断</td></tr>
+<tr><td class="k">稳态降噪</td><td>目标噪声抑制 ≥ 15 dB（设计目标）</td><td>空调、设备风扇等稳态噪声</td></tr>
+<tr><td class="k">非稳态噪声</td><td>标记但不抑制</td><td>器械提示音、门开闭、他人说话——抑制会损伤语音，改为标记后由判别层处理</td></tr>
+<tr><td class="k">回声消除</td><td>支持</td><td>避免超声设备提示音被二次采集</td></tr>
+<tr><td class="k">快捷操作</td><td>脚踏开关／键盘热键／语音指令词</td><td>医生手上有探头，脚踏与语音指令是主要方式</td></tr>
+<tr><td class="k">音频留存</td><td>原始音频本地留存，留存周期可配置</td><td>留存周期需院方确认（见 §10 阻塞项 A4）</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.2 语音识别（ASR）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:22%"><col style="width:48%"><col style="width:30%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">部署方式</td><td>院内本地推理，支持国产算力</td><td>音频不出院区，不调用任何外部接口</td></tr>
+<tr><td class="k">识别模式</td><td><b>一期：整段批处理</b>（检查结束后统一转写）</td><td>流式增量列为二期演进项，一期不交付</td></tr>
+<tr><td class="k">热词表</td><td>超声专科热词表，初始 ≥ 3000 条</td><td>解剖部位、分级词汇、常用描述、科室惯用语；支持科室自行维护</td></tr>
+<tr><td class="k">字错率 CER</td><td>≤ 5%（设计目标，安静诊室、标准普通话）</td><td><b>带口音或方言场景需现场实测标定</b>，不作为承诺值</td></tr>
+<tr><td class="k">说话人分离</td><td><b>一期不提供</b></td><td>列入二期演进项。因此声源隔离一期只能靠硬件与工位绑定，不能靠算法，见 §3.3.1</td></tr>
+<tr><td class="k">置信度输出</td><td>逐片段输出，低于阈值标红待确认</td><td>低置信片段不自动进入报告</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout amber">
+  <span class="h">关于识别率的诚实说明</span>
+  <p>识别准确率高度依赖诊室声学环境、医生语速与口音、以及检查部位术语密度。本文件标注的 CER ≤ 5% 是<b>设计目标</b>，不是承诺值。建议在试点期用科室真实录音做一轮标定，把实测值写进验收口径——这样对双方都更公平。</p>
+</div>
+
+<h3>3.3 报告内容与非报告内容分离</h3>
+<p>超声检查过程中，麦克风会同时收到报告口述、操作指令、医患对话、教学讲解、环境杂音。系统按以下规则处理：</p>
+<ul>
+  <li><b>报告内容</b>：进入槽位抽取与事实账本</li>
+  <li><b>操作指令</b>：如「另起一段」「把刚才那句删掉」「报告读一遍」，直接执行，不入正文</li>
+  <li><b>医患对话</b>：仅留存音频与转写，不进入报告正文；可用于事后复核</li>
+  <li><b>教学讲解</b>：与报告无关的讲解内容不入正文</li>
+  <li><b>环境杂音</b>：标记并丢弃，不入正文</li>
+  <li><b>同室其他医生的口述</b>：见 3.3.1，此类内容<b>不能靠语义判别处理</b></li>
+</ul>
+<p>判别准确率设计目标 ≥ 95%。判别结果在界面上以不同颜色区分，医生可随时手动改判——<b>任何自动判别都必须可被人工推翻</b>。</p>
+
+<h4>3.3.1 同室多机场景的声源串扰（高风险项）</h4>
+<p>若一个诊室内有多台超声同时检查、同时出报告，每台设备旁的麦克风都会收到邻位医生的口述。<b>这是本模块最危险的一类失效路径</b>，原因是：</p>
+<div class="callout red">
+  <span class="h">为什么语义判别在这里失效</span>
+  <p>邻位医生口述的内容，在语义上<b>就是一份完整、规范、临床上完全合理的超声报告</b>。它既不是指令，也不是闲聊，更不是杂音——用任何语义分类器都无法把它与本工位的报告内容区分开。</p>
+  <p style="margin-top:6px">后果是甲患者的报告里出现乙患者的所见与测值。<b>这不是「串抄」，是实打实的串患者</b>，比文本层的跨患者污染更隐蔽——因为内容本身没有语法错误，医生通读报告时很难察觉。</p>
+</div>
+<p>因此，此类风险必须在<b>声学层</b>解决，不能留给语义层。按可靠性从高到低：</p>
+<ol>
+  <li><b>近场定向拾音</b>：领夹麦或喉振麦，拾音距离 ≤ 30 cm，配合增益门限。最可靠，成本也最低</li>
+  <li><b>采集窗口控制</b>：脚踏开关或按键控制采集起止，仅在按下期间收音。确定性最高，不依赖算法</li>
+  <li><b>工位三方绑定</b>：麦克风 ID ↔ 超声设备 ID ↔ 报告会话 ID 唯一绑定；音频无法绑定工位则不进入报告流程</li>
+  <li><b>声纹校验</b>：<b>列入二期</b>。一期不提供说话人分离，此项不可用</li>
+  <li><b>麦克风阵列波束成形</b>：仅作辅助。<b>两人同时说话时分离能力有限，不可作为唯一手段</b></li>
+  <li><b>物理隔断与吸声处理</b>：最彻底，但属基建改造范畴，成本与工期需单列</li>
+</ol>
+<div class="callout amber">
+  <span class="h">对方案与报价的直接影响</span>
+  <p>若科室确为「一室多机同时检查」布局，则：① 吊装麦／全向麦方案作废，须改用近场定向拾音；② 需增加现场声学勘察与调优工作量；③ 识别率指标的前提条件发生变化，须按多声源环境重新标定；④ <b>一期不提供说话人分离，算法侧没有兜底</b>，声源隔离完全依赖硬件选型与工位绑定，容错空间更小。此项已列为 §10 阻塞项 A6。</p>
+</div>
+
+<h3>3.4 测值与槽位抽取</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:22%"><col style="width:48%"><col style="width:30%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">抽取对象</td><td>数值 + 单位 + 维度 + 部位</td><td>如「左卵巢大小 32×18 mm」拆为部位／长径／横径／单位</td></tr>
+<tr><td class="k">数值形态</td><td>单值／范围值／多值／比值</td><td>覆盖常见超声测值表达</td></tr>
+<tr><td class="k">单位白名单</td><td>mm / cm / ml / cm² / cm³ / 次/分 等</td><td>白名单外单位触发校验告警</td></tr>
+<tr><td class="k">量级校验</td><td>按部位配置合理区间，越界告警</td><td>如子宫长径 > 200 mm 触发人工复核</td></tr>
+<tr><td class="k">抽取结果状态</td><td>一律进入「待确认池」</td><td><b>硬规则：转写中抽出的数值不直接进槽位</b>，必须经医生确认</td></tr>
+<tr><td class="k">回填方式</td><td>确定性槽位回填，不经语言模型</td><td>数值在报告中以槽位形式渲染，模型无法改写</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.5 部位模板与分级输出</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:22%"><col style="width:48%"><col style="width:30%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">模板结构</td><td>固定骨架 + 可变描述段</td><td>骨架走模板引擎（零模型），描述段走受控生成</td></tr>
+<tr><td class="k">部位覆盖</td><td>按科室实际检查范围配置</td><td>范围待确认（见 §10 选型项 B2），直接决定模板库工作量</td></tr>
+<tr><td class="k">模板维护</td><td>科室可视化配置，支持版本管理</td><td>模板变更留版本，可回滚</td></tr>
+<tr><td class="k">分级体系</td><td>BI-RADS／TI-RADS／LI-RADS／O-RADS</td><td>按检查部位自动挂载对应分级体系</td></tr>
+<tr><td class="k">分级取值</td><td>枚举白名单，仅接受白名单取值</td><td>模型不允许生成白名单外的新分级</td></tr>
+<tr><td class="k">一致性校验</td><td>分级与所见描述匹配性检查</td><td>如描述「形态规则、边界清晰」却输出 BI-RADS 5，触发告警</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.6 口语到规范医学表述（受控生成）</h3>
+<p>这是唯一使用语言模型的环节，约束如下：</p>
+<ul>
+  <li><b>输入受限</b>：模型只能看到事实账本中已确认的事实，看不到音频、看不到其他患者数据、看不到未确认的槽位</li>
+  <li><b>输出受限</b>：每个句子必须映射至少一个 fact_id；无法映射的句子不允许产出</li>
+  <li><b>数值禁写</b>：模型输出中不得出现任何数值，数值位以槽位占位符呈现，由确定性回填</li>
+  <li><b>不新增事实</b>：模型不得补充事实账本中没有的内容；缺口以「【待补充】」占位呈现</li>
+  <li><b>不改写否定</b>：口述未提及的内容不得改写为「未见异常」「阴性」等否定表述</li>
+</ul>
+
+<h3>3.7 截图绑定</h3>
+<ul>
+  <li>从超声工作站按检查序号抓取静态图，与报告条目绑定</li>
+  <li>支持 DICOM 图像与位图两种来源，具体取决于工作站能力（见 §10 阻塞项 B1）</li>
+  <li><b>图像仅作展示引用，不进入推理链</b>——系统不读图、不测量、不下结论</li>
+  <li>图像存储于院内，与报告版本关联，随报告一同回溯</li>
+</ul>
+
+<h3>3.8 报告质控校验</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+<thead><tr><th>校验类别</th><th>校验内容</th></tr></thead>
+<tbody>
+<tr><td class="k">必填项完整性</td><td>按检查部位校验必填字段，缺失即标缺口</td></tr>
+<tr><td class="k">测值合理性</td><td>单位白名单、量级区间、数值与部位匹配</td></tr>
+<tr><td class="k">左右侧一致性</td><td>检查部位标记与描述中的左右侧是否一致（超声高风险项）</td></tr>
+<tr><td class="k">分级一致性</td><td>分级取值与所见描述是否匹配</td></tr>
+<tr><td class="k">术语规范性</td><td>口语化表述、非标准简称、错别字</td></tr>
+<tr><td class="k">无源陈述</td><td>报告中是否存在无事实支撑的句子</td></tr>
+<tr><td class="k">冲突检测</td><td>同一事实的多次口述是否存在矛盾，冲突保留并提示，不自动抹平</td></tr>
+</tbody>
+</table>
+</div>
+<p>校验分<b>实时</b>与<b>提交前</b>双模式：实时模式在医生口述过程中即时提示；提交前模式做一次全量复核。<b>存在未解决冲突或关键缺口时，报告状态无法进入「可复核草稿」。</b></p>
+
+<h3>3.9 医生审核与报告生效</h3>
+<ul>
+  <li>医生在界面上逐项确认槽位与句子，可编辑、可驳回、可重录</li>
+  <li>无事实支撑的句子不可勾选确认，也不得用一次性笼统确认替代逐项确认</li>
+  <li>确认完成后，报告以「草稿」状态回写院内系统草稿区</li>
+  <li><b>报告的审核、修改、签发在院内系统内由医生完成，系统不触发签发动作</b></li>
+</ul>
+
+<h3>3.10 版本回溯与录音留存</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+<thead><tr><th>留存对象</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">原始音频</td><td>完整留存，与报告版本关联，留存周期可配置</td></tr>
+<tr><td class="k">转写文本</td><td>含时间戳与置信度，与音频一一对应</td></tr>
+<tr><td class="k">事实账本</td><td>每条事实的来源、状态、原始切片</td></tr>
+<tr><td class="k">生成稿</td><td>每次生成的快照，含句级事实映射</td></tr>
+<tr><td class="k">医生修改稿</td><td>医生每次编辑留快照，支持 diff 对比</td></tr>
+<tr><td class="k">回写记录</td><td>回写时间、目标系统、状态标记、操作人</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ---------- 四 ---------- -->
+<h2 id="s4"><span class="no">四</span>六道安全闸门</h2>
+
+<p class="lede">超声报告的风险不在文笔，而在四处：<b>测值错、左右侧错、分级错、串患者</b>。前三类写出来临床上完全合理、肉眼很难发现，后果直接；第四类更隐蔽，内容本身毫无破绽，只是不属于这个患者。以下六道闸门专门针对这四类风险。</p>
+
+<div class="gates">
+
+  <div class="gate">
+    <h4>音频必须绑定到确定工位</h4>
+    <p>每路音频必须唯一绑定「麦克风 → 超声设备 → 报告会话」三方。同室多机场景下，邻位医生的口述在语义上就是一份完整报告内容，靠语义分类无法剔除，只能靠声学来源隔离。<b>一期不提供说话人分离，算法侧没有兜底</b>，这道闸门只能靠硬件与绑定实现。</p>
+    <p class="stop">音频无法绑定到确定工位时，拒绝进入报告流程。不允许「先收进来，再猜是谁说的」。</p>
+  </div>
+
+  <div class="gate">
+    <h4>数值不进模型</h4>
+    <p>转写中抽出的所有数值一律进「待确认池」，经医生确认后由确定性槽位回填。语言模型在任何环节都不接触、不生成数值。</p>
+    <p class="stop">若某数值无处可填，输出「【待补充】」占位，严禁自行填充或推断。</p>
+  </div>
+
+  <div class="gate">
+    <h4>左右侧与部位一致性</h4>
+    <p>检查部位标记、患者既往记录、描述文本中的左右侧标记三方交叉校验。超声场景中左右侧写反是最高频的严重缺陷。</p>
+    <p class="stop">三方不一致即阻断，必须医生显式裁决后方可继续。</p>
+  </div>
+
+  <div class="gate">
+    <h4>分级走枚举白名单</h4>
+    <p>BI-RADS 等分级只接受白名单取值，模型不允许生成白名单外的新分级。分级与所见描述做匹配性校验。</p>
+    <p class="stop">分级与描述矛盾时告警并阻断提交，不自动修正为「更合理」的取值。</p>
+  </div>
+
+  <div class="gate">
+    <h4>生成与校验上下文隔离</h4>
+    <p>校验模块不携带生成过程的对话历史，独立判断句子是否有出处。生成模块不能自审——自审等于没有校验。</p>
+    <p class="stop">发现任一无源陈述或未解决冲突，禁止回写。</p>
+  </div>
+
+  <div class="gate">
+    <h4>医生逐项确认</h4>
+    <p>槽位与句子逐项确认，无源句子不可勾选。不得用一次性笼统确认替代逐项确认。</p>
+    <p class="stop">存在未确认项时，报告状态停在「待复核」，无法进入草稿回写。</p>
+  </div>
+
+</div>
+
+<div class="callout">
+  <span class="h">设计取向：阻断是产品能力，不是异常</span>
+  <p>很多同类产品把「顺利生成」当成功指标。我们的判断相反：<b>该拦下来的没拦下来，才是失败。</b>系统宁可多停一次让医生确认，也不放过一个无源句子进报告。</p>
+</div>
+
+<!-- ---------- 五 ---------- -->
+<h2 id="s5"><span class="no">五</span>接口技术参数</h2>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:17%"><col style="width:20%"><col style="width:38%"><col style="width:25%"></colgroup>
+<thead><tr><th>对接对象</th><th>协议 / 方式</th><th>数据流向与内容</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td class="k">HIS</td><td>HL7 v2.x / RESTful</td><td>取：患者基本信息、就诊信息、申请单、既往报告。写：报告草稿</td><td>写入范围以院方授权为准</td></tr>
+<tr><td class="k">EMR 电子病历</td><td>RESTful / 数据库视图</td><td>写：报告草稿；供病历引用</td><td>需确认草稿区字段与状态标记方式</td></tr>
+<tr><td class="k">PACS</td><td>DICOM C-STORE / C-FIND / MWL</td><td>取：检查信息、序列、静态图。写：结构化报告（DICOM SR）</td><td><b>可写范围取决于工作站型号</b></td></tr>
+<tr><td class="k">超声工作站</td><td>DICOM / 厂商接口 / 屏幕抓取</td><td>取：检查序号、图像、测量值。写：报告草稿</td><td><b>阻塞项，见 §10 B1</b></td></tr>
+<tr><td class="k">LIS</td><td>HL7 v2.x / RESTful</td><td>取：检验申请与结果（用于报告关联）</td><td>按需，非核心链路</td></tr>
+<tr><td class="k">AI 智能体中台</td><td>中台服务网关</td><td>模型注册、算力调度、监控指标上报、审计日志归集</td><td>复用中台能力，不重复建设</td></tr>
+<tr><td class="k">数据驾驶舱</td><td>中台数据接口</td><td>上报：报告量、识别耗时、采纳率、质控缺陷数、告警统计</td><td>指标口径与驾驶舱模块统一</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>接口通用要求</h4>
+<ul>
+  <li>全部接口具备鉴权、限流、重试、异常处理与超时降级</li>
+  <li>接口调用全量留痕，日志含调用方、时间、参数摘要、结果状态</li>
+  <li>优先复用医院现有数据集成平台，不新建独立通道</li>
+  <li>所有对接服务统一纳入 AI 智能体中台网关管理</li>
+  <li>对接过程不干扰现有系统运行；上线前完成联调与压力测试，交付全套接口文档</li>
+</ul>
+
+<!-- ---------- 六 ---------- -->
+<h2 id="s6"><span class="no">六</span>部署架构与资源要求</h2>
+
+<h3>6.1 部署形态</h3>
+<ul>
+  <li><b>全栈容器化部署</b>，适配院内现有虚拟化与容器底座，充分利旧现有硬件</li>
+  <li><b>全栈院内私有化</b>：ASR、语言模型、服务、存储全部部署在院内网，无任何外部 API 调用</li>
+  <li>支持国产算力平台（鲲鹏 CPU / 昇腾 NPU），与中台统一算力池</li>
+  <li>服务无状态设计，可横向扩展以支撑多工作站并发</li>
+</ul>
+
+<h3>6.2 算力与资源（试点期参考配置）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:22%"><col style="width:58%"></colgroup>
+<thead><tr><th>资源</th><th>参考规格</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">GPU（ASR）</td><td>16 GB 显存级</td><td>本地语音识别；<b>共用中台资源池</b>，具体并发能力以算力实测为准</td></tr>
+<tr><td class="k">GPU（语言模型）</td><td>8–16 GB 显存（7B–14B 级，INT8 量化）</td><td>受控语言组织，推理负载轻；<b>已确认共用中台资源池</b></td></tr>
+<tr><td class="k">CPU</td><td>16 核</td><td>服务层、声学前端、模板与校验逻辑</td></tr>
+<tr><td class="k">内存</td><td>64 GB</td><td>含模型加载与服务运行</td></tr>
+<tr><td class="k">存储</td><td>按留存周期测算，见下</td><td>音频留存是存储主要消耗项</td></tr>
+<tr><td class="k">网络</td><td>院内千兆内网</td><td>不出院区，无需公网带宽</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>存储容量测算口径（供信息科核算）</h4>
+<div class="callout blue">
+  <p><b>音频：</b>16 kHz / 16 bit / 单声道 ≈ 32 KB/s ≈ 115 MB/小时。</p>
+  <p>按每诊室每天 6 小时有效检查、每年 300 个工作日计算：<code>115 MB × 6 × 300 ≈ 207 GB / 诊室 / 年</code>。</p>
+  <p><b>截图：</b>按每份报告 4 张、每张 300 KB 估算，年报告量 3 万份约 <code>36 GB / 年</code>。</p>
+  <p><b>合计：</b>单诊室约 250 GB/年。若音频留存周期要求 1 年，5 个诊室约需 1.3 TB；若要求 3 年，约需 3.9 TB。<b>留存周期直接决定存储投入，需院方明确。</b></p>
+</div>
+
+<div class="callout">
+  <span class="h">算力归属（已确认）</span>
+  <p>本模块算力<b>确定共用中台资源池，不单独采购 GPU 服务器</b>——超声语音识别的算力需求远低于大模型推理，单独采购性价比极低。ASR 与语言模型从中台资源池分配，版本升级由中台统一调度。本模块不再单列算力采购项。</p>
+</div>
+
+<!-- ---------- 七 ---------- -->
+<h2 id="s7"><span class="no">七</span>性能指标与验收口径</h2>
+
+<div class="kpi">
+  <div><div class="n">≥ 99%</div><div class="l">声源归属准确率（多机同室核心指标）</div></div>
+  <div><div class="n">≥ 98%</div><div class="l">关键槽位准确率（测值/部位/左右侧/分级）</div></div>
+  <div><div class="n">≥ 99.5%</div><div class="l">系统可用性（设计目标）</div></div>
+</div>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:24%"><col style="width:22%"><col style="width:54%"></colgroup>
+<thead><tr><th>指标</th><th>设计目标</th><th>验收口径与前提</th></tr></thead>
+<tbody>
+<tr><td class="k">识别字错率 CER</td><td>≤ 5%</td><td>安静诊室、<b>单声源</b>、标准普通话。<b>需现场实测标定后转为验收值</b>；口音场景与多机同室场景另行约定</td></tr>
+<tr><td class="k">关键槽位准确率</td><td>≥ 98%</td><td>测值、部位、左右侧、分级四类槽位，抽取准确率</td></tr>
+<tr><td class="k">声源归属准确率</td><td>≥ 99%</td><td>音频片段归属到正确工位的比例。<b>多机同室场景的核心指标</b>，直接对应串患者风险</td></tr>
+<tr><td class="k">内容判别准确率</td><td>≥ 95%</td><td>报告内容 / 非报告内容二分类</td></tr>
+<tr><td class="k">系统可用性</td><td>≥ 99.5%</td><td>按院内运维窗口计算</td></tr>
+<tr><td class="k">报告采纳率</td><td>试点期实测基线</td><td>定义待与科室共同确定（见 §10 验收项 C2）</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout red">
+  <span class="h">关于指标性质的声明</span>
+  <p>上表中标注「设计目标」的指标，是方案设计口径，<b>不是承诺值</b>。建议在试点期用科室真实数据完成一轮标定，把实测结果写入验收标准。把未实测的数字写进合同，对双方都是风险。</p>
+  <p style="margin-top:6px"><b>另需说明：</b>本模块<b>不承诺转写耗时、草稿生成耗时与并发数指标</b>。中台算力（昇腾）尚未完成性能实测，无法给出可验证的吞吐口径；待算力实测标定后，可作为补充指标纳入验收。上表保留的均为识别准确率与可用性类指标，与算力吞吐无关。</p>
+</div>
+
+<!-- ---------- 八 ---------- -->
+<h2 id="s8"><span class="no">八</span>安全合规与权限体系</h2>
+
+<h3>8.1 三级账号权限</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:44%"><col style="width:36%"></colgroup>
+<thead><tr><th>角色</th><th>权限范围</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">医生</td><td>本人报告的口述、生成、编辑、确认、回写</td><td>仅可见本人接诊患者的报告</td></tr>
+<tr><td class="k">审核医生</td><td>本科室报告查看、复核、质控、模板维护</td><td>不可跨科室</td></tr>
+<tr><td class="k">系统管理员</td><td>账号、角色、模板、规则、审计日志</td><td><b>不可查看报告正文</b>（权限隔离）</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>8.2 安全措施</h3>
+<ul>
+  <li><b>传输加密</b>：全链路 HTTPS / TLS</li>
+  <li><b>存储加密</b>：音频、报告、截图落盘加密</li>
+  <li><b>最小权限</b>：数据访问按角色与就诊关系控制，禁止越权访问患者数据</li>
+  <li><b>数据不出院</b>：模型推理、音频处理、数据存储全部院内完成</li>
+  <li><b>去标识化</b>：数据导出执行审批流程，导出内容去标识化</li>
+  <li><b>审计不可篡改</b>：全操作日志，写入后不可修改</li>
+  <li><b>合规适配</b>：满足网络安全等级保护、数据安全法、个人信息保护法要求，适配电子病历分级评价</li>
+</ul>
+
+<h3>8.3 全操作审计范围</h3>
+<p>以下操作全部留痕，记录操作人、时间、对象、结果：音频采集、转写、槽位抽取、生成、编辑、确认、驳回、回写、模板变更、规则变更、权限变更、数据导出、日志查询。</p>
+
+<!-- ---------- 九 ---------- -->
+<h2 id="s9"><span class="no">九</span>交付物与质保</h2>
+
+<h3>9.1 交付物清单</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+<thead><tr><th>交付物</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td class="k">软件系统</td><td>超声语音报告生成智能体，容器化交付，含部署包与配置说明</td></tr>
+<tr><td class="k">需求规格说明书</td><td>功能清单、接口清单、性能指标、验收标准</td></tr>
+<tr><td class="k">系统部署手册</td><td>部署拓扑、环境要求、安装步骤、参数配置</td></tr>
+<tr><td class="k">运维手册</td><td>日常巡检、故障处理、备份恢复、扩容指引</td></tr>
+<tr><td class="k">接口文档</td><td>HL7 / DICOM / RESTful 接口说明与字段映射表</td></tr>
+<tr><td class="k">测试报告</td><td>功能测试、接口联调、性能压测、安全测试</td></tr>
+<tr><td class="k">用户操作手册</td><td>面向超声科医生的操作指引</td></tr>
+<tr><td class="k">培训服务</td><td>面向超声科、信息科的业务操作与系统运维培训</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>9.2 质保服务</h3>
+<ul>
+  <li>免费质保期不低于 <b>3 年</b>（按招标文件要求）</li>
+  <li>包含缺陷修复、系统调优、版本升级、远程技术支持</li>
+  <li>质保期内模板库、热词表、质控规则的常规维护包含在内</li>
+</ul>
+
+<!-- ---------- 十 ---------- -->
+<h2 id="s10"><span class="no">十</span>待信息科确认事项</h2>
+
+<p class="lede">以下事项直接决定方案能否落地、报价能否出、验收怎么写。<b>A 组不确认无法开工</b>。已闭环事项单列在前，便于与前期沟通记录对照。</p>
+
+<h3>已闭环事项（2026-09-18 确认）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:19%"><col style="width:31%"><col style="width:50%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>确认结论</th><th>对方案的影响</th></tr></thead>
+<tbody>
+<tr><td class="no">A5</td><td>算力归属</td><td><b>确定共用中台资源池</b>，不单独采购 GPU 服务器</td><td>ASR 与语言模型从中台资源池分配算力，版本升级由中台统一调度。本模块不再单列算力采购项，也不再需要独立分配论证</td></tr>
+<tr><td class="no">B1</td><td>实时流式 vs 录音后生成</td><td><b>一期只提供检查结束后一次性生成</b></td><td>缩小技术交付难度与范围：去掉流式增量识别、低延迟推理、实时降噪调优三块工作量；首字延迟、增量延迟、转写耗时等流式相关指标全部取消。需留意招标「七（一）实时生成」的读法差异，见 §1.1 第 22 条</td></tr>
+<tr><td class="no">B3</td><td>说话人分离</td><td><b>一期明确不承诺提供</b></td><td>去掉说话人分离与声纹校验两块工作量。代价是声源隔离失去算法兜底，多机同室风险完全由硬件与工位绑定承担，<b>A6 的勘察结论因此更为关键</b>，见 §3.3.1</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout">
+  <p>上表三项已确认。编号保持稳定、不重排，便于与前期沟通记录对照；A5、B1、B3 不再出现在下述待确认清单中。</p>
+</div>
+
+<h3>A 组 · 阻塞项（5 项，不确认无法开工）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:24%"><col style="width:46%"><col style="width:26%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">A1</td><td>超声工作站型号与版本</td><td>品牌、型号、软件版本；是否支持报告写入、支持到什么程度（结构化字段 / 纯文本 / 仅 PDF）</td><td><b>决定产品形态</b>。若无法回写，方案退化为「复制粘贴」，价值大幅缩水</td></tr>
+<tr><td class="no">A2</td><td>诊室数量与整体音频环境</td><td>超声科诊室总数、各室面积与布局、现有音频设备；是否允许安装吊装麦或桌面麦</td><td>决定硬件配置与识别率基线（单室内的多机问题另见 A6）</td></tr>
+<tr><td class="no">A3</td><td>报告回写边界</td><td>写入哪张表 / 哪个接口、以什么状态写入、是否只写草稿区、医生在 HIS 内修改后能否读回</td><td>决定能否形成闭环，以及事实账本与正式报告是否一致</td></tr>
+<tr><td class="no">A4</td><td>录音合规与留存策略</td><td>医患录音的伦理与医务处书面意见；原始音频留存周期；加密与访问要求</td><td><b>合规前置条件</b>，无书面意见不能开工</td></tr>
+<tr><td class="no">A6</td><td><b>同室多机同时检查的声源隔离</b></td><td>是否存在一个房间内多台超声<b>同时检查、同时出报告</b>的情况；每室设备数量、工位间距、有无隔断或吸声处理；检查时是否多位医生<b>同时口述</b>；麦克风可否就近固定在医生侧（领夹／近场桌面）</td><td><b>决定麦克风选型，并直接关系到是否存在串患者风险</b>。若存在多机同室，吊装麦／全向麦方案作废，须改近场定向拾音 + 工位绑定，并增加现场声学勘察与调优工作量。<b>一期不提供说话人分离，此项无算法兜底</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>B 组 · 影响方案选型（3 项；B1、B3 已闭环）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:24%"><col style="width:46%"><col style="width:26%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">B2</td><td>检查部位范围</td><td>需要覆盖哪些部位的模板（妇科／产科／腹部／浅表／心血管等）</td><td><b>直接决定模板库与分级体系的工作量</b>，是工作量最大变量</td></tr>
+<tr><td class="no">B4</td><td>方言与口音</td><td>科室医生口音分布；是否需重庆话适配</td><td>影响识别率基线与是否需专项调优</td></tr>
+<tr><td class="no">B5</td><td>现有报告模板库</td><td>院内是否已有标准模板库、多少套、谁维护、能否提供</td><td>可直接复用的模板越多，工作量越小</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>C 组 · 影响验收口径（4 项）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:24%"><col style="width:46%"><col style="width:26%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">C1</td><td>识别准确率验收方式</td><td>按字错率 CER 还是关键字段准确率；测试语料由谁提供、多少条</td><td>决定验收标准写法</td></tr>
+<tr><td class="no">C2</td><td>报告采纳率定义</td><td>「采纳」的判定标准：原文采用 / 修改后采用 / 生成即算</td><td>影响效果指标口径</td></tr>
+<tr><td class="no">C3</td><td>并发规模</td><td>实际同时在用的工作站数量与峰值时段</td><td>决定资源规格与冗余配置</td></tr>
+<tr><td class="no">C4</td><td>质控规则来源</td><td>采用院内现有质控标准，还是由科室另行制定</td><td>决定规则库建设方式与工作量</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ---------- 十一 ---------- -->
+<h2 id="s11"><span class="no">十一</span>与中台及其他模块的关系</h2>
+
+<p>本模块不是独立系统，而是运行在 AI 智能体中台之上的应用之一。复用关系如下：</p>
+
+<div class="cards">
+  <div class="card g">
+    <div class="eyebrow">复用 · 中台</div>
+    <h4>算力与模型管理</h4>
+    <p>ASR 与语言模型注册在中台统一纳管，算力从资源池分配，版本升级由中台统一调度，不单独建设推理服务。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">复用 · 中台</div>
+    <h4>网关与审计</h4>
+    <p>接口鉴权、限流、调用日志统一走中台网关；审计日志归集到中台，与病历生成、病历质控模块共用同一套审计体系。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">复用 · 数据服务</div>
+    <h4>患者与就诊数据</h4>
+    <p>通过中台统一数据接口获取患者与就诊信息，不单独对接 HIS，避免重复建设接口。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">输出 · 驾驶舱</div>
+    <h4>运行指标</h4>
+    <p>报告量、识别耗时、采纳率、质控缺陷、告警统计上报数据驾驶舱「AI 应用运行监控主题」。</p>
+  </div>
+</div>
+
+<h4>与「病历生成智能体」的关系</h4>
+<p>两者共用同一套底层设计（事实账本、来源分级、槽位回填、生成校验隔离、逐句确认），差异在输入形态：超声模块以实时语音为主输入，病历生成以多源业务数据聚合为主输入。<b>底层引擎与安全机制可复用，模板库与槽位定义各自独立</b>——这是分期建设中成本可控的关键。</p>
+
+<div class="foot">
+  <p><b>文档性质：</b>本文件为技术交流稿，所载指标中标注「设计目标」的为方案设计口径，需在试点期以科室真实数据实测标定后转为验收指标。接口范围、权限边界、合规条款均以院方书面授权为准。</p>
+  <p><b>下一步建议：</b>本轮已闭环 3 项（A5 算力归属、B1 生成方式、B3 说话人分离）。本次交流优先闭环 §10 的 A 组 5 项阻塞项，其中 <b>A6（同室多机声源隔离）建议现场勘察时一并确认</b>，避免麦克风选型返工；B 组剩余 3 项可在现场勘察后一周内确认。A 组确认后即可出具带工作量口径的实施与报价方案。</p>
+  <p style="margin-top:12px">超声语音报告生成智能体 · 技术参数说明书 V1.0 · 2026-09-18 · 技术交流稿</p>
+</div>
+
+</main>
+</div>
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function refresh(){
+    var pos = window.scrollY + 140, active = 0;
+    targets.forEach(function(el, i){ if(el && el.offsetTop <= pos) active = i; });
+    links.forEach(function(a, i){ a.className = i === active ? 'on' : ''; });
+  }
+  window.addEventListener('scroll', refresh, {passive:true});
+  window.addEventListener('resize', refresh);
+  refresh();
+})();
+</script>
+</body>
+</html>

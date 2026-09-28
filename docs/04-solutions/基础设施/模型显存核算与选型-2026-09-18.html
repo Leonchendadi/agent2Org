@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>200GB 昇腾卡 · DeepSeek V4 显存核算与模型选型</title>
+<style>
+  :root{
+    --ink:#2D2A32; --ink-2:#5A5560;
+    --paper:#FAF7F2; --card:#FFFFFF;
+    --red:#B03050; --red-soft:#F6E3E8;
+    --purple:#8E7CC3; --purple-soft:#EFEAF7;
+    --green:#4E7A5E; --green-soft:#E6F0E8;
+    --amber:#8A6A2F; --amber-soft:#FBF0DC;
+    --line:#E8E2D9;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    line-height:1.65; padding:32px 16px;}
+  .wrap{max-width:1100px; margin:0 auto;}
+  header{border-left:6px solid var(--red); padding-left:18px; margin-bottom:8px;}
+  h1{font-size:26px; letter-spacing:.5px;}
+  .meta{color:var(--ink-2); font-size:13px; margin-top:6px;}
+  nav{margin:18px 0 26px; display:flex; gap:10px; flex-wrap:wrap;}
+  nav a{text-decoration:none; font-size:13px; padding:6px 14px; border-radius:999px;
+    background:var(--purple-soft); color:#5D4B8C;}
+  nav a:hover{background:var(--purple); color:#fff;}
+  h2{font-size:19px; margin:36px 0 12px; padding-bottom:8px; border-bottom:2px solid var(--line);
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  h2 .tag{font-size:12px; font-weight:normal; color:#fff; padding:2px 10px; border-radius:999px;}
+  .tag-fact{background:var(--purple);}
+  .tag-risk{background:var(--red);}
+  .tag-money{background:var(--amber);}
+  h3{font-size:15px; margin:22px 0 8px; color:#4A4440;}
+  p{margin-bottom:10px;}
+  table{width:100%; border-collapse:collapse; background:var(--card); font-size:13.5px;
+    border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:12px;}
+  th{background:#F1ECE4; text-align:left; padding:10px 12px; font-size:13px; color:#4A4440;
+    border-bottom:2px solid var(--line);}
+  td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#FBF4F6;}
+  td.num{font-family:"Cascadia Mono",Consolas,monospace; white-space:nowrap;}
+  td.pname{font-weight:bold;}
+  .pill{display:inline-block; font-size:12px; padding:1px 8px; border-radius:4px; white-space:nowrap;}
+  .p-no{background:var(--red-soft); color:#8E2440;}
+  .p-warn{background:var(--amber-soft); color:var(--amber);}
+  .p-ok{background:var(--green-soft); color:var(--green);}
+  .p-mid{background:#F0EBE4; color:#7A6A58;}
+  .muted{color:var(--ink-2); font-size:12.5px;}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; margin:14px 0;}
+  .card{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--purple);
+    border-radius:10px; padding:14px 16px; font-size:13.5px;}
+  .card b{color:var(--red);}
+  .card.warn{border-left-color:var(--red);}
+  .card.good{border-left-color:var(--green);}
+  .note{background:var(--purple-soft); border-radius:10px; padding:14px 18px; font-size:13.5px; margin:12px 0;}
+  .note b{color:#5D4B8C;}
+  .note.red{background:var(--red-soft);}
+  .note.red b{color:var(--red);}
+  .note.green{background:var(--green-soft);}
+  .note.green b{color:var(--green);}
+  .note.amber{background:var(--amber-soft);}
+  .note.amber b{color:var(--amber);}
+  pre{background:#2D2A32; color:#EDEAF2; border-radius:10px; padding:14px 16px;
+    font-size:12.5px; line-height:1.6; overflow-x:auto; margin:10px 0;
+    font-family:"Cascadia Mono",Consolas,monospace;}
+  pre .c{color:#9B94A8;}
+  code{font-family:"Cascadia Mono",Consolas,monospace; font-size:12.5px;
+    background:#F1ECE4; padding:1px 5px; border-radius:4px;}
+  ol,ul{margin:0 0 12px 20px; font-size:13.5px;}
+  li{margin-bottom:5px;}
+  .bar-wrap{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin:14px 0;}
+  .bar{display:flex; align-items:center; gap:12px; margin-bottom:10px; font-size:13px;}
+  .bar .lbl{width:180px; flex:none; color:#4A4440;}
+  .bar .track{flex:1; height:20px; background:#F1ECE4; border-radius:4px; overflow:hidden;}
+  .bar .fill{height:100%; border-radius:4px;}
+  .bar .val{width:110px; flex:none; text-align:right; font-family:"Cascadia Mono",Consolas,monospace; font-size:12.5px; color:#5A5560;}
+  footer{margin-top:40px; color:var(--ink-2); font-size:12px; border-top:1px solid var(--line); padding-top:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>200GB 昇腾卡 · DeepSeek V4 显存核算与模型选型</h1>
+  <div class="meta">核算日期 2026-09-18 · 场景：20 名医护 · RAG 知识库（WeKnora）+ Agent 平台（Octop）· 需自建 LLM + Embedding + Reranker + ASR 四类模型</div>
+</header>
+
+<nav>
+  <a href="#verdict">结论</a>
+  <a href="#facts">三个硬事实</a>
+  <a href="#calc">显存算账</a>
+  <a href="#alloc">四类模型分配</a>
+  <a href="#capacity">200GB 能跑什么</a>
+  <a href="#ctx">1M 上下文问题</a>
+  <a href="#paths">三条路径</a>
+  <a href="#weknora">WeKnora 部署要点</a>
+  <a href="#ask">需澄清项</a>
+</nav>
+
+<h2 id="verdict">结论 <span class="tag tag-risk">不够</span></h2>
+
+<div class="cards">
+  <div class="card warn"><b>200GB 不够跑 V4，差 2.5–10 倍</b><br>V4-Flash W8A8 需 512GB（8×64G）；V4.1-Flash 需 2048GB（2×A3 或 4×A2）。200GB 无论哪条路都进不去。</div>
+  <div class="card warn"><b>"开 FP8 精度"这个选项在昇腾上不存在</b><br>昇腾 910B <b>不支持 FP8 格式</b>。V4.1-Flash 原生 FP8/FP4 权重（约 511GB）到昇腾侧必须转成 W8A8（INT8）或 BF16。这不是显存够不够的问题，是硬件能力问题。</div>
+  <div class="card warn"><b>1M 上下文只有 V4.1-Flash 支持</b><br>V4-Flash 稳定基线 256K，官方启动配置 <code>--max-model-len 133120</code>。而 V4.1-Flash 官方文档写明"生产性能认证与任务级精度评估尚未完成，现阶段不宜直接进生产"。</div>
+  <div class="card good"><b>但 20 人根本不需要 V4</b><br>20 名医护的 RAG 问答，峰值并发个位数。32B 级模型（Qwen3-32B 等）足够，200GB 绰绰有余，还能留出冗余。</div>
+</div>
+
+<div class="note red">
+<b>一句话：</b>你问的"200GB 够不够开 FP8 + 1M 上下文"，前提有两处不成立——<b>昇腾开不了 FP8</b>，<b>V4 系列里只有 V4.1-Flash 支持 1M 而它要 2048GB</b>。但好消息是：20 人的场景用 32B 级模型就能覆盖，200GB 不是不够，是<b>买错了方向</b>——把钱花在了远超需求的模型规格上。
+</div>
+
+<h2 id="facts">三个硬事实 <span class="tag tag-fact">已核实</span></h2>
+
+<table>
+  <tr><th style="width:150px">事实</th><th>核实结果</th><th style="width:150px">来源</th></tr>
+  <tr>
+    <td class="pname">昇腾 910B 不支持 FP8</td>
+    <td>910B 只支持 FP16 / BF16 / INT8。DeepSeek 官方发布的 FP8 权重在昇腾上必须转换格式才能加载——R1 时代就是这个情况（FP8 权重约 640G，转 BF16 后翻倍）。V4 系列同理，昇腾侧走的是 <b>W8A8（INT8）</b>量化路径</td>
+    <td>多来源一致（CSDN / 知乎昇腾部署复盘）</td>
+  </tr>
+  <tr>
+    <td class="pname">V4 系列最小尺寸是 552B</td>
+    <td>DeepSeek V4.1-Flash 是"全新模型结构系列中<b>最小尺寸</b>的成员"，主干 552B、总参约 769B、激活 16B。V4 系列<b>没有 32B 级别的小模型</b></td>
+    <td>官方发布信息（2026-09-10）</td>
+  </tr>
+  <tr>
+    <td class="pname">V4 系在昇腾上只走 vLLM-Ascend</td>
+    <td>MindIE 官方模型列表里没有 V4 系列。且官方只验证了 <b>Atlas 800 A2 / A3</b> 两种机型；<b>Atlas 800I A2 与 Atlas 300I Duo 在 V4 系文档中完全未被提及</b></td>
+    <td>vLLM-Ascend 官方教程</td>
+  </tr>
+</table>
+
+<div class="note amber">
+<b>你的调研文档（2026-09-17）已经把这些摸清了</b>，本次核算沿用其中的权重规模数据，并补充了"FP8 在昇腾不可用"与"卡型支持范围"两条边界。
+</div>
+
+<h2 id="calc">显存算账 <span class="tag tag-money">V4 各档位 vs 200GB</span></h2>
+
+<table>
+  <tr><th>模型 / 量化档</th><th>权重规模</th><th>昇腾最小配置</th><th class="num">总显存需求</th><th>vs 200GB</th></tr>
+  <tr>
+    <td class="pname">V4-Flash · W4A8<br><span class="muted">社区量化，官方文档未覆盖</span></td>
+    <td class="num">20–22 GB / 卡</td>
+    <td>1 × Atlas 800 A2 <b>8×32G</b>（910B4）</td>
+    <td class="num">256 GB</td>
+    <td><span class="pill p-no">差 1.3 倍</span><br><span class="muted">且必须 8 卡</span></td>
+  </tr>
+  <tr>
+    <td class="pname">V4-Flash · W8A8<br><span class="muted">官方路径</span></td>
+    <td class="num">约 293 GiB MoE</td>
+    <td>1 × Atlas 800 A2 <b>8×64G</b></td>
+    <td class="num">512 GB</td>
+    <td><span class="pill p-no">差 2.5 倍</span></td>
+  </tr>
+  <tr>
+    <td class="pname">V4.1-Flash · W8A8<br><span class="muted">唯一支持 1M 上下文的</span></td>
+    <td class="num">552B 主干 / 769B 总参<br>原生 FP8/FP4 约 511 GB</td>
+    <td>2 × Atlas 800 A3 <b>8×128G</b><br>或 4 × Atlas 800 A2 <b>8×64G</b></td>
+    <td class="num">2048 GB</td>
+    <td><span class="pill p-no">差 10 倍</span></td>
+  </tr>
+</table>
+
+<div class="bar-wrap">
+  <div class="bar"><span class="lbl">V4.1-Flash W8A8</span><span class="track"><span class="fill" style="width:100%; background:#B03050;"></span></span><span class="val">2048 GB</span></div>
+  <div class="bar"><span class="lbl">V4-Flash W8A8</span><span class="track"><span class="fill" style="width:25%; background:#D4728A;"></span></span><span class="val">512 GB</span></div>
+  <div class="bar"><span class="lbl">V4-Flash W4A8</span><span class="track"><span class="fill" style="width:12.5%; background:#E8A0B0;"></span></span><span class="val">256 GB</span></div>
+  <div class="bar"><span class="lbl"><b>你手上有的</b></span><span class="track"><span class="fill" style="width:9.8%; background:#4E7A5E;"></span></span><span class="val">200 GB</span></div>
+  <div class="bar"><span class="lbl">32B 模型 BF16 + 128K KV</span><span class="track"><span class="fill" style="width:4.7%; background:#8E7CC3;"></span></span><span class="val">96 GB</span></div>
+</div>
+
+<h2 id="alloc">四类模型的显存分配 <span class="tag tag-fact">关键建议</span></h2>
+
+<p><b>先纠正一个前提：WeKnora 本身不吃显存。</b>它是纯编排层——文档解析、分块、检索编排、Agent 调度，模型全部通过 OpenAI 兼容 API 外部调用。所以 200GB 可以全部给模型服务，不需要给 WeKnora 留一份。</p>
+
+<table>
+  <tr><th>模型类型</th><th>推荐选型</th><th class="num">显存</th><th>部署位置建议</th></tr>
+  <tr>
+    <td class="pname">LLM</td>
+    <td>见下一节选型</td>
+    <td class="num">大头</td>
+    <td>NPU（vLLM-Ascend）</td>
+  </tr>
+  <tr>
+    <td class="pname">Embedding</td>
+    <td>BGE-M3（1024 维，中文医学语料表现好）</td>
+    <td class="num">≈ 2.3 GB</td>
+    <td><span class="pill p-ok">建议 CPU</span> 20 人并发下 CPU 延迟可接受，不占显存</td>
+  </tr>
+  <tr>
+    <td class="pname">Reranker</td>
+    <td>bge-reranker-v2-m3</td>
+    <td class="num">≈ 2.3 GB</td>
+    <td><span class="pill p-ok">建议 CPU</span> 同上，调用量比 embedding 更低</td>
+  </tr>
+  <tr>
+    <td class="pname">ASR</td>
+    <td>Qwen3-ASR-1.7B（昇腾已有适配案例）<br>或 Paraformer / Whisper</td>
+    <td class="num">≈ 3.5 GB</td>
+    <td><span class="pill p-warn">建议 NPU</span> ASR 在 CPU 上实时率差，且调用频次低，占显存极小</td>
+  </tr>
+  <tr style="background:#F6E3E8">
+    <td class="pname">三类小模型合计</td>
+    <td colspan="2" class="num">≈ 8 GB</td>
+    <td>相对 LLM 可忽略，但<b>能放 CPU 就放 CPU</b></td>
+  </tr>
+</table>
+
+<div class="note green">
+<b>结论：</b>Embedding 与 Reranker 放 CPU 跑，ASR 放 NPU（占 3.5GB）。<b>200GB 里可以拿出约 190GB 给 LLM。</b>
+</div>
+
+<h2 id="capacity">190GB 实际能跑什么 <span class="tag tag-money">选型依据</span></h2>
+
+<table>
+  <tr><th>模型档位</th><th class="num">权重</th><th class="num">128K 上下文 KV</th><th class="num">合计</th><th>可行性</th></tr>
+  <tr>
+    <td class="pname">14B BF16<br><span class="muted">Qwen3-14B</span></td>
+    <td class="num">28 GB</td>
+    <td class="num">12 GB</td>
+    <td class="num">40 GB</td>
+    <td><span class="pill p-ok">轻松</span> 可开多实例</td>
+  </tr>
+  <tr>
+    <td class="pname">32B BF16<br><span class="muted">Qwen3-32B / DeepSeek-R1-Distill-32B</span></td>
+    <td class="num">64 GB</td>
+    <td class="num">32 GB</td>
+    <td class="num">96 GB</td>
+    <td><span class="pill p-ok">推荐</span> 余量充足</td>
+  </tr>
+  <tr>
+    <td class="pname">70B BF16</td>
+    <td class="num">140 GB</td>
+    <td class="num">40 GB</td>
+    <td class="num">180 GB</td>
+    <td><span class="pill p-warn">勉强</span> 上下文需压到 64K</td>
+  </tr>
+  <tr>
+    <td class="pname">V4-Flash W4A8</td>
+    <td class="num">160–176 GB</td>
+    <td class="num">—</td>
+    <td class="num">> 200 GB</td>
+    <td><span class="pill p-no">不可行</span> 且需 8 卡拓扑</td>
+  </tr>
+</table>
+
+<p class="muted">KV cache 按 GQA 架构估算（32B 级：64 层 × 8 KV heads × 128 dim × 2 × 2 bytes ≈ 256 KB/token）。DeepSeek 系列用 MLA 架构，KV 显著更小，但权重本身就是瓶颈。</p>
+
+<div class="note amber">
+<b>20 人的真实负载：</b>20 人 × 每天 30 次提问 ≈ 600 次/天，折算峰值并发个位数。RAG 场景每次检索回来的上下文通常 4K–16K token。<b>32B 级模型在这类负载下毫无压力</b>——用 V4 是 10–20 倍的过度配置。
+</div>
+
+<h2 id="ctx">1M 上下文与 RAG 的关系 <span class="tag tag-risk">需求本身要打个问号</span></h2>
+
+<p>这一条值得单独说：<b>1M 上下文和 RAG 在技术上是相互替代的关系，不是叠加关系。</b></p>
+
+<table>
+  <tr><th></th><th>1M 长上下文</th><th>RAG 检索增强</th></tr>
+  <tr><td class="pname">思路</td><td>把全部资料塞进上下文，让模型自己找</td><td>先精准检索出相关片段，只把片段给模型</td></tr>
+  <tr><td class="pname">成本</td><td>KV cache 随长度线性增长，显存与延迟都爆炸</td><td>KV cache 稳定在 8K–32K，成本可控</td></tr>
+  <tr><td class="pname">准确率</td><td>长上下文中间部分易被忽略（lost in the middle）</td><td>召回质量取决于检索，但可优化、可评测</td></tr>
+  <tr><td class="pname">医院场景适用性</td><td>适合"通读一份长病历"这类任务</td><td><b>适合知识库问答，这是主场景</b></td></tr>
+</table>
+
+<div class="note red">
+<b>判断：</b>你要建 RAG 知识库，那么 1M 上下文<b>基本用不上</b>——RAG 的价值恰恰在于不需要把全部资料塞进上下文。1M 是模型厂的营销参数，不是医院知识库的必需能力。<b>为了一个用不上的能力去补 10 倍硬件（200GB → 2048GB），是这次选型里最大的浪费点。</b>
+</div>
+
+<h2 id="paths">三条路径 <span class="tag tag-money">含代价</span></h2>
+
+<table>
+  <tr><th>路径</th><th>配置</th><th>硬件代价</th><th>评价</th></tr>
+  <tr>
+    <td class="pname" style="color:#4E7A5E">A · 降级到 32B 级</td>
+    <td>Qwen3-32B 或 DeepSeek-R1-Distill-32B，BF16，128K 上下文</td>
+    <td><span class="pill p-ok">零追加</span> 200GB 用掉约一半</td>
+    <td><b>推荐。</b>20 人场景性能足够，余量可做双实例或更大上下文。省下的预算投到知识库建设与数据治理上，收益更高</td>
+  </tr>
+  <tr>
+    <td class="pname" style="color:#8A6A2F">B · V4-Flash W8A8</td>
+    <td>1 × Atlas 800 A2（8×64G = 512GB）</td>
+    <td><span class="pill p-warn">补 2.5 倍</span> 约 312GB 显存</td>
+    <td>若甲方明确要求"必须上 DeepSeek V4"。注意只支持到 256K 上下文，<b>没有 1M</b>。且 W8A8 路线官方验证的是 64G 卡</td>
+  </tr>
+  <tr>
+    <td class="pname" style="color:#B03050">C · V4.1-Flash（含 1M）</td>
+    <td>2 × Atlas 800 A3（8×128G）或 4 × Atlas 800 A2（8×64G）</td>
+    <td><span class="pill p-no">补 10 倍</span> 约 1848GB 显存</td>
+    <td><b>不建议。</b>成本极高，且官方文档写明"生产性能认证与任务级精度评估尚未完成，现阶段不宜直接进生产"。医院生产系统不该踩这个</td>
+  </tr>
+</table>
+
+<h2 id="weknora">WeKnora 部署要点 <span class="tag tag-fact">已核实源码</span></h2>
+
+<table>
+  <tr><th style="width:150px">项目</th><th>情况</th></tr>
+  <tr><td class="pname">资源占用</td><td><b>不吃显存</b>。已核对 <code>docker-compose.yml</code> 全文，<b>零 GPU 配置</b>（无 <code>runtime: nvidia</code>、无 <code>deploy.resources</code> 设备段）。纯编排层</td></tr>
+  <tr><td class="pname">服务组成</td><td><b>多容器栈，不是单体</b>。基础部署 6 个容器：<code>frontend</code>（Vue）/ <code>app</code>（Go 后端）/ <code>docreader</code>（文档解析）/ <code>postgres</code> / <code>redis</code> / <code>mcp</code>。另有可选 profile：searxng、minio、neo4j、qdrant、milvus、weaviate、doris、dex、langfuse</td></tr>
+  <tr><td class="pname">部署方式</td><td>Docker Compose（profiles：core / full / neo4j / minio / langfuse），也支持 K8s Helm。<b>官方支持私有化与离线部署</b></td></tr>
+  <tr>
+    <td class="pname" style="color:#B03050">数据库<br><span class="pill p-no">重要修正</span></td>
+    <td>用的是 <b>ParadeDB</b>（镜像 <code>paradedb/paradedb:v0.22.6-pg17</code>），不是普通 PostgreSQL——这是 <b>PG 17 + pg_search + pgvector</b> 的扩展发行版，同时承担主库（<code>DB_DRIVER=postgres</code>）和向量存储（<code>RETRIEVE_DRIVER=postgres</code>）两个角色。<br><b>与 Octop 侧用的 <code>pgvector/pgvector:pg16</code> 版本与扩展均不同，技术上无法共用实例</b>——不是"建议分开"，是硬约束。两台服务器各自独立部署</td>
+  </tr>
+  <tr><td class="pname">模型接入</td><td>5 种模型类型：<code>KnowledgeQA</code>（LLM）/ <code>Embedding</code> / <code>Rerank</code> / <code>VLM</code> / <code>ASR</code>。全部为 <code>source: remote</code> 的 API 调用（<code>base_url</code> + <code>api_key</code>）</td></tr>
+  <tr><td class="pname">模型配置方式</td><td>两条路径：① <code>.env</code> 环境变量（<code>LLM_*</code> / <code>EMBEDDING_*</code> / <code>RERANK_*</code>，模板 788 行，中文注释）；② 声明式 <code>config/builtin_models.yaml</code>（启动时 upsert 入库）。<b>ASR 没有环境变量模板</b>，需走 YAML 或前端模型管理界面配置</td></tr>
+  <tr><td class="pname">Reranker 选型</td><td>官方 <code>BUILTIN_MODELS.md</code> 示例用的就是 <b><code>bge-reranker-v2-m3</code></b>——与本文档推荐一致，可直接照抄</td></tr>
+  <tr><td class="pname">与 Octop 的集成</td><td><b>官方提供 MCP Server</b>（PyPI <code>tencent-weknora-mcp</code>，29 个工具，支持 stdio / SSE / HTTP）。Octop 原生支持 MCP → 两者通过 MCP 对接，<b>不需要改任何一方代码</b></td></tr>
+</table>
+
+<div class="note green">
+<b>集成架构很干净：</b>Octop（Agent 平台，MCP 客户端）→ MCP → WeKnora（RAG 编排）→ OpenAI 兼容 API → 院内 vLLM-Ascend 模型服务。三层解耦，任一层替换不影响其他两层。
+</div>
+
+<div class="note amber">
+<b>资源规划提醒：</b>WeKnora 是 6 个容器的微服务栈，加上 Octop 侧的 3 个容器（Octop + PG + nginx），联想服务器上实际要跑 <b>9 个左右容器</b>。原来给 Octop 估的 4C8G 需要重算——建议单独出一份资源核算，把这套栈的 CPU / 内存 / 磁盘需求列清楚。官方 README 未给出明确的系统配置要求，需按实际知识库规模压测确定。
+</div>
+
+<h2 id="ask">需澄清项 <span class="tag tag-risk">阻塞选型</span></h2>
+
+<table>
+  <tr><th style="width:52px">编号</th><th style="width:240px">问题</th><th>为什么关键</th></tr>
+  <tr>
+    <td class="pname" style="color:#B03050">G1</td>
+    <td>"200GB" 的<b>确切构成</b>是什么？几张卡 × 单卡多少 GB？</td>
+    <td>显存不是按 GB 买的，是按卡买的。<b>卡数比容量更致命</b>——昇腾部署 V4 系需要 TP8（8 卡）拓扑，如果只有 3–4 张卡，连并行拓扑都组不起来</td>
+  </tr>
+  <tr>
+    <td class="pname" style="color:#B03050">G2</td>
+    <td>卡型是 <b>Atlas 800I A2</b>（8 模组推理服务器）还是 <b>Atlas 300I Duo</b>（推理卡）？</td>
+    <td>两者在 vLLM-Ascend 的 V4 系文档中<b>完全未被提及</b>，不在官方验证路径内。若现场是 300I Duo，需单独向华为确认，否则出问题没有官方兜底</td>
+  </tr>
+  <tr>
+    <td class="pname" style="color:#B03050">G3</td>
+    <td>甲方是否<b>硬性要求"必须部署 DeepSeek V4"</b>？还是只要求"本地大模型"？</td>
+    <td>这一条决定路径 A / B / C。如果只是要求本地化，32B 级模型完全达标，能省下 2.5–10 倍硬件预算</td>
+  </tr>
+  <tr>
+    <td class="pname" style="color:#8A6A2F">G4</td>
+    <td>1M 上下文是<b>真实业务需求</b>还是看参数表选的？</td>
+    <td>RAG 场景用不上 1M。若确有"通读长病历"类需求，需单独评估，而不是为它上 2048GB</td>
+  </tr>
+  <tr>
+    <td class="pname" style="color:#8A6A2F">G5</td>
+    <td>ASR 的使用场景是什么？（语音录入病历？会议记录？）</td>
+    <td>决定选型：短语音指令用 0.6B 级即可；长音频转写需更大模型与更长显存占用</td>
+  </tr>
+  <tr>
+    <td class="pname" style="color:#8A6A2F">G6</td>
+    <td>知识库规模有多大？文档数量与类型？</td>
+    <td>决定 embedding 与 reranker 的吞吐需求，以及向量库选型</td>
+  </tr>
+</table>
+
+<footer>
+核算依据：<code>昇腾部署DeepSeek-V4Flash调研-2026-09-17.html</code>（权重规模与昇腾最小配置）+ 昇腾 910B FP8 支持情况核实（多来源一致）+ DeepSeek V4.1-Flash 官方发布信息（2026-09-10）+ WeKnora 源码核实（<code>_ref/WeKnora</code>：README.md / .env.example 788 行 / docker-compose.yml 1045 行 / config/builtin_models.yaml.example / docs/BUILTIN_MODELS.md）。<br>
+KV cache 按 GQA 架构估算，DeepSeek 系列实际使用 MLA 架构，KV 更小但权重仍是瓶颈。<br>
+未实测项：具体显存占用需在实际卡型上验证；WeKnora 的 CPU / 内存需求官方未给出，需按知识库规模压测确定。本文档为选型阶段的容量核算。
+</footer>
+
+</div>
+</body>
+</html>

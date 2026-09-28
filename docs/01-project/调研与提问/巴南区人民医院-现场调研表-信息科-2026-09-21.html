@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>巴南区人民医院 · 现场调研表（信息科）</title>
+<style>
+  :root{
+    --ink:#2E2A26;--ink-2:#6B6157;--ink-3:#948B80;
+    --paper:#FAF7F2;--card:#FFFFFF;--line:#E7E0D6;
+    --red:#B23A2E;--red-soft:#F6E7E3;--purple:#6E5AA8;--purple-soft:#EFEAF8;--sand:#F3EDE3;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB",-apple-system,sans-serif;
+    font-size:13px;line-height:1.7;-webkit-font-smoothing:antialiased;
+  }
+  .sheet{max-width:896px;margin:0 auto;padding:30px 34px 26px;}
+  .head{border-top:4px solid var(--red);padding-top:14px;}
+  .eyebrow{font-size:11.5px;letter-spacing:.16em;color:var(--red);font-weight:700;}
+  h1{font-size:21px;line-height:1.4;margin:8px 0 8px;}
+  h1 small{display:block;font-size:12.5px;color:var(--ink-2);font-weight:400;margin-top:5px;}
+  .purpose{
+    background:var(--sand);border:1px solid var(--line);border-left:3px solid var(--purple);
+    border-radius:8px;padding:10px 13px;font-size:11.8px;color:var(--ink-2);
+  }
+  .purpose b{color:var(--ink);}
+  section{margin-top:20px;}
+  h2{
+    font-size:14px;margin:0 0 10px;padding-left:11px;
+    border-left:4px solid var(--red);line-height:1.35;
+  }
+  h2 span{font-size:11.5px;color:var(--ink-3);font-weight:400;margin-left:8px;}
+  table{
+    width:100%;border-collapse:collapse;background:var(--card);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:11.8px;
+  }
+  th{
+    background:var(--sand);color:var(--ink);text-align:left;font-weight:700;
+    padding:7px 9px;border-bottom:1px solid var(--line);font-size:11.3px;
+  }
+  td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2);line-height:1.62;}
+  tr:last-child td{border-bottom:none;}
+  td.k{color:var(--ink);font-weight:600;}
+  td.fill{color:#C9C0B4;font-size:11px;letter-spacing:.06em;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 13px;
+  }
+  .card h3{font-size:12.3px;margin:0 0 7px;color:var(--red);}
+  ul.q{margin:0;padding-left:0;list-style:none;}
+  ul.q li{
+    position:relative;padding-left:22px;font-size:11.8px;color:var(--ink-2);
+    margin-bottom:8px;line-height:1.62;
+  }
+  ul.q li:before{
+    content:"";position:absolute;left:0;top:3px;
+    width:11px;height:11px;border:1.5px solid #B8AD9F;border-radius:3px;
+  }
+  .lines{margin-top:2px;}
+  .lines i{
+    display:block;border-bottom:1px dotted #D6CEC2;height:15px;margin-bottom:3px;
+  }
+  .star{color:var(--red);font-weight:700;}
+  footer{
+    margin-top:20px;padding-top:10px;border-top:1px dashed var(--line);
+    font-size:10.8px;color:var(--ink-3);line-height:1.65;
+  }
+  @media print{
+    body{background:#fff;font-size:10.4pt;}
+    .sheet{max-width:none;padding:0;}
+    section{margin-top:12px;}
+    h1{font-size:16pt;}
+    h2{font-size:11pt;}
+    ul.q li{margin-bottom:5px;}
+  }
+  @page{size:A4;margin:14mm 12mm;}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="head">
+    <div class="eyebrow">现场调研表 · 请信息科协助填写</div>
+    <h1>宫颈癌诊疗综合场景 AI 智能体及数据驾驶舱一体化建设项目
+      <small>部署环境与业务系统现状调研（技术对接前置资料）</small>
+    </h1>
+    <div class="purpose">
+      本表用于确定系统部署方案、接口对接方式与实施周期。共 <b>7 组、约 40 项</b>信息，其中标注 <span class="star">★</span> 的为<b>阻塞项</b>——未确认将无法确定部署方案与实施工作量。信息科可转交原厂商协助填写，不涉及商业条款。
+    </div>
+    <div class="purpose" style="margin-top:8px;border-left-color:var(--red);">
+      <b>填写方</b>：巴南区人民医院信息科（及接口原厂商）　　<b>对接人</b>：＿＿＿＿＿＿　<b>联系方式</b>：＿＿＿＿＿＿　　<b>填写日期</b>：＿＿＿＿＿＿
+    </div>
+  </div>
+
+  <section>
+    <h2>一、业务系统构成<span>逐个系统确认厂商、版本与维保状态</span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:132px;">系统</th>
+          <th style="width:112px;">厂商</th>
+          <th style="width:66px;">版本</th>
+          <th style="width:70px;">上线年份</th>
+          <th style="width:80px;">是否在维保期</th>
+          <th>备注（是否可提供接口 / 接口联系人）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="k">★ HIS 核心业务系统</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">★ 电子病历（EMR）</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">★ 集成平台</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">LIS 检验系统</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">PACS 影像系统</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">★ 超声系统（含报告）</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">手术麻醉系统</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">★ 体检系统</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">随访系统（如有）</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">远程病理 PACS（独立采购）</td><td class="fill">＿＿＿＿</td><td class="fill">＿＿</td><td class="fill">＿＿＿＿</td><td class="fill">□是　□否</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>二、接口能力<span>本项目最大技术风险点，需明确到「有没有」</span></h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>取数接口（院方向智能体提供数据）</h3>
+        <ul class="q">
+          <li>电子病历、检验、影像、超声、体检、病理等系统是否已有标准取数接口？</li>
+          <li>是否通过集成平台统一取数，还是各系统分别对接？</li>
+          <li>是否支持按患者、按就诊、按时间范围的条件化取数？</li>
+          <li>取数接口是否存在费用？由谁承担？</li>
+        </ul>
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="card">
+        <h3>★ 回写接口（智能体向院内系统写入）</h3>
+        <ul class="q">
+          <li>电子病历是否提供<b>草稿回写</b>接口（非签署态）？</li>
+          <li>回写时的身份认证方式？是否需医生登录态透传？</li>
+          <li>超声报告是否提供草稿回写接口？</li>
+          <li>回写接口是否收费？原厂商是否愿意配合开通？</li>
+        </ul>
+        <div class="lines"><i></i><i></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>三、集成平台与厂商配合</h2>
+    <table>
+      <tbody>
+        <tr><td class="k" style="width:270px;">集成平台是否承担院内系统间数据交换？</td><td class="fill">□是　□否　　说明：＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">原厂商接口配合由哪一方出面协调？</td><td class="fill">□院方信息科　□院方业务科室　□平台公司　　说明：＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">是否需要我方直接与接口原厂商对接技术细节？</td><td class="fill">□需要　□不需要，统一走院方　　说明：＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">是否有其他院内系统在近期计划改造或上线？</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>四、服务器与算力资源<span>资源不足将直接影响实施周期</span></h2>
+    <table>
+      <thead>
+        <tr><th style="width:210px;">项目</th><th>现状</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="k">★ 现有服务器数量与用途</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">★ 可分配给本项目的 vCPU / 内存</td><td class="fill">vCPU ＿＿核　　内存 ＿＿GB</td></tr>
+        <tr><td class="k">★ 可用存储空间</td><td class="fill">可用 ＿＿TB　　类型（本地/SAN/NAS/分布式）：＿＿＿＿</td></tr>
+        <tr><td class="k">★ CPU 架构</td><td class="fill">□ 鲲鹏（ARM）　□ Intel/AMD（x86）　□ 其他＿＿＿＿</td></tr>
+        <tr><td class="k">★ 是否已配备国产 AI 加速卡</td><td class="fill">型号 ＿＿＿＿＿＿　数量 ＿＿张　单卡显存 ＿＿GB</td></tr>
+        <tr><td class="k">服务器形态</td><td class="fill">□ 裸机　□ 虚拟化（平台：＿＿＿＿＿＿）　□ 已容器化</td></tr>
+        <tr><td class="k">容器与编排环境</td><td class="fill">□ Docker　□ containerd　□ 其他＿＿　　是否已部署 K8s：□是 □否</td></tr>
+        <tr><td class="k">加速卡驱动与运行环境是否已安装</td><td class="fill">□ 是（版本＿＿＿＿）　□ 否　□ 不清楚</td></tr>
+        <tr><td class="k">是否有共享存储 / 备份设施可复用</td><td class="fill">＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>五、诊室、终端与语音采集硬件</h2>
+    <table>
+      <tbody>
+        <tr><td class="k" style="width:270px;">★ 超声科诊室数量与类型</td><td class="fill">阴超诊室 ＿＿间　其他超声诊室 ＿＿间（类型：＿＿＿＿＿＿）</td></tr>
+        <tr><td class="k">超声音频采集方式</td><td class="fill">□ 专用医学音频采集器　□ 普通麦克风　□ 手机/其他＿＿＿＿</td></tr>
+        <tr><td class="k">★ 是否已有医用级音频采集设备</td><td class="fill">□ 有（型号＿＿＿＿）　□ 无　□ 需本项目采购</td></tr>
+        <tr><td class="k">妇科门诊与住院诊室数量</td><td class="fill">门诊 ＿＿间　住院 ＿＿个病区</td></tr>
+        <tr><td class="k">诊室是否有可用网络点位与稳定电源</td><td class="fill">□ 是　□ 否　说明：＿＿＿＿＿＿＿＿＿＿</td></tr>
+        <tr><td class="k">临床终端环境</td><td class="fill">操作系统 ＿＿＿＿　浏览器 ＿＿＿＿　是否含国产系统终端：□是 □否</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>六、网络、安全与消息通道</h2>
+    <table>
+      <tbody>
+        <tr><td class="k" style="width:270px;">院内网是否可访问公网</td><td class="fill">□ 完全隔离　□ 白名单出口　□ 可访问</td></tr>
+        <tr><td class="k">系统等保等级要求</td><td class="fill">＿＿级　　是否有安全加固基线：□是 □否</td></tr>
+        <tr><td class="k">是否需要接入堡垒机 / 日志审计平台</td><td class="fill">□ 需要　□ 不需要　□ 待定</td></tr>
+        <tr><td class="k">院内可用消息通道</td><td class="fill">□ OA　□ 企业微信院内版　□ 短信网关　□ 其他＿＿＿＿</td></tr>
+        <tr><td class="k">消息通道是否允许承载患者相关提醒</td><td class="fill">□ 允许　□ 不允许　□ 需另行审批</td></tr>
+        <tr><td class="k">机房是否有可用机柜空间与供电余量</td><td class="fill">□ 有　□ 无　说明：＿＿＿＿＿＿＿＿＿＿</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>七、配合事项与项目对接</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>院方需明确的事项</h3>
+        <ul class="q">
+          <li>院方项目对接人（信息科）及技术负责人</li>
+          <li>业务科室对接人：妇科、超声科、病理科、体检中心、质控科</li>
+          <li>原厂商接口协调的责任部门</li>
+          <li>数据授权范围与审批流程</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>需院方提供的资料</h3>
+        <ul class="q">
+          <li>招标需求文件技术部分完整版</li>
+          <li>现有服务器配置清单与资源使用情况</li>
+          <li>机房网络拓扑或网段划分说明</li>
+          <li>已建/拟建系统的接口文档（如有）</li>
+          <li>院内专科随访方案、宫颈癌筛查与诊治相关规范文本（如有）</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    本表信息仅用于技术方案设计与实施工作量评估，不作为商务承诺依据。标注 <span class="star">★</span> 项建议在技术交流后 5 个工作日内确认归集，以便我方出具正式部署方案与实施计划。第四、五组信息可能直接改变技术方案选型，建议优先提供。
+  </footer>
+
+</div>
+</body>
+</html>

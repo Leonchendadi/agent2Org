@@ -1,0 +1,113 @@
+# =============================================================================
+# Octop 医院/内网部署 compose
+#
+# 相对官方 docker/docker-compose.yml 的改动：
+#   1. 默认启用 PostgreSQL(pgvector) —— 避免 SQLite 单写者与锁竞争
+#   2. 非 root 运行（uid 10001）+ capability 收敛 + no-new-privileges
+#   3. 入口脚本修复了官方 PG 模式下 octop init 反复执行导致容器崩溃循环的问题
+#   4. 端口默认只绑 127.0.0.1，前置 nginx 做 TLS 与访问控制
+#   5. 数据卷必须写绝对路径（官方默认值 ~/.octop 的波浪号展开在部分 Compose 版本上不可靠）
+#   6. 日志轮转 + 资源上限
+#
+# 用法：
+#   cp .env.example .env      # 必填 OCTOP_DATA / POSTGRES_PASSWORD / OCTOP_DEFAULT_PASSWORD
+#   docker compose up -d --build
+#   docker compose logs -f octop
+#
+# 注意：Octop 是单进程架构（进程内调度 + IM 长连接 + 本地文件 workspace），
+#       **只能跑 1 副本**。不要加 scale，不要用 RollingUpdate。
+# =============================================================================
+
+name: octop
+
+services:
+  octop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        OCTOP_BASE: ${OCTOP_BASE:-ghcr.io/tencentcloud/octop:1.0.0}
+        APT_MIRROR: ${APT_MIRROR:-}
+        PLAYWRIGHT_DOWNLOAD_HOST: ${PLAYWRIGHT_DOWNLOAD_HOST:-}
+    image: ${OCTOP_IMAGE:-octop-hospital:1.0.0}
+    container_name: octop
+    restart: unless-stopped
+    ports:
+      # 只绑本机回环，外部访问统一走 nginx。内网直连可改成 0.0.0.0
+      - "${OCTOP_BIND_ADDR:-127.0.0.1}:${OCTOP_PORT:-8088}:8088"
+    volumes:
+      # 必须为宿主机绝对路径，且属主需为 10001:10001
+      - ${OCTOP_DATA:?请在 .env 中把 OCTOP_DATA 设为宿主机绝对路径}:/data/.octop
+    environment:
+      HOME: /data
+      OCTOP_BIND_HOST: 0.0.0.0
+      OCTOP_PORT: "8088"
+      OCTOP_LOG_LEVEL: ${OCTOP_LOG_LEVEL:-info}
+      OCTOP_DEFAULT_TIMEZONE: ${OCTOP_DEFAULT_TIMEZONE:-Asia/Shanghai}
+      OCTOP_DEFAULT_PASSWORD: ${OCTOP_DEFAULT_PASSWORD:-}
+      OCTOP_ADMIN_USERNAME: ${OCTOP_ADMIN_USERNAME:-admin}
+      OCTOP_ADMIN_DISPLAY_NAME: ${OCTOP_ADMIN_DISPLAY_NAME:-Admin}
+      # PostgreSQL 后端。留空则回落到容器内 SQLite（不推荐生产使用）
+      OCTOP_DATABASE_URL: ${OCTOP_DATABASE_URL:-postgresql://octop:${POSTGRES_PASSWORD:?请在 .env 中设置 POSTGRES_PASSWORD}@postgres:5432/octop}
+      # 模型：指向院内私有推理服务（OpenAI 兼容端点）
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # ---- 安全加固 ----
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      # 仅保留入口脚本 chown 与降权所需
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    tmpfs:
+      - /tmp:size=512m,mode=1777
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8088/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "${OCTOP_CPUS:-4.0}"
+          memory: ${OCTOP_MEMORY:-8G}
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: octop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: octop
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请在 .env 中设置 POSTGRES_PASSWORD}
+      POSTGRES_DB: octop
+    volumes:
+      - octop-pgdata:/var/lib/postgresql/data
+      - ./postgres/init-vector.sql:/docker-entrypoint-initdb.d/01-vector.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U octop -d octop"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+volumes:
+  octop-pgdata:

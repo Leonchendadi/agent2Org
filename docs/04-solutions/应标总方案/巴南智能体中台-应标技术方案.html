@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医疗 AI 智能体统一中台建设方案 · 技术应标文件</title>
+<style>
+  :root{
+    --ink:#1C2B3A; --ink-2:#5A6875; --ink-3:#8695A4;
+    --paper:#FFFFFF; --page:#F4F6F8;
+    --navy:#1F4E79; --navy-soft:#E8F0F8;
+    --line:#DCE3EA;
+    --accent:#B5442F; --accent-soft:#FBEDEA;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--page); color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    line-height:1.75; padding:28px 16px; font-size:14px;}
+  .wrap{max-width:960px; margin:0 auto; background:var(--paper);
+    border:1px solid var(--line); border-radius:12px; padding:48px 56px 56px;}
+
+  header{border-bottom:3px solid var(--navy); padding-bottom:22px; margin-bottom:8px;}
+  .doctype{display:inline-block; font-size:12px; letter-spacing:2px; color:#fff;
+    background:var(--navy); padding:3px 12px; border-radius:4px; margin-bottom:14px;}
+  h1{font-size:25px; line-height:1.4; letter-spacing:.5px;}
+  .sub{color:var(--ink-2); font-size:14px; margin-top:8px;}
+  .meta-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:6px 32px;
+    margin-top:20px; font-size:13px;}
+  .meta-grid div{color:var(--ink-2);}
+  .meta-grid b{color:var(--ink); font-weight:normal;}
+
+  h2{font-size:18px; margin:44px 0 16px; padding:10px 0 10px 14px;
+    border-left:5px solid var(--navy); background:linear-gradient(90deg,var(--navy-soft) 0%,transparent 70%);}
+  h3{font-size:14.5px; margin:24px 0 10px; color:var(--navy);}
+  h3::before{content:""; display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--accent); margin-right:8px; vertical-align:middle;}
+  p{margin:10px 0;}
+
+  .clause{background:var(--accent-soft); border-left:4px solid var(--accent);
+    border-radius:0 8px 8px 0; padding:12px 18px; margin:14px 0 18px; font-size:13.5px;
+    color:#6B2A1C; line-height:1.7;}
+  .clause b{color:var(--accent);}
+
+  table{width:100%; border-collapse:collapse; font-size:13px; margin:12px 0 6px;
+    border:1px solid var(--line);}
+  th{background:#EEF3F8; text-align:left; padding:10px 12px; font-weight:normal;
+    color:#2C4A66; border-bottom:1.5px solid var(--line); font-size:12.5px;}
+  td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td.cap{font-weight:bold; white-space:nowrap; color:var(--navy); width:170px;}
+
+  .tech{background:#F7F9FB; border:1px solid var(--line); border-radius:8px;
+    padding:14px 18px; margin:14px 0; font-size:13px; color:#3E4C5A;}
+  .tech b{color:var(--navy);}
+
+  figure{margin:22px 0; text-align:center;}
+  figcaption{font-size:12.5px; color:var(--ink-3); margin-top:10px;}
+  svg{max-width:100%; height:auto;}
+
+  ul{margin:8px 0 8px 20px;}
+  li{margin:5px 0; font-size:13.5px;}
+
+  .highlight{background:var(--navy-soft); border-radius:8px; padding:14px 18px;
+    margin:16px 0; font-size:13.5px;}
+  .highlight b{color:var(--navy);}
+
+  footer{margin-top:52px; padding-top:18px; border-top:1px solid var(--line);
+    font-size:12px; color:var(--ink-3); line-height:1.8;}
+
+  @media print{
+    body{background:#fff; padding:0; font-size:11.5pt;}
+    .wrap{border:none; border-radius:0; padding:0; max-width:100%;}
+    h2{page-break-after:avoid;}
+    table,figure,.clause{page-break-inside:avoid;}
+  }
+  @media (max-width:720px){
+    .wrap{padding:24px 18px 32px;}
+    .meta-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="doctype">技术应标文件</div>
+  <h1>医疗 AI 智能体统一中台建设方案</h1>
+  <div class="sub">对应招标文件「二、智能体中台建设」（一）～（五）全部条款的技术响应</div>
+  <div class="meta-grid">
+    <div>项目名称：<b>重庆市巴南区人民医院宫颈癌诊疗综合场景 AI 智能体及数据驾驶舱一体化建设项目</b></div>
+    <div>响应章节：<b>第二章 智能体中台建设</b></div>
+    <div>对应采购分项：<b>AI 智能体中台平台软件（第 1 项）</b></div>
+    <div>编制日期：<b>2026 年 9 月</b></div>
+  </div>
+</header>
+
+<h2>一、技术架构总览</h2>
+
+<p>本方案以「分层解耦、能力复用、利旧优先」为设计原则，将智能体中台划分为七个技术层级。自下而上，下层为上层提供能力支撑；每一层均可独立演进，新增 AI 能力无需改动已有层级。</p>
+
+<p>整体适配医院现有虚拟化与容器底座，中台全部组件及上层智能体应用均采用容器化部署，充分利用现有服务器硬件资源，不新增 GPU 服务器采购。</p>
+
+<figure>
+<svg viewBox="0 0 680 592" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family:inherit">
+<title>中台技术架构分层图</title>
+<desc>自下而上七层：容器化基础设施底座、算力资源池与调度、多模型统一接入管理、智能体开发与快速迭代、服务网关与能力封装、数据服务能力、运维监控与审计</desc>
+<text x="40" y="20" font-size="14" font-weight="500" fill="#1C2B3A">中台技术架构分层（自下而上）</text>
+
+<g>
+<rect x="40" y="40" width="600" height="60" rx="10" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="56" y="62" font-size="12" font-weight="500" fill="#1F4E79" dominant-baseline="central">L7</text>
+<text x="80" y="62" font-size="14" font-weight="500" fill="#153A5C" dominant-baseline="central">运维监控与审计</text>
+<text x="624" y="62" font-size="12" fill="#5A6875" text-anchor="end" dominant-baseline="central">指标告警 · 审计日志</text>
+<text x="80" y="82" font-size="12" fill="#1F4E79" dominant-baseline="central">解决：运行黑盒，故障定位与责任追溯缺依据</text>
+</g>
+
+<g>
+<rect x="40" y="110" width="600" height="60" rx="10" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="56" y="132" font-size="12" font-weight="500" fill="#1F4E79" dominant-baseline="central">L6</text>
+<text x="80" y="132" font-size="14" font-weight="500" fill="#153A5C" dominant-baseline="central">数据服务能力</text>
+<text x="624" y="132" font-size="12" fill="#5A6875" text-anchor="end" dominant-baseline="central">专题数据集 · 统一数据接口</text>
+<text x="80" y="152" font-size="12" fill="#1F4E79" dominant-baseline="central">解决：取数口径不一、隐私数据越权访问</text>
+</g>
+
+<g>
+<rect x="40" y="180" width="600" height="60" rx="10" fill="#EDF2F7" stroke="#2C4A66" stroke-width="0.5"/>
+<text x="56" y="202" font-size="12" font-weight="500" fill="#2C4A66" dominant-baseline="central">L5</text>
+<text x="80" y="202" font-size="14" font-weight="500" fill="#153A5C" dominant-baseline="central">服务网关与能力封装</text>
+<text x="624" y="202" font-size="12" fill="#5A6875" text-anchor="end" dominant-baseline="central">统一 API 网关</text>
+<text x="80" y="222" font-size="12" fill="#2C4A66" dominant-baseline="central">解决：能力散落调用，无鉴权、无限流、无计量</text>
+</g>
+
+<g>
+<rect x="40" y="250" width="600" height="60" rx="10" fill="#EDF2F7" stroke="#2C4A66" stroke-width="0.5"/>
+<text x="56" y="272" font-size="12" font-weight="500" fill="#2C4A66" dominant-baseline="central">L4</text>
+<text x="80" y="272" font-size="14" font-weight="500" fill="#153A5C" dominant-baseline="central">智能体开发与快速迭代</text>
+<text x="624" y="272" font-size="12" fill="#5A6875" text-anchor="end" dominant-baseline="central">配置化 · 工作流编排</text>
+<text x="80" y="292" font-size="12" fill="#2C4A66" dominant-baseline="central">解决：专科应用重复开发，上线与迭代慢</text>
+</g>
+
+<g>
+<rect x="40" y="320" width="600" height="60" rx="10" fill="#EDF2F7" stroke="#2C4A66" stroke-width="0.5"/>
+<text x="56" y="342" font-size="12" font-weight="500" fill="#2C4A66" dominant-baseline="central">L3</text>
+<text x="80" y="342" font-size="14" font-weight="500" fill="#153A5C" dominant-baseline="central">多模型统一接入管理</text>
+<text x="624" y="342" font-size="12" fill="#5A6875" text-anchor="end" dominant-baseline="central">大模型 · 影像 AI · 病理 AI</text>
+<text x="80" y="362" font-size="12" fill="#2C4A66" dominant-baseline="central">解决：模型与业务绑死，替换升级要改代码</text>
+</g>
+
+<g>
+<rect x="40" y="390" width="600" height="60" rx="10" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="56" y="412" font-size="12" font-weight="500" fill="#1F4E79" dominant-baseline="central">L2</text>
+<text x="80" y="412" font-size="14" font-weight="500" fill="#153A5C" dominant-baseline="central">算力资源池与调度</text>
+<text x="624" y="412" font-size="12" fill="#5A6875" text-anchor="end" dominant-baseline="central">GPU / CPU 池化</text>
+<text x="80" y="432" font-size="12" fill="#1F4E79" dominant-baseline="central">解决：算力靠人工分配，任务互相抢占</text>
+</g>
+
+<g>
+<rect x="40" y="460" width="600" height="60" rx="10" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="56" y="482" font-size="12" font-weight="500" fill="#1F4E79" dominant-baseline="central">L1</text>
+<text x="80" y="482" font-size="14" font-weight="500" fill="#153A5C" dominant-baseline="central">容器化基础设施底座</text>
+<text x="624" y="482" font-size="12" fill="#5A6875" text-anchor="end" dominant-baseline="central">容器编排 · 资源隔离</text>
+<text x="80" y="502" font-size="12" fill="#1F4E79" dominant-baseline="central">解决：环境不一致，交付慢、故障易扩散</text>
+</g>
+
+<text x="40" y="548" font-size="12" fill="#8695A4">依赖方向：下层为上层提供能力支撑</text>
+</svg>
+<figcaption>图 1　中台技术架构分层</figcaption>
+</figure>
+
+<h2>二、L1 容器化基础设施底座</h2>
+
+<div class="clause">
+<b>对应条款（一）：</b>统一技术底座——采用容器化部署架构，提供统一算力调度、任务编排、资源隔离、日志监控、权限管控能力。
+</div>
+
+<h3>本层可实现的功能</h3>
+<table>
+  <tr><th>功能能力</th><th>具体实现说明</th></tr>
+  <tr><td class="cap">容器化统一部署</td><td>中台全部组件与上层智能体应用均以容器镜像形态封装交付，支持一键部署、一键升级、一键回滚，部署过程不依赖互联网。</td></tr>
+  <tr><td class="cap">集群高可用</td><td>多节点集群部署，关键组件多副本运行；节点故障时业务自动迁移至健康节点，服务不中断。</td></tr>
+  <tr><td class="cap">统一任务编排</td><td>提供统一的容器编排调度能力，支持应用编排、依赖管理、启动顺序控制、健康检查与自动重启。</td></tr>
+  <tr><td class="cap">网络策略管控</td><td>应用间东西向流量按需放通、默认拒绝，对外访问统一出口，满足院内网络安全要求。</td></tr>
+  <tr><td class="cap">权限管控</td><td>基于角色的分级权限体系，对接院内统一身份认证，所有管理操作留痕可查。</td></tr>
+  <tr><td class="cap">日志集中管理</td><td>容器运行日志、应用业务日志集中采集、统一存储、支持全文检索。</td></tr>
+  <tr><td class="cap">离线交付能力</td><td>适配院内网无外网环境，全部镜像、依赖包、模型文件在交付前完成离线打包与本地化部署。</td></tr>
+</table>
+
+<h3>技术实现路径</h3>
+<div class="tech">
+采用业界成熟的容器编排技术构建中台底座，所有服务以容器镜像形式交付并纳入院内私有镜像仓库统一管理，确保内网环境可完整复现部署。集群采用多节点冗余部署，通过健康探针与副本机制实现故障自愈。资源隔离依托命名空间与配额机制实现，网络隔离依托网络策略实现。全部组件均支持离线安装，不产生任何对外网络依赖。
+</div>
+
+<h2>三、L2 算力资源池与调度</h2>
+
+<div class="clause">
+<b>对应条款（一）：</b>实现算力资源动态分配，支持 GPU/CPU 资源池化管理，对各智能体任务进行优先级调度、任务熔断、异常告警。
+</div>
+
+<h3>本层可实现的功能</h3>
+<table>
+  <tr><th>功能能力</th><th>具体实现说明</th></tr>
+  <tr><td class="cap">算力资源池化</td><td>将现有服务器的 GPU、CPU 资源统一纳管为资源池，屏蔽物理机差异，按任务需求统一分配，不以物理机为单位绑定资源。</td></tr>
+  <tr><td class="cap">动态分配</td><td>依据任务负载自动分配与回收算力，空闲资源自动释放回池，峰值需求按策略排队或弹性调度。</td></tr>
+  <tr><td class="cap">显存共享与切分</td><td>支持单张 GPU 卡被多个推理任务共享使用，按需切分显存额度，显著提升医院现有硬件利用率。</td></tr>
+  <tr><td class="cap">优先级调度</td><td>支持按业务场景设置任务优先级：临床实时类任务（病历生成、报告解读、影像辅助）优先调度；批量类任务（数据集标注、模型评测、数据治理）低优先级排队执行。</td></tr>
+  <tr><td class="cap">任务熔断</td><td>单任务超时、连续失败或资源占用超限时自动熔断终止，防止异常任务拖垮整体服务。</td></tr>
+  <tr><td class="cap">异常告警</td><td>对 GPU 温度、显存占用、任务失败率、队列积压、节点离线等指标设置阈值，触发告警并通知运维人员。</td></tr>
+  <tr><td class="cap">利旧适配</td><td>整体适配医院现有服务器虚拟化环境，充分利用现有硬件资源。</td></tr>
+</table>
+
+<h3>技术实现路径</h3>
+<div class="tech">
+以容器编排平台为底座，通过设备插件机制将 GPU 资源纳入统一调度体系；通过队列与优先级机制实现任务分级调度；通过显存切分技术实现单卡多任务共享，解决医院现有 GPU 资源有限的问题。算力监控数据统一采集至监控体系，与 L7 运维监控联动。
+</div>
+
+<h2>四、L3 多模型统一接入管理</h2>
+
+<div class="clause">
+<b>对应条款（二）：</b>支持大语言模型、影像 AI 模型、病理 AI 模型等多类型模型接入纳管；支持本地部署模型、API 服务模型统一注册、版本管理、模型启停、性能监控；提供模型接入标准化规范，可按需新增、替换、升级模型，做到业务应用与底层模型解耦。
+</div>
+
+<h3>本层可实现的功能</h3>
+<table>
+  <tr><th>功能能力</th><th>具体实现说明</th></tr>
+  <tr><td class="cap">多类型模型纳管</td><td>统一纳管大语言模型、影像 AI 模型、病理 AI 模型等不同类型模型，屏蔽底层框架与调用协议差异；影像、病理类模型按其原厂商接口接入，中台负责注册、版本、启停与调用监控，不改变其原有推理实现。</td></tr>
+  <tr><td class="cap">双形态接入</td><td>同时支持院内本地部署模型与外部 API 服务模型的注册接入，两类模型在中台内统一管理、统一调用。</td></tr>
+  <tr><td class="cap">统一注册与台账</td><td>模型统一注册登记，形成模型清单台账，记录模型名称、类型、版本、来源、责任科室、上线时间、适用范围。</td></tr>
+  <tr><td class="cap">版本管理</td><td>支持模型多版本并存、版本切换、一键回退；版本变更全程留痕，可追溯每次变更的操作人、时间与原因。</td></tr>
+  <tr><td class="cap">模型启停</td><td>支持按需启动、停止模型服务，停用模型自动释放其占用的算力资源。</td></tr>
+  <tr><td class="cap">性能监控</td><td>监控模型响应时延、调用成功率、吞吐量、资源占用与错误分布，异常自动告警。</td></tr>
+  <tr><td class="cap">标准化接入规范</td><td>制定并交付《模型接入标准化规范》，明确接口协议、数据格式、鉴权方式、健康检查、错误码定义；后续新增模型按规范接入，无需定制开发。</td></tr>
+  <tr><td class="cap">业务与模型解耦</td><td>上层智能体应用通过统一模型服务接口调用，模型替换、升级、切换版本均无需修改应用代码。</td></tr>
+</table>
+
+<figure>
+<svg viewBox="0 0 680 320" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family:inherit">
+<title>模型统一接入与业务解耦示意</title>
+<desc>上层智能体应用通过统一模型服务接口层调用下层各类模型，模型替换升级不影响上层应用</desc>
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<text x="40" y="24" font-size="13" font-weight="500" fill="#1C2B3A">业务与模型解耦</text>
+
+<g>
+<rect x="40" y="42" width="180" height="44" rx="8" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="130" y="64" font-size="13" fill="#153A5C" text-anchor="middle" dominant-baseline="central">病历生成智能体</text>
+</g>
+<g>
+<rect x="240" y="42" width="180" height="44" rx="8" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="330" y="64" font-size="13" fill="#153A5C" text-anchor="middle" dominant-baseline="central">病历质控智能体</text>
+</g>
+<g>
+<rect x="440" y="42" width="180" height="44" rx="8" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="530" y="64" font-size="13" fill="#153A5C" text-anchor="middle" dominant-baseline="central">影像辅助智能体</text>
+</g>
+
+<line x1="130" y1="86" x2="130" y2="128" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="330" y1="86" x2="330" y2="128" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="530" y1="86" x2="530" y2="128" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar)"/>
+
+<g>
+<rect x="40" y="130" width="580" height="56" rx="10" fill="#EDF2F7" stroke="#2C4A66" stroke-width="0.5"/>
+<text x="330" y="150" font-size="13.5" font-weight="500" fill="#153A5C" text-anchor="middle" dominant-baseline="central">统一模型服务接口层</text>
+<text x="330" y="170" font-size="12" fill="#5A6875" text-anchor="middle" dominant-baseline="central">统一注册 · 版本管理 · 启停控制 · 性能监控 · 调用计量</text>
+</g>
+
+<line x1="130" y1="186" x2="130" y2="228" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="330" y1="186" x2="330" y2="228" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="530" y1="186" x2="530" y2="228" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar)"/>
+
+<g>
+<rect x="40" y="230" width="180" height="44" rx="8" fill="#F4F6F8" stroke="#8695A4" stroke-width="0.5"/>
+<text x="130" y="252" font-size="13" fill="#3E4C5A" text-anchor="middle" dominant-baseline="central">大语言模型</text>
+</g>
+<g>
+<rect x="240" y="230" width="180" height="44" rx="8" fill="#F4F6F8" stroke="#8695A4" stroke-width="0.5"/>
+<text x="330" y="252" font-size="13" fill="#3E4C5A" text-anchor="middle" dominant-baseline="central">影像 AI 模型</text>
+</g>
+<g>
+<rect x="440" y="230" width="180" height="44" rx="8" fill="#F4F6F8" stroke="#8695A4" stroke-width="0.5"/>
+<text x="530" y="252" font-size="13" fill="#3E4C5A" text-anchor="middle" dominant-baseline="central">病理 AI 模型</text>
+</g>
+
+<text x="40" y="298" font-size="12" fill="#8695A4">新增、替换、升级模型仅需在接口层完成注册配置，上层智能体应用无需改动</text>
+</svg>
+<figcaption>图 2　模型统一接入与业务解耦示意</figcaption>
+</figure>
+
+<h2>五、L4 智能体开发与快速迭代</h2>
+
+<div class="clause">
+<b>对应条款（二）：</b>提供低代码/配置化智能体开发工具，支持提示词编排、工作流编排、业务规则配置；支持基于中台快速开发、调试、发布新的专科 AI 应用；支持应用灰度发布、版本回滚，满足业务持续迭代更新需求。
+</div>
+
+<h3>本层可实现的功能</h3>
+<table>
+  <tr><th>功能能力</th><th>具体实现说明</th></tr>
+  <tr><td class="cap">提示词编排</td><td>提示词模板化管理，支持变量注入、多场景复用、版本管理与变更留痕。</td></tr>
+  <tr><td class="cap">工作流编排</td><td>支持顺序执行、条件分支、并行处理、循环迭代、人工审核等流程节点，支持多智能体协同编排。</td></tr>
+  <tr><td class="cap">在线调试</td><td>提供独立调试环境，支持单步执行、中间结果查看、调用日志追踪，调试过程不影响生产环境。</td></tr>
+  <tr><td class="cap">一键发布</td><td>编排完成后一键发布为可调用服务，自动生成调用接口与说明文档。</td></tr>
+  <tr><td class="cap">灰度发布</td><td>支持按科室、用户、流量比例灰度放量，灰度期间可随时中止并回退，不影响存量业务。</td></tr>
+  <tr><td class="cap">版本回滚</td><td>保留历史版本完整快照，异常时一键回滚至上一稳定版本，回滚过程秒级完成。</td></tr>
+</table>
+
+<figure>
+<svg viewBox="0 0 680 210" role="img" xmlns="http://www.w3.org/2000/svg" style="font-family:inherit">
+<title>智能体开发与迭代闭环</title>
+<desc>编排配置、在线调试、灰度发布、全量发布、运行监控五步流程，异常时可版本回滚</desc>
+<defs>
+<marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<g>
+<rect x="40" y="56" width="100" height="52" rx="8" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="90" y="82" font-size="13" fill="#153A5C" text-anchor="middle" dominant-baseline="central">编排配置</text>
+</g>
+<line x1="140" y1="82" x2="163" y2="82" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar2)"/>
+
+<g>
+<rect x="165" y="56" width="100" height="52" rx="8" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="215" y="82" font-size="13" fill="#153A5C" text-anchor="middle" dominant-baseline="central">在线调试</text>
+</g>
+<line x1="265" y1="82" x2="288" y2="82" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar2)"/>
+
+<g>
+<rect x="290" y="56" width="100" height="52" rx="8" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="340" y="82" font-size="13" fill="#153A5C" text-anchor="middle" dominant-baseline="central">灰度发布</text>
+</g>
+<line x1="390" y1="82" x2="413" y2="82" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar2)"/>
+
+<g>
+<rect x="415" y="56" width="100" height="52" rx="8" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="465" y="82" font-size="13" fill="#153A5C" text-anchor="middle" dominant-baseline="central">全量发布</text>
+</g>
+<line x1="515" y1="82" x2="538" y2="82" stroke="#8695A4" stroke-width="1.5" marker-end="url(#ar2)"/>
+
+<g>
+<rect x="540" y="56" width="100" height="52" rx="8" fill="#E8F0F8" stroke="#1F4E79" stroke-width="0.5"/>
+<text x="590" y="82" font-size="13" fill="#153A5C" text-anchor="middle" dominant-baseline="central">运行监控</text>
+</g>
+
+<path d="M590 108 L590 150 L90 150 L90 108" fill="none" stroke="#B5442F" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#ar2)"/>
+<text x="340" y="168" font-size="12" fill="#B5442F" text-anchor="middle">版本回滚 / 迭代优化</text>
+<text x="40" y="196" font-size="12" fill="#8695A4">新增专科 AI 应用沿用同一流程，无需重复搭建基础设施</text>
+</svg>
+<figcaption>图 3　智能体开发与迭代闭环</figcaption>
+</figure>
+
+<h2>六、L5 服务网关与能力封装</h2>
+
+<div class="clause">
+<b>对应条款（三）：</b>提供统一 AI 服务网关，将模型能力封装为标准化 API 服务，供上层智能体应用调用；具备接口鉴权、限流、熔断、流量统计、调用链路日志留存。
+</div>
+
+<h3>本层可实现的功能</h3>
+<table>
+  <tr><th>功能能力</th><th>具体实现说明</th></tr>
+  <tr><td class="cap">统一服务网关</td><td>所有模型能力、智能体能力统一封装为标准 API 服务，对外提供统一调用入口，形成统一服务目录。</td></tr>
+  <tr><td class="cap">能力封装</td><td>将底层模型推理能力封装为标准服务接口，屏蔽不同模型的技术差异，上层应用按统一格式调用。</td></tr>
+  <tr><td class="cap">接口鉴权</td><td>采用令牌鉴权与角色权限双重校验，未授权调用直接拦截并记录。</td></tr>
+  <tr><td class="cap">限流</td><td>支持按应用、接口、时段配置限流策略，防止异常流量冲击后端模型服务。</td></tr>
+  <tr><td class="cap">熔断降级</td><td>下游服务异常时自动熔断，返回降级响应，避免单点故障扩散至整个中台。</td></tr>
+  <tr><td class="cap">流量统计</td><td>统计各接口调用量、成功率、平均时延、错误分布，按应用与时间维度出报表。</td></tr>
+  <tr><td class="cap">调用链路日志</td><td>完整记录调用链路日志，包含调用方、时间、参数摘要、结果状态、耗时，支持检索与追溯。</td></tr>
+  <tr><td class="cap">统一纳管</td><td>医院各业务系统对接服务统一纳入网关管理，接口调用统一鉴权、统一监控。</td></tr>
+</table>
+
+<h3>技术实现路径</h3>
+<div class="tech">
+网关作为中台唯一服务出口，位于上层应用与下层模型之间。所有调用需先经网关完成身份校验、权限判定、流量控制，再转发至后端服务；调用全过程生成链路日志并汇总至监控体系。网关自身支持多副本部署，避免成为单点。
+</div>
+
+<h2>七、L6 数据服务能力</h2>
+
+<div class="clause">
+<b>对应条款（四）：</b>中台提供统一数据访问接口，对接专题数据集，为各 AI 智能体提供合规的数据读取能力，落实数据访问权限控制，禁止越权访问患者隐私数据。
+</div>
+
+<h3>本层可实现的功能</h3>
+<table>
+  <tr><th>功能能力</th><th>具体实现说明</th></tr>
+  <tr><td class="cap">统一数据访问接口</td><td>提供统一数据服务接口，各智能体通过标准接口读取数据，非特殊情况不直连业务系统数据库。</td></tr>
+  <tr><td class="cap">专题数据集对接</td><td>对接宫颈癌诊疗高质量专题数据集，提供数据集访问服务，支撑模型迭代与科研分析。</td></tr>
+  <tr><td class="cap">数据权限控制</td><td>按角色、科室、业务场景分级授权，遵循最小必要原则，只开放业务必需的数据范围。</td></tr>
+  <tr><td class="cap">越权访问阻断</td><td>支持字段级、行级权限校验，越权请求直接拒绝并记录，从机制上禁止越权访问患者隐私数据。</td></tr>
+  <tr><td class="cap">隐私数据保护</td><td>患者隐私字段脱敏后对外提供，落实去标识化处理，满足医疗数据分级分类管理要求。</td></tr>
+  <tr><td class="cap">数据访问审计</td><td>完整记录数据访问主体、时间、范围、用途与结果，全流程可追溯审计。</td></tr>
+  <tr><td class="cap">业务系统对接</td><td>支持与医院数据集成平台、数据仓库、HIS、LIS、PACS、超声系统、体检系统的对接。</td></tr>
+  <tr><td class="cap">多形式接口</td><td>支持 API 接口、消息队列、数据视图等多种对接方式，优先复用医院现有数据集成平台。</td></tr>
+</table>
+
+<h2>八、L7 运维监控与审计</h2>
+
+<div class="clause">
+<b>对应条款（五）：</b>对模型运行状态、调用次数、响应时延、报错情况、资源占用进行集中监控，支持指标告警；提供完整审计日志，记录模型调用、智能体操作行为。
+</div>
+
+<h3>本层可实现的功能</h3>
+<table>
+  <tr><th>功能能力</th><th>具体实现说明</th></tr>
+  <tr><td class="cap">可视化集中监控大盘</td><td>提供监控大屏与 PC 端视图，支持按模型、智能体、科室、时间维度查看运行状态、调用次数、响应时延、报错情况与资源占用。</td></tr>
+  <tr><td class="cap">指标告警</td><td>支持自定义告警阈值与告警规则，触发后通过院内合规渠道通知运维人员，支持告警分级。</td></tr>
+  <tr><td class="cap">审计日志</td><td>完整记录模型调用、智能体操作行为，包含操作主体、时间、对象、结果，无遗漏、不可篡改。</td></tr>
+  <tr><td class="cap">日志留存</td><td>日志集中存储，留存期限满足网络安全等级保护与电子病历分级评价相关要求。</td></tr>
+  <tr><td class="cap">日志防篡改</td><td>审计日志独立存储并采取防篡改保护，仅授权人员可查询，不可修改删除。</td></tr>
+  <tr><td class="cap">数据驾驶舱联动</td><td>监控指标通过中台接口对外输出，供数据驾驶舱「AI 应用运行监控主题」调用。</td></tr>
+</table>
+
+<h2>九、合规、交付与服务保障</h2>
+
+<div class="clause">
+<b>对应条款（十二）：</b>项目通用技术及商务要求。
+</div>
+
+<h3>9.1 部署要求响应</h3>
+<div class="highlight">
+中台及上层智能体应用全部采用容器化部署，整体适配医院现有虚拟化与容器底座，充分利旧现有硬件资源；本项目不含 GPU 服务器硬件采购，全部算力调度基于医院现有服务器资源实现。
+</div>
+
+<h3>9.2 合规要求响应</h3>
+<div class="highlight">
+方案满足网络安全、数据安全、个人信息保护相关要求，适配电子病历分级评价；医疗 AI 相关功能遵循医疗器械监管相关政策。数据全程在院内网流转，不产生外发，落实医疗数据分级分类管理与去标识化处理。
+</div>
+
+<h3>9.3 文档交付</h3>
+<ul>
+  <li>需求规格说明书</li>
+  <li>系统部署手册</li>
+  <li>运维手册</li>
+  <li>接口文档（含《模型接入标准化规范》）</li>
+  <li>测试报告</li>
+  <li>用户操作手册</li>
+</ul>
+
+<h3>9.4 培训服务</h3>
+<p>针对临床、病理、超声、质控、信息科五类角色，分别开展业务操作与系统运维培训，提供培训教材与操作视频，培训后组织考核确认掌握情况。</p>
+
+<h3>9.5 质保服务</h3>
+<p>提供完整免费质保期服务，<b>质保期不低于 3 年</b>，包含缺陷修复、系统调优、版本升级、远程技术支持。质保期内提供响应时限承诺与定期巡检。</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>体检指引与报告解读智能体 · 技术解决方案</title>
+<style>
+:root{
+  --paper:#FFFFFF; --canvas:#F5F5F1;
+  --ink:#222220; --muted:#686761; --hint:#8C8A83;
+  --line:#DEDCD4; --line-strong:#BEBBB2;
+  --mint:#E1F5EE; --mint-2:#B8E7D5; --green:#0F6E56; --green-2:#1D9E75;
+  --amber:#FAEEDA; --amber-line:#F0D89B; --amber-ink:#854F0B;
+  --red:#FCEBEB; --red-line:#F1C5C5; --red-ink:#A32D2D;
+  --blue:#E6F1FB; --blue-line:#B8D4F0; --blue-ink:#185FA5;
+  --purple:#EEEDFE; --purple-ink:#534AB7;
+  --serif:"Noto Serif SC","Songti SC","STSong",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,Consolas,"Cascadia Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--sans);
+  font-size:13.5px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;background:var(--paper);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+
+.cover{padding:52px 56px 40px;border-bottom:3px solid var(--green);background:#FCFCFA}
+.cover .kicker{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--green);font-weight:600;margin-bottom:18px}
+.cover h1{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:-.02em;
+  line-height:1.25;margin:0 0 10px;max-width:820px}
+.cover .sub{font-size:15px;color:var(--muted);max-width:780px;margin:0 0 26px;line-height:1.7}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.meta div{background:var(--paper);padding:11px 14px}
+.meta dt{font-size:11px;color:var(--hint);letter-spacing:.05em;margin:0 0 3px}
+.meta dd{margin:0;font-size:13px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
+.chip{font-size:11.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);
+  background:var(--paper);color:var(--muted)}
+.chip.g{background:var(--mint);border-color:var(--mint-2);color:var(--green)}
+.chip.a{background:var(--amber);border-color:var(--amber-line);color:var(--amber-ink)}
+.chip.r{background:var(--red);border-color:var(--red-line);color:var(--red-ink)}
+
+.body{display:grid;grid-template-columns:228px minmax(0,1fr);gap:0}
+.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  padding:28px 18px 28px 24px;border-right:1px solid var(--line);background:#FCFCFA}
+.toc .t{font-size:11px;letter-spacing:.14em;color:var(--hint);font-weight:600;margin-bottom:12px}
+.toc a{display:block;font-size:12.5px;color:var(--muted);text-decoration:none;
+  padding:4px 8px;border-radius:5px;border-left:2px solid transparent;line-height:1.45}
+.toc a:hover{background:var(--mint);color:var(--green)}
+.toc a.on{color:var(--green);font-weight:600;border-left-color:var(--green-2);background:var(--mint)}
+.toc .div{font-size:10.5px;letter-spacing:.1em;color:var(--hint);font-weight:600;
+  margin:14px 0 6px;padding-left:8px;border-top:1px solid var(--line);padding-top:12px}
+.content{padding:36px 52px 64px;min-width:0}
+
+h2{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.015em;
+  margin:52px 0 6px;padding-top:22px;border-top:1px solid var(--line);line-height:1.35}
+h2:first-child{margin-top:0;padding-top:0;border-top:none}
+h2 .no{color:var(--green);margin-right:9px}
+h3{font-size:15.5px;font-weight:600;margin:30px 0 8px}
+h4{font-size:13.5px;font-weight:600;margin:20px 0 6px;color:var(--ink)}
+p{margin:0 0 11px}
+.lede{font-size:14px;color:var(--muted);margin-bottom:20px;max-width:780px}
+ul,ol{margin:8px 0 14px;padding-left:20px}
+li{margin-bottom:5px}
+code{font-family:var(--mono);font-size:12px;background:#F1EFE8;padding:1px 5px;border-radius:4px;
+  color:#3D3C38}
+
+table{width:100%;border-collapse:collapse;margin:14px 0 18px;font-size:12.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{background:#F1EFE8;color:#4A4944;font-weight:600;font-size:12px;white-space:nowrap}
+td.k{font-weight:600;color:var(--green);white-space:nowrap}
+td.no{color:var(--hint);font-variant-numeric:tabular-nums;white-space:nowrap;width:34px}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#FBFBF8}
+.tbl-note{font-size:11.5px;color:var(--hint);margin:-12px 0 20px;line-height:1.6}
+.tw{overflow-x:auto}
+
+.callout{border-left:3px solid var(--green);background:var(--mint);padding:12px 16px;
+  border-radius:0 8px 8px 0;margin:14px 0 18px;font-size:13px}
+.callout.amber{border-left-color:var(--amber-ink);background:var(--amber)}
+.callout.red{border-left-color:var(--red-ink);background:var(--red)}
+.callout.blue{border-left-color:var(--blue-ink);background:var(--blue)}
+.callout b{font-weight:600}
+.callout p:last-child{margin-bottom:0}
+.callout .h{display:block;font-weight:600;margin-bottom:4px;font-size:12.5px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:16px 0 20px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--paper)}
+.card .eyebrow{font-size:10.5px;letter-spacing:.09em;color:var(--hint);margin-bottom:6px}
+.card h4{margin:0 0 6px;font-size:14px}
+.card p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.65}
+.card.g{background:var(--mint);border-color:var(--mint-2)}
+.card.a{background:var(--amber);border-color:var(--amber-line)}
+.card.r{background:var(--red);border-color:var(--red-line)}
+
+.arch{margin:20px 0 8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.layer{display:grid;grid-template-columns:124px minmax(0,1fr);border-bottom:1px solid var(--line)}
+.layer:last-child{border-bottom:none}
+.layer .lab{padding:13px 14px;background:#F1EFE8;font-size:11.5px;font-weight:600;
+  color:#4A4944;display:flex;align-items:center;letter-spacing:.02em}
+.layer .bd{padding:12px 16px}
+.layer .bd .t{font-size:13px;font-weight:600;margin-bottom:5px}
+.layer .bd .d{font-size:12.5px;color:var(--muted);line-height:1.7}
+.layer .bd .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{font-size:11px;padding:2px 7px;border-radius:4px;background:#F1EFE8;color:#5F5E5A}
+.tag.g{background:var(--mint);color:var(--green)}
+.tag.b{background:var(--blue);color:var(--blue-ink)}
+.tag.a{background:var(--amber);color:var(--amber-ink)}
+.tag.p{background:var(--purple);color:var(--purple-ink)}
+.tag.r{background:var(--red);color:var(--red-ink)}
+.layer.rule{background:#FCFCFA}
+.layer.rule .lab{background:var(--blue);color:var(--blue-ink)}
+.layer.llm{background:#FAFEFC}
+.layer.llm .lab{background:var(--mint);color:var(--green)}
+.layer.gate{background:#FFFCFC}
+.layer.gate .lab{background:var(--red);color:var(--red-ink)}
+
+.gates{counter-reset:g;margin:18px 0}
+.gate{border:1px solid var(--line);border-left:3px solid var(--green-2);border-radius:0 10px 10px 0;
+  padding:13px 16px 13px 18px;margin-bottom:9px;background:#FCFCFA;position:relative}
+.gate:before{counter-increment:g;content:"闸 " counter(g);position:absolute;left:-1px;top:-1px;
+  font-size:10px;font-weight:600;letter-spacing:.06em;background:var(--green-2);color:#fff;
+  padding:2px 7px;border-radius:0 0 6px 0}
+.gate h4{margin:12px 0 5px}
+.gate p{font-size:12.5px;color:var(--muted);margin:0 0 5px}
+.gate .stop{color:var(--red-ink);font-weight:600}
+
+.hard{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:9px;margin:16px 0 20px;
+  counter-reset:h}
+.hard div{border:1px solid var(--line);border-left:3px solid var(--green-2);border-radius:0 8px 8px 0;
+  padding:10px 13px;background:#FCFCFA;font-size:12.5px;line-height:1.6;position:relative}
+.hard div:before{counter-increment:h;content:counter(h);position:absolute;left:-1px;top:-1px;
+  font-size:10px;font-weight:600;background:var(--green-2);color:#fff;padding:1px 6px;border-radius:0 0 6px 0}
+.hard div b{color:var(--green)}
+
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin:16px 0 20px}
+.kpi div{border-left:3px solid var(--green);background:var(--mint);padding:11px 13px;border-radius:0 9px 9px 0}
+.kpi div.a{border-left-color:var(--amber-ink);background:var(--amber)}
+.kpi .n{font-size:19px;font-weight:600;color:var(--green);letter-spacing:-.02em;line-height:1.2}
+.kpi div.a .n{color:var(--amber-ink)}
+.kpi .l{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0 20px}
+.flow .st{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:#FCFCFA;
+  font-size:12.5px;font-weight:600}
+.flow .st.g{background:var(--mint);border-color:var(--mint-2);color:var(--green)}
+.flow .st.r{background:var(--red);border-color:var(--red-line);color:var(--red-ink)}
+.flow .ar{color:var(--hint);font-size:13px}
+
+.foot{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:11.5px;color:var(--hint);line-height:1.8}
+.foot b{color:var(--muted)}
+
+@media(max-width:900px){
+  .body{grid-template-columns:1fr}
+  .toc{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:4px;padding:14px 18px}
+  .toc .t{width:100%}
+  .toc .div{width:100%;margin-top:8px}
+  .toc a{border-left:none;background:#F1EFE8}
+  .content{padding:26px 20px 48px}
+  .cover{padding:32px 20px 26px}
+  .cover h1{font-size:25px}
+  .layer{grid-template-columns:1fr}
+  .layer .lab{border-bottom:1px solid var(--line)}
+}
+@media print{
+  body{background:#fff;font-size:10.5px}
+  .wrap{border:none;max-width:none}
+  .toc{display:none}
+  .body{grid-template-columns:1fr}
+  .content{padding:0 8mm}
+  .cover{padding:0 8mm 14px}
+  h2{page-break-after:avoid;font-size:17px;margin-top:26px}
+  h3,h4{page-break-after:avoid}
+  table,.arch,.callout,.gate,.card,.hard div,.flow{page-break-inside:avoid}
+  @page{size:A4;margin:12mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="cover">
+  <div class="kicker">Technical Solution · Module 11-A</div>
+  <h1>体检指引与报告解读智能体<br>技术解决方案</h1>
+  <p class="sub">重庆市巴南区人民医院宫颈癌诊疗综合场景 AI 智能体及数据驾驶舱一体化建设项目<br>
+  对应招标文件「八、体检指引与报告解读智能体应用」（一）～（四）<br>
+  <b>（五）一体化分层随访管理已单独成册，见《一体化分层随访管理 · 技术参数说明书》。</b></p>
+  <dl class="meta">
+    <div><dt>文档版本</dt><dd>V1.0 · 技术交流稿</dd></div>
+    <div><dt>编制日期</dt><dd>2026-09-18</dd></div>
+    <div><dt>交付形态</dt><dd>自研产品 · 院内私有化部署</dd></div>
+    <div><dt>文档用途</dt><dd>信息科技术交流 / 接口与资源澄清</dd></div>
+  </dl>
+  <div class="chips">
+    <span class="chip g">28 条逐条响应，2 条待明确</span>
+    <span class="chip g">解析与风险分级走规则，不走模型</span>
+    <span class="chip g">解读必须医师确认后才可推送</span>
+    <span class="chip a">（五）分层随访见独立文档</span>
+    <span class="chip r">含 6 项阻塞待确认 · 3 项需求缺口</span>
+  </div>
+</header>
+
+<div class="body">
+
+<nav class="toc">
+  <div class="t">目录</div>
+  <a href="#s1">一、模块定位与需求溯源</a>
+  <a href="#s2">二、总体技术架构</a>
+  <a href="#s3">三、功能技术参数</a>
+  <a href="#s4">四、硬约束与七道闸门</a>
+  <a href="#s5">五、接口技术参数</a>
+  <a href="#s6">六、部署架构与资源要求</a>
+  <a href="#s7">七、性能指标与验收口径</a>
+  <a href="#s8">八、安全合规与权限体系</a>
+  <a href="#s9">九、交付物与质保</a>
+  <a href="#s10">十、待确认事项</a>
+  <a href="#s11">十一、与中台及其他模块的关系</a>
+</nav>
+
+<main class="content">
+
+<!-- ==================== 一 ==================== -->
+<h2 id="s1"><span class="no">一</span>模块定位与需求溯源</h2>
+
+<p class="lede">本模块解决一件事：把一份看不懂的筛查报告，变成<b>医师看一眼就能确认、受检者看一眼就能懂</b>的解读，并在筛查前后给出该做的检查和该知道的常识。<b>系统不写诊断、不给治疗建议、未经医师确认不对外推送。</b></p>
+
+<h3>1.1 模块定位与覆盖范围</h3>
+<p>本模块是采购表第 11 项「体检指引与报告解读智能体应用系统」的主体部分。招标「八」共五节，覆盖关系如下：</p>
+<div class="tw">
+<table>
+<colgroup><col style="width:34%"><col style="width:20%"><col style="width:46%"></colgroup>
+<thead><tr><th>招标节次</th><th>本文档</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">（一）多源体检及随访数据获取</td><td>覆盖</td><td>本模块的取数底座，见 §3.1</td></tr>
+<tr><td class="k">（二）筛查体检智能指引</td><td>覆盖</td><td>筛查前置指引 + 异常结果就诊指引，见 §3.2、§3.3</td></tr>
+<tr><td class="k">（三）筛查报告结构化智能解读</td><td>覆盖</td><td>解析、分级、解读、医师确认，见 §3.4～§3.7</td></tr>
+<tr><td class="k">（四）健康宣教与风险提示</td><td>覆盖</td><td>知识库匹配与维护，见 §3.8、§3.9</td></tr>
+<tr><td class="k">（五）一体化分层随访管理</td><td><b>不覆盖</b></td><td><b>已单独成册</b>：《一体化分层随访管理 · 技术参数说明书》</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout amber">
+  <p>招标总述中「分层随访全流程管理」属第（五）节内容。本文档不重复描述，两册在<b>患者主索引、随访方案库、复查结果归集</b>三处存在共用关系，边界见 §11。</p>
+</div>
+
+<h3>1.2 招标条款响应总览</h3>
+<p>招标「八」总述 +（一）～（四），拆解为 28 条可验证要求，逐条响应如下。其中第 4、18 条为<b>待明确项</b>，第 26～28 条为<b>需求缺口</b>，均已单独标出。</p>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:25%"><col style="width:51%"><col style="width:20%"></colgroup>
+<thead><tr><th>#</th><th>招标要求</th><th>技术响应</th><th>结论</th></tr></thead>
+<tbody>
+<tr><td class="no">1</td><td>部署于 AI 智能体中台之上</td><td>作为中台应用运行，复用中台算力调度、模型纳管、服务网关与审计体系，不单独建设推理服务</td><td class="k">满足</td></tr>
+<tr><td class="no">2</td><td>面向体检人群、筛查异常人群、癌前病变及确诊治疗后患者</td><td>四类人群分别配置指引策略与解读版本；人群标识由中台主索引与筛查结果共同确定</td><td class="k">满足</td></tr>
+<tr><td class="no">3</td><td>服务门诊体检、妇科门诊、术后 / 放化疗后随访业务</td><td>三个院内场景全覆盖，按场景配置调用入口与展示形态</td><td class="k">满足</td></tr>
+<tr><td class="no">4</td><td>服务社区筛查业务</td><td><b>社区筛查数据不在院内系统内</b>，一期只能覆盖院内场景</td><td style="color:var(--red-ink);font-weight:600">待明确</td></tr>
+<tr><td class="no">5</td><td>作为医师辅助工具，不替代临床医师诊疗判断</td><td>产品硬约束。系统不生成诊断结论与治疗建议，触发即停止流程</td><td class="k">满足</td></tr>
+<tr><td class="no">6</td><td>（一）通过中台统一数据接口对接 HIS、LIS、PACS、体检系统、电子病历</td><td>全部取数经中台网关，按字段白名单近实时读取，不单独直连业务库</td><td class="k">条件满足</td></tr>
+<tr><td class="no">7</td><td>（一）自动获取受检者 / 患者基本信息</td><td>经中台主索引锚定，含姓名、性别、年龄、联系方式、就诊号</td><td class="k">满足</td></tr>
+<tr><td class="no">8</td><td>（一）获取 HPV 检测结果</td><td>支持分型结果（16 / 18 / 其他高危型）与检测方法识别</td><td class="k">条件满足</td></tr>
+<tr><td class="no">9</td><td>（一）获取 TCT / 液基细胞学结果</td><td>支持 TBS 报告系统术语识别（NILM / ASC-US / ASC-H / LSIL / HSIL / AGC / SCC）与标本满意度</td><td class="k">条件满足</td></tr>
+<tr><td class="no">10</td><td>（一）获取阴道镜结果</td><td>支持转化区类型、醋白上皮、碘试验、Reid 评分、活检部位等结构化字段</td><td class="k">条件满足</td></tr>
+<tr><td class="no">11</td><td>（一）获取超声等筛查相关检查结果</td><td>取已签发报告文本；<b>图像不进推理链</b></td><td class="k">条件满足</td></tr>
+<tr><td class="no">12</td><td>（一）获取既往病史、高危因素、治疗史</td><td>按字段白名单读取；高危因素以结构化字段 + 规则推导双通道获取</td><td class="k">条件满足</td></tr>
+<tr><td class="no">13</td><td>（一）获取既往复查记录、历史随访结局</td><td>经中台数据接口读取，与随访模块共用同一份归集结果</td><td class="k">条件满足</td></tr>
+<tr><td class="no">14</td><td>（二）筛查前置指引：针对适龄体检人群提供科普宣教</td><td>按年龄分层配置宣教内容，内容取自专科知识库</td><td class="k">满足</td></tr>
+<tr><td class="no">15</td><td>（二）根据年龄、既往筛查史、高危因素智能给出筛查项目建议</td><td>依据院内审定的规则表匹配，<b>不由模型推断</b>；模型只负责组织话术</td><td class="k">满足</td></tr>
+<tr><td class="no">16</td><td>（二）给出筛查周期建议</td><td>同上，规则表匹配。<b>规则表内容须院方审定</b>，见 §1.2 缺口一</td><td class="k">条件满足</td></tr>
+<tr><td class="no">17</td><td>（二）给出检查前注意事项</td><td>按检查项目配置注意事项模板，内容来自知识库</td><td class="k">满足</td></tr>
+<tr><td class="no">18</td><td>（二）支持院内公众号、体检窗口、门诊医生工作站多渠道调用</td><td>提供统一服务接口，三个渠道分别适配；<b>公众号涉及对外触达，须经院内授权</b></td><td style="color:var(--red-ink);font-weight:600">待明确</td></tr>
+<tr><td class="no">19</td><td>（二）异常结果就诊指引：智能推送就诊提示，引导至专科门诊</td><td>按异常结果规则触发，输出就诊科室、就诊注意事项、复诊建议</td><td class="k">满足</td></tr>
+<tr><td class="no">20</td><td>（三）对各类筛查报告进行结构化解析，提取关键指标、阳性结果、风险等级</td><td>解析与分级全部走规则引擎与术语映射表；风险等级按院方给定标准映射</td><td class="k">条件满足</td></tr>
+<tr><td class="no">21</td><td>（三）用通俗化医学语言生成解读文本，区分普通人群、高风险人群版本</td><td>受控语言组织，两个版本各配独立话术库与禁写词表</td><td class="k">满足</td></tr>
+<tr><td class="no">22</td><td>（三）解读结果仅作为辅助参考</td><td>每份解读强制附免责声明；正文不得出现「确诊」「排除」「无需担心」等表述</td><td class="k">满足</td></tr>
+<tr><td class="no">23</td><td>（三）所有解读内容必须经医师确认后才可推送给受检者；支持医师编辑、修改、驳回</td><td>逐条确认（非整篇确认）；未确认内容禁止进入任何分发通道</td><td class="k">满足</td></tr>
+<tr><td class="no">24</td><td>（四）内置专科健康知识库，针对不同筛查结果匹配对应宣教内容（生活方式、疫苗科普、复查建议、风险告知）</td><td>四类内容分别建库，按筛查结果组合匹配；匹配关系可视化配置</td><td class="k">满足</td></tr>
+<tr><td class="no">25</td><td>（四）知识库支持可视化维护更新</td><td>科室可视化维护，变更留版本；<b>已推送内容不随知识库变更而改写</b></td><td class="k">满足</td></tr>
+<tr><td class="no">26</td><td><b>（需求缺口）</b>「筛查项目建议、筛查周期建议」的依据来源</td><td>招标要求「智能给出」，但未指定依据哪一版指南、由谁审定。这类内容属临床建议，不能由乙方编写后直接上线</td><td style="color:var(--red-ink);font-weight:600">待明确</td></tr>
+<tr><td class="no">27</td><td><b>（需求缺口）</b>「风险等级」的分级标准</td><td>招标要求提取风险等级，但未指定分级依据（TBS 术语 / HPV 分型 / 联合筛查策略）。<b>风险等级直接决定解读版本与随访分层</b></td><td style="color:var(--red-ink);font-weight:600">待明确</td></tr>
+<tr><td class="no">28</td><td><b>（需求缺口）</b>「推送给受检者」的通道与合规</td><td>招标（三）要求「经医师确认后才可推送给受检者」，但全文未指定推送通道；八（六）又限定「必须经院内授权流程输出」</td><td style="color:var(--red-ink);font-weight:600">待明确</td></tr>
+</tbody>
+</table>
+</div>
+<p class="tbl-note">第 26～28 条不是偏离，是<b>需求本身存在空白</b>，详见下方说明。</p>
+
+<div class="callout red">
+  <span class="h">需求缺口一：筛查建议的临床依据，乙方不能自己写</span>
+  <p>招标（二）要求系统「智能给出筛查项目建议、筛查周期建议」。但「谁该查什么、多久查一次」是<b>临床决策内容</b>，由厂商编写后直接上线，一旦出现漏筛、错筛，责任无法界定。</p>
+  <p style="margin-top:6px"><b>此项属院方责任，须由院方明确：</b></p>
+  <p style="margin-top:6px">① <b>采用哪一版指南</b>——国家宫颈癌筛查工作方案、国家宫颈癌筛查与诊治指南，还是院内专科方案；若采用院内方案，须提供成文文本。</p>
+  <p>② <b>规则表的院内审定人</b>——科室主任或指定专家签字确认，作为规则上线的前置条件。</p>
+  <p>③ <b>规则变更的审批流程</b>——指南更新后由谁提出、谁审定、何时生效。</p>
+  <p style="margin-top:6px">系统侧承诺的是<b>可配置、可版本化、可回溯</b>的能力，<b>不承诺规则内容的临床正确性</b>。这条边界必须在合同中写明。</p>
+</div>
+
+<div class="callout red">
+  <span class="h">需求缺口二：风险等级的分级标准，必须院方给定</span>
+  <p>招标（三）要求解析时提取「风险等级」。但风险等级怎么分，直接决定两件事：<b>解读文本用哪个版本</b>（普通 / 高风险），以及<b>该受检者进入随访的哪一层人群</b>。标准不定，这两个下游全部悬空。</p>
+  <p style="margin-top:6px">需要院方明确：<b>① 分级依据</b>（仅看 TBS 术语？是否纳入 HPV 分型？是否采用联合筛查策略？）；<b>② 分级档位</b>（两级 / 三级 / 四级）；<b>③ 边界情形的归属</b>（如 HPV 16/18 阳性但 TCT 阴性，归高风险还是普通）。</p>
+  <p style="margin-top:6px">系统侧做法：把分级标准做成<b>可配置的规则表</b>，支持逐条评审、版本管理与回溯。院方给标准，系统给执行与追溯能力。</p>
+</div>
+
+<div class="callout red">
+  <span class="h">需求缺口三：解读「推送给受检者」的通道，招标没定义</span>
+  <p>招标（三）明确要求「经医师确认后才可推送给受检者」，但全文没有指定<b>用什么通道推</b>。同时八（六）又写「解读、提醒内容不直接自动对外推送患者，必须经院内授权流程输出」——两条一起读，含义是：<b>可以推，但通道必须经院内授权，且不得系统自动发送。</b></p>
+  <p style="margin-top:6px">需要院方明确：<b>① 通道选型</b>（院内公众号 / 短信 / 体检报告随附 / 仅院内端展示）；<b>② 授权流程</b>（谁审批、审批记录如何留）；<b>③ 个人信息保护合规意见</b>（书面）。</p>
+  <p style="margin-top:6px"><b>一期建议：</b>先做「院内端展示 + 体检报告随附」两种不出院的通道，公众号与短信待合规意见明确后再开。这样既响应了招标（医师确认后可推送），又不把项目卡在合规审批上。</p>
+</div>
+
+<h3>1.3 系统定位与三条底线</h3>
+
+<div class="cards">
+  <div class="card g">
+    <div class="eyebrow">底线 01</div>
+    <h4>解析与分级走规则，不走模型</h4>
+    <p>HPV 分型、TBS 术语、风险等级全部由确定性规则与术语映射表产出。<b>模型只做一件事：把已确定的结构化结果翻译成通俗话术。</b>「阳性 / 阴性」判错一个就是医疗事故，这类判断不能交给概率模型。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">底线 02</div>
+    <h4>未经医师确认，不进入任何分发通道</h4>
+    <p>解读生成后状态为「待确认」，医师逐条确认（非整篇确认）后才进入分发队列。存在未确认项时，该份解读<b>整体阻断</b>，不得部分推送。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">底线 03</div>
+    <h4>不生成诊断与治疗建议</h4>
+    <p>系统不产出诊断结论、鉴别诊断、用药建议、治疗方案。一旦识别到此类生成意图，<b>停止流程</b>而非降级输出。解读文本中的处置方向只能引用院内规则表的原文。</p>
+  </div>
+</div>
+
+<div class="callout red">
+  <span class="h">边界外声明（永久不做）</span>
+  <p><b>不做超声 / 影像图像的 AI 识别。</b>图像判读属医疗器械监管范围，需 NMPA 注册证。本模块只处理<b>已签发的报告文本</b>，图像不进推理链。</p>
+  <p style="margin-top:6px"><b>不做病理切片的 AI 判读。</b>同上。病理结果以已签发报告文本为准，本模块不参与判读。</p>
+  <p style="margin-top:6px"><b>不做患者端自主上传与自助解读。</b>0914 调研中三位临床主任一致明确否定患者自助 APP——依从性差、农村患者操作不了、隐私风险高。本模块全部功能做在医护侧与院内渠道侧。</p>
+  <p style="margin-top:6px"><b>不做跨受检者数据训练。</b>模型永远看不到其他受检者的真实报告。院内数据用于模型训练需另行立项、另行授权。</p>
+</div>
+
+<div class="callout amber">
+  <span class="h">一期能力边界（可演进，非永久排除）</span>
+  <p><b>不做社区筛查场景。</b>招标总述提到「服务社区筛查业务」，但（一）列出的数据源全部是院内系统（HIS / LIS / PACS / 体检 / 电子病历），社区筛查数据在基层机构。一期只覆盖院内场景，社区场景待数据通道明确后另行评估。</p>
+  <p style="margin-top:6px"><b>不做对外推送通道。</b>一期只做院内端展示与体检报告随附，公众号、短信等对外通道待合规意见明确后开启（见 §1.2 缺口三）。</p>
+  <p style="margin-top:6px"><b>不做院外报告解析。</b>外院检验、第三方检测机构的报告格式不受控，一期不承诺解析，由医护人工录入关键结论。</p>
+  <p style="margin-top:6px"><b>不做随访任务与提醒。</b>属招标（五）范围，见《一体化分层随访管理 · 技术参数说明书》。</p>
+</div>
+
+<!-- ==================== 二 ==================== -->
+<h2 id="s2"><span class="no">二</span>总体技术架构</h2>
+
+<p class="lede">架构分七层。核心设计是把「不能算错的」和「需要说人话的」彻底分开——解析、分级、规则匹配全部走确定性引擎，只有通俗化解读交给模型，两者之间由独立校验层隔离。</p>
+
+<div class="arch">
+
+  <div class="layer">
+    <div class="lab">接入层</div>
+    <div class="bd">
+      <div class="t">多源数据接入</div>
+      <div class="d">全部取数经中台统一数据接口，按字段白名单近实时读取。不单独直连业务库，不建立旁路通道。三个调用渠道（公众号、体检窗口、门诊工作站）同层接入。</div>
+      <div class="tags"><span class="tag g">中台统一接口</span><span class="tag">字段白名单</span><span class="tag">多渠道入口</span></div>
+    </div>
+  </div>
+
+  <div class="layer gate">
+    <div class="lab">身份锚定</div>
+    <div class="bd">
+      <div class="t">受检者 · 就诊 / 体检批次 · 报告类型 三方锁定</div>
+      <div class="d">三者任一缺失即阻断，禁止解析、禁止生成解读。这是防止多受检者报告串档的第一道闸，也是整套架构的前置条件。同名、多体检号等歧义情形一律转人工确认。</div>
+      <div class="tags"><span class="tag r">缺一即阻断</span><span class="tag">主索引匹配</span><span class="tag">歧义转人工</span></div>
+    </div>
+  </div>
+
+  <div class="layer rule">
+    <div class="lab">解析层</div>
+    <div class="bd">
+      <div class="t">报告结构化解析（零模型）</div>
+      <div class="d">按报告类型走确定性解析：结构化字段直接映射，文本报告走术语表匹配。<b>HPV 分型表、TBS 术语表、阴道镜字段字典、病理分级表全部为院内审定版本</b>。解析结果标注来源与置信状态。</div>
+      <div class="tags"><span class="tag b">术语表映射</span><span class="tag b">零幻觉</span><span class="tag">来源可溯源</span></div>
+    </div>
+  </div>
+
+  <div class="layer rule">
+    <div class="lab">分级层</div>
+    <div class="bd">
+      <div class="t">风险等级判定（零模型）</div>
+      <div class="d">按院方给定的分级规则表映射风险等级。规则表逐条可评审、可版本化、可回溯。<b>规则内容由院方审定</b>，系统只负责执行与留痕。</div>
+      <div class="tags"><span class="tag b">规则表映射</span><span class="tag">可逐条评审</span><span class="tag a">标准待院方给定</span></div>
+    </div>
+  </div>
+
+  <div class="layer rule">
+    <div class="lab">指引层</div>
+    <div class="bd">
+      <div class="t">筛查指引与就诊指引（零模型）</div>
+      <div class="d">按年龄、既往筛查史、高危因素匹配筛查项目与周期建议；按异常结果规则触发就诊指引。内容取自院内审定规则表与知识库，<b>不由模型推断医学建议</b>。</div>
+      <div class="tags"><span class="tag b">规则匹配</span><span class="tag">知识库取文</span><span class="tag">不推断建议</span></div>
+    </div>
+  </div>
+
+  <div class="layer llm">
+    <div class="lab">受控成稿区</div>
+    <div class="bd">
+      <div class="t">通俗化解读生成（受控语言组织）</div>
+      <div class="d">仅对已解析、已分级的确定结果做语言组织。每句映射到结构化字段；无法映射的句子不允许产出；不得新增医学结论；不得出现「确诊」「排除」「无需担心」等表述；强制附免责声明。</div>
+      <div class="tags"><span class="tag g">句级溯源</span><span class="tag g">禁写词表</span><span class="tag g">强制免责声明</span></div>
+    </div>
+  </div>
+
+  <div class="layer gate">
+    <div class="lab">校验与确认</div>
+    <div class="bd">
+      <div class="t">独立校验 → 医师逐条确认 → 分发队列</div>
+      <div class="d">校验层与生成上下文隔离，独立检查无源陈述、结论越界、风险等级与解读版本错配。医师逐条确认后进入分发队列；存在未确认项时<b>整体阻断</b>。</div>
+      <div class="tags"><span class="tag r">上下文隔离</span><span class="tag r">逐条确认</span><span class="tag r">未确认不分发</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="callout blue">
+  <span class="h">横切能力（贯穿全部层级）</span>
+  <p>权限管控 · 全操作审计 · 规则表与知识库版本快照 · 术语表版本管理 · 系统监控告警。这五项不归属单一层，但每一层都必须调用，缺失任一项即视为未完成交付。</p>
+</div>
+
+<div class="callout">
+  <span class="h">为什么解析与分级不走模型</span>
+  <p>筛查报告的关键结论是「阳性 / 阴性」「高风险 / 低风险」这类二元或有序判断。模型在这类判断上会有一定概率出错，而<b>错的方向往往是把阳性读成阴性</b>——受检者拿到「没问题」的解读就不会来复查，这是最危险的失效模式，且事后无法从文本上发现。</p>
+  <p style="margin-top:6px">所以解析与分级全部走确定性规则与术语表，规则表可以导出给科室逐条评审，出错可以定位到具体哪条规则。语言模型只用在它真正有价值的地方：把已经确定的结果，翻译成受检者读得懂的话。</p>
+</div>
+
+<h3>2.1 一次解读的完整链路</h3>
+<div class="flow">
+  <span class="st">报告签发</span><span class="ar">→</span>
+  <span class="st">取数（中台接口）</span><span class="ar">→</span>
+  <span class="st">身份锚定</span><span class="ar">→</span>
+  <span class="st g">结构化解析（规则）</span><span class="ar">→</span>
+  <span class="st g">风险分级（规则）</span><span class="ar">→</span>
+  <span class="st g">解读生成（受控模型）</span><span class="ar">→</span>
+  <span class="st r">独立校验</span><span class="ar">→</span>
+  <span class="st">医师逐条确认</span><span class="ar">→</span>
+  <span class="st">分发队列</span><span class="ar">→</span>
+  <span class="st">院内渠道展示</span>
+</div>
+<p class="tbl-note">任一步骤失败即停止，不得跳步进入下一环节。校验不通过或存在未确认项，一律回到医师侧，不进入分发队列。</p>
+
+<!-- ==================== 三 ==================== -->
+<h2 id="s3"><span class="no">三</span>功能技术参数</h2>
+
+<h3>3.1 多源体检与筛查数据获取</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">取数方式</td><td>中台统一数据接口，字段白名单按需读取</td><td>禁止批量同步全量数据</td></tr>
+<tr><td class="k">数据源</td><td>HIS、LIS、PACS、体检系统、EMR</td><td>实际可取的字段以院方授权为准</td></tr>
+<tr><td class="k">受检者范围</td><td>严格限定当前受检者 + 当前体检批次 / 就诊</td><td>跨批次数据需显式授权并单独标注</td></tr>
+<tr><td class="k">数据范围</td><td>基本信息、HPV 检测、TCT / 液基细胞学、阴道镜、超声、既往病史、高危因素、治疗史、既往复查记录、历史随访结局</td><td>与随访模块共用同一份归集结果</td></tr>
+<tr><td class="k">报告形态支持</td><td>结构化字段直接映射；文本报告走术语表匹配</td><td><b>是否需 OCR 取决于报告实际形态</b>，见 §10 A2</td></tr>
+<tr><td class="k">状态标记</td><td>每条数据附来源系统、采集时间与核实状态（<code>verified</code> / <code>preliminary</code> / <code>unverified</code>）</td><td>只有 verified 可作为分级判定依据</td></tr>
+<tr><td class="k">失败降级</td><td>超时重试 1 次；仍失败则降级为医护手工录入关键结论</td><td>手工录入结论标 <code>unverified</code>，<b>不得作为风险分级锚点</b></td></tr>
+<tr><td class="k">取数时效</td><td>≤ 3 s（设计目标，单次完整取数）</td><td>取决于院方接口响应能力</td></tr>
+<tr><td class="k">取数审计</td><td>记录受检者、字段、调用人、时间与结果状态</td><td>保存周期按院方要求</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.2 筛查体检智能指引（筛查前置指引）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">适用人群</td><td>适龄体检人群，按年龄段分层配置</td><td>年龄取自体检登记信息</td></tr>
+<tr><td class="k">输入要素</td><td>年龄、既往筛查史、高危因素</td><td>三要素任一缺失时，输出提示补充而非默认推断</td></tr>
+<tr><td class="k">输出内容</td><td>筛查项目建议、筛查周期建议、检查前注意事项</td><td>三类内容分别取自规则表与知识库</td></tr>
+<tr><td class="k">生成方式</td><td><b>规则表匹配 + 知识库取文</b>，模型只做话术组织</td><td>不由模型推断医学建议</td></tr>
+<tr><td class="k">科普宣教</td><td>按年龄与筛查状态匹配宣教内容</td><td>内容取自专科知识库</td></tr>
+<tr><td class="k">规则表管理</td><td>可视化配置，逐条可评审，变更留版本</td><td><b>规则内容由院方审定</b>，见 §1.2 缺口一</td></tr>
+<tr><td class="k">缺要素处理</td><td>既往筛查史缺失时，输出「建议补充既往筛查史」提示</td><td>不得按「从未筛查」默认处理</td></tr>
+<tr><td class="k">调用渠道</td><td>院内公众号、体检窗口、门诊医生工作站</td><td>公众号渠道须经院内授权，见 §1.2 缺口三</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout amber">
+  <p><b>缺要素不得默认。</b>既往筛查史缺失时，如果系统默认按「从未筛查」处理，会给一个本该两年后复查的人安排立即检查——过度检查同样是有害的。所以缺要素一律输出补充提示，由人工补齐后再出建议。</p>
+</div>
+
+<h3>3.3 异常结果就诊指引</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">触发条件</td><td>初筛阳性、可疑异常结果，按规则表判定</td><td>触发规则可配置、可版本化</td></tr>
+<tr><td class="k">输出内容</td><td>就诊科室、就诊注意事项、复诊建议</td><td>内容取自院内审定的指引模板</td></tr>
+<tr><td class="k">引导科室</td><td>妇科门诊（可按院内实际科室配置）</td><td>科室映射表可视化维护</td></tr>
+<tr><td class="k">紧急情形处理</td><td>命中紧急规则（如高度可疑浸润癌）时，提示「尽快就诊」并标注优先级</td><td>不生成诊断结论，只给就诊紧迫度</td></tr>
+<tr><td class="k">触达范围</td><td>一期仅院内端展示，不对外推送</td><td>对外通道见 §1.2 缺口三</td></tr>
+<tr><td class="k">指引留痕</td><td>记录触发规则、输出内容、展示渠道与时间</td><td>用于后续依从性分析</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.4 筛查报告结构化解析</h3>
+<p>解析是本模块的地基，也是唯一不能出错的一环。四类报告分别建术语表与解析规则。</p>
+<div class="tw">
+<table>
+<colgroup><col style="width:16%"><col style="width:44%"><col style="width:40%"></colgroup>
+<thead><tr><th>报告类型</th><th>解析字段</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">HPV 检测</td><td>检测方法、分型结果（16 / 18 / 其他高危型）、阴阳性判定</td><td>分型表以院方审定版本为准</td></tr>
+<tr><td class="k">TCT / 液基细胞学</td><td>TBS 术语（NILM / ASC-US / ASC-H / LSIL / HSIL / AGC / SCC）、标本满意度、备注</td><td>TBS 术语表院内审定，含同义词归并</td></tr>
+<tr><td class="k">阴道镜</td><td>转化区类型、醋白上皮、碘试验、Reid 评分、活检部位、检查结论</td><td>字段字典可配置</td></tr>
+<tr><td class="k">病理</td><td>CIN 分级、浸润癌、切缘状态、免疫组化关键项</td><td>仅解析已签发报告文本，<b>不参与判读</b></td></tr>
+<tr><td class="k">超声</td><td>检查所见、结论文本</td><td>取报告文本，图像不进推理链</td></tr>
+</tbody>
+</table>
+</div>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">解析方式</td><td>结构化字段直接映射；文本报告走术语表匹配</td><td><b>不依赖模型自由抽取关键指标</b></td></tr>
+<tr><td class="k">术语表管理</td><td>HPV 分型表、TBS 术语表、阴道镜字段字典、病理分级表</td><td>可视化维护，变更留版本</td></tr>
+<tr><td class="k">同义词归并</td><td>同一结论的不同书写方式归并到标准术语</td><td>归并规则可评审、可回滚</td></tr>
+<tr><td class="k">未识别处理</td><td>无法匹配到术语表的结论，标记为「未识别」并转医师人工确认</td><td><b>不得猜测归并</b>，宁可不解析</td></tr>
+<tr><td class="k">解析结果</td><td>每条字段附原文切片、来源系统、置信状态</td><td>支持逐字段回溯到原文</td></tr>
+<tr><td class="k">关键字段准确率</td><td>≥ 99%（设计目标，试点期实测标定）</td><td>关键字段指 HPV 分型、TBS 术语、风险等级</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.5 风险等级判定</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">判定方式</td><td>按院方给定的分级规则表映射</td><td><b>零模型</b>，确定性判定</td></tr>
+<tr><td class="k">分级依据</td><td>待院方给定：TBS 术语 / HPV 分型 / 联合筛查策略</td><td>见 §1.2 缺口二</td></tr>
+<tr><td class="k">分级档位</td><td>待院方给定（两级 / 三级 / 四级）</td><td>档位数直接影响解读版本与随访分层</td></tr>
+<tr><td class="k">边界情形</td><td>规则表未覆盖的组合，标记「待医师判定」并阻断自动解读</td><td>如 HPV 16/18 阳性但 TCT 阴性的归属</td></tr>
+<tr><td class="k">规则表管理</td><td>可视化配置，逐条可评审，变更留版本、可回滚</td><td>规则内容由院方审定</td></tr>
+<tr><td class="k">判定留痕</td><td>记录命中的规则编号、输入要素、输出等级</td><td>出错可定位到具体规则</td></tr>
+<tr><td class="k">与医师判定一致率</td><td>≥ 95%（设计目标，试点期实测标定）</td><td>以医师人工判定为比对基线</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.6 通俗化解读文本生成</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">生成输入</td><td>仅限已解析、已分级、状态为 verified 的结构化结果</td><td>模型看不到原始报告全文、看不到其他受检者数据</td></tr>
+<tr><td class="k">生成输出</td><td>每句映射至少一个结构化字段</td><td>无法映射的句子不允许产出</td></tr>
+<tr><td class="k">解读版本</td><td>普通人群版 / 高风险人群版，各配独立话术库与禁写词表</td><td>版本由风险等级自动选择</td></tr>
+<tr><td class="k">禁写词表</td><td>「确诊」「排除」「无需担心」「没问题」「治愈」等</td><td>出现即拦截，不放行</td></tr>
+<tr><td class="k">处置方向表述</td><td>只能引用院内规则表的原文</td><td>不得由模型自行表述下一步该做什么</td></tr>
+<tr><td class="k">免责声明</td><td>每份解读强制附「本解读仅为辅助参考，请以医师意见为准」</td><td>不可关闭、不可配置</td></tr>
+<tr><td class="k">缺口处理</td><td>关键结果缺失时输出「【待医师确认】」占位</td><td>不得改写为「未见异常」「阴性」</td></tr>
+<tr><td class="k">产出状态</td><td>最高为「待确认」，<b>不可直接分发</b></td><td>见闸门 2</td></tr>
+<tr><td class="k">医师操作</td><td>全文可编辑，支持逐条确认、修改、驳回</td><td>驳回须填原因</td></tr>
+<tr><td class="k">独立校验</td><td>无源陈述、结论越界、风险等级与解读版本错配、禁写词命中</td><td><b>校验与生成上下文隔离</b>，不得自审</td></tr>
+<tr><td class="k">无源内容拦截率</td><td><b>100%</b></td><td>硬约束，非性能指标</td></tr>
+<tr><td class="k">痕迹留存</td><td>生成稿、编辑稿逐次留快照，支持 diff 对比与回滚</td><td>含句级字段映射</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.7 医师确认与分发</h3>
+<div class="flow">
+  <span class="st">生成解读</span><span class="ar">→</span>
+  <span class="st">独立校验</span><span class="ar">→</span>
+  <span class="st">医师逐条确认</span><span class="ar">→</span>
+  <span class="st g">分发队列</span><span class="ar">→</span>
+  <span class="st">院内渠道展示</span>
+</div>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">确认粒度</td><td>逐条确认，非整篇确认</td><td>不得用一次性笼统确认替代</td></tr>
+<tr><td class="k">确认内容</td><td>解析结果、风险等级、解读正文、宣教内容</td><td>四类分别确认</td></tr>
+<tr><td class="k">分发前置条件</td><td>全部条目确认完毕，且校验无拦截</td><td><b>存在未确认项时整体阻断</b>，不得部分推送</td></tr>
+<tr><td class="k">分发渠道</td><td>院内端展示、体检报告随附；公众号 / 短信待合规明确</td><td>见 §1.2 缺口三</td></tr>
+<tr><td class="k">分发记录</td><td>记录渠道、时间、操作人、内容版本</td><td>支持回溯「当时推的是哪一版」</td></tr>
+<tr><td class="k">内容不可变性</td><td>已分发内容不随知识库或规则表变更而改写</td><td>变更只影响后续新生成的解读</td></tr>
+<tr><td class="k">撤回机制</td><td>支持对已进入队列但未展示的内容撤回</td><td>撤回留痕</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.8 健康宣教与风险提示</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">内容分类</td><td>生活方式、疫苗科普、复查建议、风险告知</td><td>四类分别建库，独立维护</td></tr>
+<tr><td class="k">匹配方式</td><td>按筛查结果组合与风险等级匹配</td><td>匹配关系可视化配置</td></tr>
+<tr><td class="k">内容来源</td><td>专科健康知识库</td><td>内容由院方提供或审定</td></tr>
+<tr><td class="k">风险告知</td><td>按风险等级匹配对应风险说明</td><td>不得弱化高风险等级的告知强度</td></tr>
+<tr><td class="k">展示位置</td><td>与解读文本同屏展示，医师确认后一并分发</td><td>宣教内容同样纳入确认范围</td></tr>
+<tr><td class="k">版本管理</td><td>内容变更留版本，已分发内容不受影响</td><td>便于回溯</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.9 知识库管理</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">维护方式</td><td>可视化维护，支持新增、修改、停用</td><td>无需开发介入</td></tr>
+<tr><td class="k">内容类型</td><td>科普宣教、检查前注意事项、复查建议、风险告知、就诊指引模板</td><td>按用途分区管理</td></tr>
+<tr><td class="k">版本管理</td><td>变更留版本、可回滚</td><td>已分发内容不随变更而改写</td></tr>
+<tr><td class="k">审核流程</td><td>内容发布前须经科室审核</td><td>审核记录留痕</td></tr>
+<tr><td class="k">术语一致性</td><td>知识库术语与解析术语表共用同一份标准</td><td>避免解读与宣教用词打架</td></tr>
+<tr><td class="k">使用边界</td><td>内容用于院内展示与报告随附</td><td><b>对外输出须经院内授权流程</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.10 多渠道调用接入</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>渠道</th><th>接入方式</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">体检窗口</td><td>院内终端页面调用统一服务接口</td><td>一期可做</td></tr>
+<tr><td class="k">门诊医生工作站</td><td>轻量组件嵌入，支持弹窗与侧栏</td><td><b>需 HIS 侧提供嵌入能力</b>，见 §10 A3</td></tr>
+<tr><td class="k">院内公众号</td><td>统一服务接口 + 院内授权流程</td><td><b>涉及对外触达</b>，待合规意见，见 §1.2 缺口三</td></tr>
+<tr><td class="k">体检报告随附</td><td>解读文本随体检报告一并输出</td><td>一期建议通道，不出院、风险最低</td></tr>
+<tr><td class="k">统一服务接口</td><td>一次开发，多渠道适配</td><td>渠道差异只在展示层与授权层</td></tr>
+<tr><td class="k">渠道鉴权</td><td>各渠道独立鉴权，权限与院内角色绑定</td><td>不因渠道不同而放宽权限</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ==================== 四 ==================== -->
+<h2 id="s4"><span class="no">四</span>硬约束与七道闸门</h2>
+
+<p class="lede">以下八条是不可妥协的产品约束，不接受配置项开关；七道闸门是它们的执行机制。</p>
+
+<h3>4.1 八条硬约束</h3>
+<div class="hard">
+  <div><b>解析与分级不走模型</b>，走确定性规则与术语表</div>
+  <div><b>风险等级不由模型判定</b>，规则表未覆盖即转人工</div>
+  <div><b>未经医师确认不进入任何分发通道</b>，未确认项整体阻断</div>
+  <div><b>不产出诊断与治疗建议</b>，触发即停止流程</div>
+  <div><b>不识别图像</b>，只用已签发报告文本</div>
+  <div><b>免责声明不可关闭</b>，每份解读强制附带</div>
+  <div><b>未识别结论不得猜测归并</b>，一律转人工确认</div>
+  <div><b>生成与校验必须上下文隔离</b>，不得自审</div>
+</div>
+
+<h3>4.2 七道闸门</h3>
+<div class="gates">
+
+  <div class="gate">
+    <h4>身份锚定：受检者 · 就诊 / 体检批次 · 报告类型</h4>
+    <p>三者任一缺失即阻断，禁止解析、禁止生成解读。这是防止多受检者报告串档的第一道闸，也是整套架构的前置条件。同名、多体检号等歧义情形一律转人工确认，不得自动择一。</p>
+    <p class="stop">未锚定时，解析、解读生成、分发入口全部拒绝接入。</p>
+  </div>
+
+  <div class="gate">
+    <h4>风险等级不走模型</h4>
+    <p>风险等级由规则表映射，规则表逐条可评审、可版本化。规则表未覆盖的结果组合，一律标记「待医师判定」。</p>
+    <p class="stop">未覆盖情形禁止自动生成解读——宁可让医师多看一眼，不可让系统猜一个等级。</p>
+  </div>
+
+  <div class="gate">
+    <h4>未识别结论不得猜测归并</h4>
+    <p>无法匹配到术语表的报告结论，标记为「未识别」并转医师人工确认，不进入自动解读流程。</p>
+    <p class="stop">禁止用相似度或模型猜测归并——把「ASC-H」猜成「ASC-US」，风险等级会直接掉一档。</p>
+  </div>
+
+  <div class="gate">
+    <h4>未经医师确认不得分发</h4>
+    <p>解读生成后状态为「待确认」。医师逐条确认（解析结果、风险等级、解读正文、宣教内容四类分别确认）后，才进入分发队列。</p>
+    <p class="stop">存在任一未确认项时，该份解读<b>整体阻断</b>，不得部分推送。</p>
+  </div>
+
+  <div class="gate">
+    <h4>不产出诊断与治疗建议</h4>
+    <p>系统不生成诊断结论、鉴别诊断、用药建议、治疗方案。处置方向的表述只能引用院内规则表的原文。</p>
+    <p class="stop">识别到此类生成意图即停止流程，而非降级输出。</p>
+  </div>
+
+  <div class="gate">
+    <h4>禁写词与免责声明强制生效</h4>
+    <p>解读正文不得出现「确诊」「排除」「无需担心」「没问题」「治愈」等表述；每份解读强制附免责声明。</p>
+    <p class="stop">命中禁写词即拦截；免责声明不可关闭、不可配置，缺失即视为不合格产出。</p>
+  </div>
+
+  <div class="gate">
+    <h4>超出授权范围的受检者数据不得导出</h4>
+    <p>导出执行审批流程，导出内容去标识化，记录导出人、范围、用途与时间。统计查询不得导出含身份信息的明细。</p>
+    <p class="stop">阻断而非降级。该拦下来的没拦下来，才是失败。</p>
+  </div>
+
+</div>
+
+<!-- ==================== 五 ==================== -->
+<h2 id="s5"><span class="no">五</span>接口技术参数</h2>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:17%"><col style="width:22%"><col style="width:36%"><col style="width:25%"></colgroup>
+<thead><tr><th>对接对象</th><th>协议 / 方式</th><th>数据流向与内容</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td class="k">体检系统</td><td>RESTful / 厂商接口 / 数据视图</td><td>取：受检者登记信息、体检项目、筛查报告、HPV / TCT 结果</td><td><b>报告形态待确认</b>，见 §10 A2</td></tr>
+<tr><td class="k">LIS</td><td>HL7 v2.x / RESTful</td><td>取：HPV 检测、TCT 检验结果（含参考范围与异常标记）</td><td>单位与参考范围须一并取回</td></tr>
+<tr><td class="k">PACS</td><td>DICOM / RESTful</td><td>取：影像检查信息与<b>已签发报告文本</b></td><td><b>图像不进推理链</b></td></tr>
+<tr><td class="k">病理系统</td><td>RESTful / 数据视图</td><td>取：病理报告结论、CIN 分级、免疫组化结果</td><td><b>仅取文本，不参与判读</b></td></tr>
+<tr><td class="k">HIS</td><td>HL7 v2.x / RESTful / 数据视图</td><td>取：受检者基本信息、就诊、门诊记录、医嘱</td><td>写入范围以院方授权为准</td></tr>
+<tr><td class="k">EMR 电子病历</td><td>RESTful / 数据库视图</td><td>取：既往病史、治疗史、既往复查记录</td><td>与随访模块共用取数通道</td></tr>
+<tr><td class="k">体检窗口终端</td><td>院内页面调用统一接口</td><td>展示：筛查指引、解读结果</td><td>一期可做</td></tr>
+<tr><td class="k">门诊医生工作站</td><td>轻量组件嵌入</td><td>展示：筛查指引、解读结果、确认入口</td><td><b>需 HIS 侧提供嵌入能力</b>，见 §10 A3</td></tr>
+<tr><td class="k">院内公众号</td><td>统一接口 + 院内授权流程</td><td>发：经确认的解读与宣教内容</td><td><b>涉及对外触达，待合规意见</b></td></tr>
+<tr><td class="k">AI 智能体中台</td><td>中台服务网关</td><td>模型注册、算力调度、监控指标上报、审计日志归集</td><td>复用中台能力，不重复建设</td></tr>
+<tr><td class="k">一体化分层随访管理</td><td>中台数据接口</td><td>输出：风险等级、筛查结果、异常结论；供其做人群分层</td><td><b>风险等级是分层的关键输入</b></td></tr>
+<tr><td class="k">综合数据驾驶舱</td><td>中台数据接口</td><td>上报：调用量、采纳率、报错统计、筛查指引服务统计、报告解读调用统计</td><td>对应招标十（一）1、3</td></tr>
+<tr><td class="k">高质量数据集</td><td>中台数据接口</td><td>输出：结构化筛查报告数据</td><td><b>用于模型训练需另行授权</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>接口通用要求</h4>
+<ul>
+  <li>全部接口具备鉴权、限流、重试、异常处理与超时降级</li>
+  <li>接口调用全量留痕，日志含调用方、时间、参数摘要、结果状态</li>
+  <li>优先复用医院现有数据集成平台，不新建独立通道</li>
+  <li>所有对接服务统一纳入 AI 智能体中台网关管理</li>
+  <li>对接过程不干扰现有系统运行；上线前完成联调与压力测试，交付全套接口文档</li>
+</ul>
+
+<!-- ==================== 六 ==================== -->
+<h2 id="s6"><span class="no">六</span>部署架构与资源要求</h2>
+
+<h3>6.1 部署形态</h3>
+<ul>
+  <li><b>全栈容器化部署</b>，适配院内现有虚拟化与容器底座，充分利旧现有硬件</li>
+  <li><b>全栈院内私有化</b>：语言模型、服务、存储全部部署在院内网，无任何外部 API 调用</li>
+  <li>支持国产算力平台（鲲鹏 CPU / 昇腾 NPU），与中台统一算力池</li>
+  <li>解析引擎、规则引擎、分发服务均为无状态设计，可横向扩展</li>
+</ul>
+
+<h3>6.2 算力与资源（参考配置）</h3>
+<div class="callout">
+  <span class="h">算力归属（沿用项目已确认结论）</span>
+  <p>本模块算力<b>共用中台资源池，不单独采购 GPU 服务器</b>。除通俗化解读生成外，解析、分级、规则匹配、指引全部为确定性规则计算，CPU 即可承担；模型推理为轻量短文本任务，单独采购性价比极低。</p>
+</div>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:28%"><col style="width:52%"></colgroup>
+<thead><tr><th>资源</th><th>参考规格</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">GPU（语言模型）</td><td>共用中台资源池，不单独配置</td><td>仅通俗化解读生成调用，短文本轻量任务</td></tr>
+<tr><td class="k">CPU</td><td>8–16 核</td><td>解析引擎、规则引擎、分发服务、统计</td></tr>
+<tr><td class="k">内存</td><td>32–64 GB</td><td>含术语表与规则表常驻内存</td></tr>
+<tr><td class="k">存储</td><td>约 2–3 GB / 年（详见下）</td><td><b>本模块存储消耗在全部模块中最小</b></td></tr>
+<tr><td class="k">网络</td><td>院内千兆内网</td><td>不出院区，无需公网带宽</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout blue">
+  <span class="h">存储容量测算口径（供信息科核算）</span>
+  <p>单份解读文本约 800 字 ≈ 1.6 KB（UTF-8）；计入解析结果、宣教内容、多版本快照与审计日志，按 10 倍放大估算约 <b>16 KB / 份</b>。</p>
+  <p>按年生成解读 1 万份计：<code>16 KB × 10,000 ≈ 160 MB / 年</code>。计入知识库、术语表、规则表版本与统计冗余副本，总量约 <b>0.5–1 GB / 年</b>，按 3 倍冗余估算 <b>约 2–3 GB / 年</b>。</p>
+  <p><b>对比：</b>本模块<b>无音频留存、无影像留存</b>，存储消耗比超声语音模块（含音频）和病历生成模块都小，不构成资源瓶颈。变量主要是年体检量与解读生成比例，需院方提供（见 §10 B3）。</p>
+</div>
+
+<!-- ==================== 七 ==================== -->
+<h2 id="s7"><span class="no">七</span>性能指标与验收口径</h2>
+
+<div class="kpi">
+  <div><div class="n">≥ 99%</div><div class="l">关键字段解析准确率（设计目标）</div></div>
+  <div><div class="n">≥ 95%</div><div class="l">风险分级与医师判定一致率（设计目标）</div></div>
+  <div><div class="n">100%</div><div class="l">无源内容拦截率（硬约束）</div></div>
+  <div><div class="n">100%</div><div class="l">分发前医师确认率（硬约束）</div></div>
+  <div><div class="n">≥ 99.5%</div><div class="l">系统可用性（设计目标）</div></div>
+</div>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:26%"><col style="width:22%"><col style="width:52%"></colgroup>
+<thead><tr><th>指标</th><th>设计目标</th><th>验收口径与前提</th></tr></thead>
+<tbody>
+<tr><td class="k">关键字段解析准确率</td><td>≥ 99%</td><td>关键字段指 HPV 分型、TBS 术语、风险等级。以医师人工复核为基线，抽样比对</td></tr>
+<tr><td class="k">风险分级与医师判定一致率</td><td>≥ 95%</td><td>以医师人工判定为基线；<b>规则表未覆盖而转人工的情形不计入分母</b></td></tr>
+<tr><td class="k">无源内容拦截率</td><td><b>100%</b></td><td>硬约束，非性能指标。校验层发现任一即阻断分发</td></tr>
+<tr><td class="k">分发前医师确认率</td><td><b>100%</b></td><td>硬约束。任何进入分发队列的内容必须有对应确认记录</td></tr>
+<tr><td class="k">取数时效</td><td>≤ 3 s</td><td>单次完整取数，院内网环境；<b>取决于院方接口响应能力</b></td></tr>
+<tr><td class="k">解读内容驳回率</td><td>试点期实测基线</td><td>作为解读质量的代理指标。定义待与科室共同确定（见 §10 C2）</td></tr>
+<tr><td class="k">知识库匹配命中率</td><td>≥ 98%</td><td>按筛查结果组合匹配到宣教内容的比例；未命中时输出兜底内容</td></tr>
+<tr><td class="k">系统可用性</td><td>≥ 99.5%</td><td>按院内运维窗口计算</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout red">
+  <span class="h">关于指标性质的声明</span>
+  <p>上表中标注「设计目标」的指标是方案设计口径，<b>不是承诺值</b>。建议在试点期用科室真实报告完成一轮标定，把实测结果写入验收标准。把未实测的数字写进合同，对双方都是风险。</p>
+  <p style="margin-top:6px"><b>本模块不承诺解读文本的生成耗时与并发路数指标。</b>中台算力（昇腾）尚未完成性能实测，无法给出可验证的吞吐口径；待算力实测标定后，可作为补充指标纳入验收。本模块其余功能（解析、分级、规则匹配、指引）均为确定性计算，其时效指标已在表中列明。</p>
+  <p style="margin-top:6px"><b>另需说明：</b>「解读是否通俗易懂」不是可验收指标，本模块用<b>医师驳回率</b>作为代理指标。这个口径的优点是客观可统计，缺点是它衡量的是「医师认不认可」，不等于「受检者看不看得懂」——受检者侧的真实理解度需要独立调研，不在本模块验收范围。</p>
+</div>
+
+<!-- ==================== 八 ==================== -->
+<h2 id="s8"><span class="no">八</span>安全合规与权限体系</h2>
+
+<h3>8.1 四级账号权限</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:46%"><col style="width:34%"></colgroup>
+<thead><tr><th>角色</th><th>权限范围</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">体检医师 / 妇科医师</td><td>本人接诊受检者的解读查看、编辑、逐条确认、驳回</td><td>仅可见本人接诊的受检者</td></tr>
+<tr><td class="k">审核医师</td><td>本科室解读复核、解析术语表与分级规则表维护</td><td><b>不可跨科室</b>；规则变更须留版本</td></tr>
+<tr><td class="k">健教管理员</td><td>健康知识库内容维护、审核记录查看</td><td>不可修改临床规则表</td></tr>
+<tr><td class="k">系统管理员</td><td>账号、角色、审计日志、系统配置</td><td>权限与配置变更全程留痕审计</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>8.2 安全措施</h3>
+<ul>
+  <li><b>传输加密</b>：全链路 HTTPS / TLS</li>
+  <li><b>存储加密</b>：解析结果、解读文本、快照落盘加密</li>
+  <li><b>最小权限</b>：数据访问按角色与接诊关系控制，禁止越权访问受检者数据</li>
+  <li><b>数据不出院</b>：模型推理、数据存储全部院内完成</li>
+  <li><b>去标识化</b>：数据导出执行审批流程，导出内容去标识化</li>
+  <li><b>审计不可篡改</b>：全操作日志，写入后不可修改</li>
+  <li><b>对外输出管控</b>：解读与宣教内容对外推送须经院内授权流程，系统不得自动发送</li>
+  <li><b>合规适配</b>：满足网络安全等级保护、数据安全法、个人信息保护法要求，适配电子病历分级评价；医疗 AI 相关功能遵循医疗器械监管相关政策</li>
+</ul>
+
+<h3>8.3 全操作审计范围</h3>
+<p>以下操作全部留痕，记录操作人、时间、对象、结果：取数、解析、术语表变更、风险分级、规则表变更、解读生成、编辑、逐条确认、驳回、分发、撤回、知识库变更、渠道调用、权限变更、数据导出、日志查询。</p>
+
+<!-- ==================== 九 ==================== -->
+<h2 id="s9"><span class="no">九</span>交付物与质保</h2>
+
+<h3>9.1 交付物清单</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+<thead><tr><th>交付物</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td class="k">软件系统</td><td>体检指引与报告解读智能体，容器化交付，含部署包与配置说明</td></tr>
+<tr><td class="k">需求规格说明书</td><td>功能清单、接口清单、性能指标、验收标准</td></tr>
+<tr><td class="k">系统部署手册</td><td>部署拓扑、环境要求、安装步骤、参数配置</td></tr>
+<tr><td class="k">运维手册</td><td>日常巡检、故障处理、备份恢复、扩容指引</td></tr>
+<tr><td class="k">接口文档</td><td>中台数据接口、HL7 / RESTful 接口说明与字段映射表</td></tr>
+<tr><td class="k">术语表与规则表说明</td><td>HPV 分型表、TBS 术语表、风险分级规则表、筛查指引规则表的结构与维护指引</td></tr>
+<tr><td class="k">知识库内容清单</td><td>四类宣教内容清单与匹配关系表</td></tr>
+<tr><td class="k">测试报告</td><td>功能测试、接口联调、解析准确率测试、安全测试</td></tr>
+<tr><td class="k">用户操作手册</td><td>面向临床医师、健教管理员、信息科的操作指引</td></tr>
+<tr><td class="k">培训服务</td><td>面向妇科、体检中心、健教、信息科的业务操作与系统运维培训</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>9.2 质保服务</h3>
+<ul>
+  <li>免费质保期不低于 <b>3 年</b>（按招标文件要求）</li>
+  <li>包含缺陷修复、系统调优、版本升级、远程技术支持</li>
+  <li>质保期内术语表、规则表、知识库的常规维护包含在内</li>
+</ul>
+
+<!-- ==================== 十 ==================== -->
+<h2 id="s10"><span class="no">十</span>待确认事项</h2>
+
+<p class="lede">以下事项直接决定方案能否落地、报价能否出、验收怎么写。<b>A 组不确认无法开工</b>。</p>
+
+<h3>A 组 · 阻塞项（6 项，不确认无法开工）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:24%"><col style="width:44%"><col style="width:32%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">A1</td><td><b>本模块的采购归属与验收方式</b></td><td>采购表第 11 项含（一）～（五）五节，是否独立报价、是否单独验收；与随访模块如何拆分计量</td><td><b>决定工作量挂在哪一项</b>。若无独立分项，工作量无法单独计量</td></tr>
+<tr><td class="no">A2</td><td>体检系统与报告的实际形态</td><td>① 体检系统厂商与接口能力；② HPV / TCT / 阴道镜 / 病理报告是<b>结构化字段、PDF 还是扫描件</b>；③ 报告模板是否统一</td><td><b>决定解析方案是字段映射还是 OCR</b>。若是扫描件，工作量与准确率口径都要重估</td></tr>
+<tr><td class="no">A3</td><td>医生工作站的嵌入能力</td><td>院内 HIS（卫宁）是否支持第三方轻量组件嵌入；支持弹窗、侧栏还是仅独立页面；单点登录方式</td><td><b>决定「门诊医生工作站调用」这一条款能否按字面响应</b>。若不支持，只能降级为独立页面，属部分偏离</td></tr>
+<tr><td class="no">A4</td><td>筛查指引规则表的临床依据与审定人</td><td>采用哪一版指南、规则表由谁提供、谁签字审定、变更审批流程</td><td><b>合规前置条件</b>。规则表不能由乙方编写后直接上线，见 §1.2 缺口一</td></tr>
+<tr><td class="no">A5</td><td>风险等级的分级标准</td><td>① 分级依据（TBS / HPV 分型 / 联合策略）；② 分级档位（两级 / 三级 / 四级）；③ 边界情形归属（如 HPV 16/18 阳性 + TCT 阴性）</td><td><b>决定解读版本与随访分层两件事</b>。标准不定，这两条链路全部悬空，见 §1.2 缺口二</td></tr>
+<tr><td class="no">A6</td><td>「推送给受检者」的通道与合规</td><td>① 通道选型（公众号 / 短信 / 报告随附 / 仅院内展示）；② 授权审批流程；③ 个人信息保护合规意见（书面）</td><td><b>决定招标（三）「推送给受检者」能否按字面响应</b>，见 §1.2 缺口三</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>B 组 · 影响方案选型（4 项）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:24%"><col style="width:44%"><col style="width:32%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">B1</td><td>一期覆盖的报告类型</td><td>HPV / TCT / 阴道镜 / 病理 / 超声，五类全做还是先做 HPV + TCT</td><td><b>工作量最大变量</b>。每类报告要单独建术语表与解析规则</td></tr>
+<tr><td class="no">B2</td><td>解读版本数量</td><td>普通 / 高风险两版是否够，是否需要按人群再细分</td><td>决定话术库建设量</td></tr>
+<tr><td class="no">B3</td><td>年体检量与解读生成比例</td><td>年体检人次、其中筛查相关人次、预计生成解读份数</td><td>决定存储测算与资源规格</td></tr>
+<tr><td class="no">B4</td><td>知识库内容来源</td><td>院内是否已有成文的宣教材料与检查注意事项；由谁提供</td><td>有则可直接导入，无则需建设</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>C 组 · 影响验收口径（4 项）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:24%"><col style="width:44%"><col style="width:32%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">C1</td><td>解析准确率的验收方式</td><td>抽样人工复核，还是全量比对；测试语料由谁提供、多少份</td><td>决定验收标准写法</td></tr>
+<tr><td class="no">C2</td><td>「解读驳回率」的定义</td><td>驳回指整篇驳回还是逐条驳回；驳回后重生成的算不算新的分母</td><td>影响解读质量代理指标的口径</td></tr>
+<tr><td class="no">C3</td><td>风险分级一致率的比对基线</td><td>以哪位医师的判定为基线；多人判定不一致时如何取值</td><td>决定该指标能否成立</td></tr>
+<tr><td class="no">C4</td><td>试点科室与语料</td><td>一期试点科室（妇科 / 体检中心）；是否提供历史筛查报告作为规则标定语料</td><td>决定试点期实测能否做，直接影响指标能否转验收值</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ==================== 十一 ==================== -->
+<h2 id="s11"><span class="no">十一</span>与中台及其他模块的关系</h2>
+
+<p>本模块不是独立系统，而是运行在 AI 智能体中台之上的应用之一。复用关系如下：</p>
+
+<div class="cards">
+  <div class="card g">
+    <div class="eyebrow">复用 · 中台</div>
+    <h4>算力与模型管理</h4>
+    <p>语言模型注册在中台统一纳管，算力从资源池分配，版本升级由中台统一调度，不单独建设推理服务。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">复用 · 中台</div>
+    <h4>数据接口与审计</h4>
+    <p>全部取数经中台统一数据接口，不单独直连业务库；审计日志归集到中台，与随访、病历生成模块共用同一套审计体系。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">复用 · 数据底座</div>
+    <h4>受检者主索引</h4>
+    <p>主索引与匹配规则复用中台统一身份服务，不单独建设匹配逻辑。这是防止多受检者报告串档的关键前提。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">输出 · 驾驶舱</div>
+    <h4>运行指标</h4>
+    <p>调用量、采纳率、报错统计、筛查指引服务统计、报告解读调用统计上报数据驾驶舱「筛查业务主题」与「AI 应用运行监控主题」。</p>
+  </div>
+</div>
+
+<h4>与其他模块的边界</h4>
+<div class="tw">
+<table>
+<colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+<thead><tr><th>模块</th><th>关系</th></tr></thead>
+<tbody>
+<tr><td class="k">一体化分层随访管理（八（五））</td><td><b>本模块向随访模块输出风险等级、筛查结果与异常结论</b>，作为人群分层的关键输入；两者共用受检者主索引与复查结果归集。<b>随访任务、提醒、闭环管理归随访模块</b>，本文档不覆盖。<b>风险等级标准未定会同时卡住两条链路</b>（见 §10 A5）</td></tr>
+<tr><td class="k">病历生成智能体</td><td>本模块的解读文本与随访记录生成共用同一套受控生成引擎（句级溯源、禁写词表、生成校验隔离），差异只在话术库与模板定义</td></tr>
+<tr><td class="k">病历质控智能体</td><td>本模块不参与病历质控；随访记录的书写规范性由质控模块的规则库承担</td></tr>
+<tr><td class="k">综合数据驾驶舱</td><td>本模块输出调用量、采纳率、报错统计与筛查业务统计；<b>指标口径定义归驾驶舱指标梳理项</b>，本模块不定义口径</td></tr>
+<tr><td class="k">高质量数据集</td><td>本模块产生的结构化筛查报告数据可沉淀为数据集来源之一；<b>用于模型训练需另行立项、另行授权</b></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+  <span class="h">本模块是整条业务链的入口</span>
+  <p>筛查指引 → 报告解读 → 异常就诊指引 → 分层随访，本模块负责前三段，随访模块负责第四段。<b>风险等级是两册之间的唯一接口</b>——分级标准一旦定下来，两册就都活了；定不下来，解读版本和随访分层会同时悬空。这是本次交流最该先解决的一件事。</p>
+</div>
+
+<div class="foot">
+  <p><b>文档性质：</b>本文件为技术交流稿。所载指标中标注「设计目标」的为方案设计口径，需在试点期以科室真实报告实测标定后转为验收指标。接口范围、权限边界、合规条款均以院方书面授权为准。</p>
+  <p><b>下一步建议：</b>本次交流优先闭环 §10 的 A 组 6 项阻塞项，其中 <b>A5（风险等级分级标准）最关键</b>——它同时决定解读版本与随访分层两条链路，不定则两册文档都无法落地。其次是 A2（报告实际形态），它决定解析方案是字段映射还是 OCR，是工作量与技术路线的分水岭。A1（模块采购归属）决定工作量能否单独计量。A 组确认后即可出具带工作量口径的实施与报价方案。</p>
+  <p style="margin-top:12px">体检指引与报告解读智能体 · 技术解决方案 V1.0 · 2026-09-18 · 技术交流稿</p>
+</div>
+
+</main>
+</div>
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function refresh(){
+    var pos = window.scrollY + 140, active = 0;
+    targets.forEach(function(el, i){ if(el && el.offsetTop <= pos) active = i; });
+    links.forEach(function(a, i){ a.className = i === active ? 'on' : ''; });
+  }
+  window.addEventListener('scroll', refresh, {passive:true});
+  window.addEventListener('resize', refresh);
+  refresh();
+})();
+</script>
+</body>
+</html>

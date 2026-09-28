@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>病历生成智能体 · 技术参数说明书（技术交流稿）</title>
+<style>
+:root{
+  --paper:#FFFFFF; --canvas:#F5F5F1;
+  --ink:#222220; --muted:#686761; --hint:#8C8A83;
+  --line:#DEDCD4; --line-strong:#BEBBB2;
+  --mint:#E1F5EE; --mint-2:#B8E7D5; --green:#0F6E56; --green-2:#1D9E75;
+  --amber:#FAEEDA; --amber-line:#F0D89B; --amber-ink:#854F0B;
+  --red:#FCEBEB; --red-line:#F1C5C5; --red-ink:#A32D2D;
+  --blue:#E6F1FB; --blue-line:#B8D4F0; --blue-ink:#185FA5;
+  --purple:#EEEDFE; --purple-ink:#534AB7;
+  --serif:"Noto Serif SC","Songti SC","STSong",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --mono:ui-monospace,Consolas,"Cascadia Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--sans);
+  font-size:13.5px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;background:var(--paper);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+
+.cover{padding:52px 56px 40px;border-bottom:3px solid var(--green);background:#FCFCFA}
+.cover .kicker{font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--green);font-weight:600;margin-bottom:18px}
+.cover h1{font-family:var(--serif);font-size:34px;font-weight:600;letter-spacing:-.02em;
+  line-height:1.25;margin:0 0 10px;max-width:820px}
+.cover .sub{font-size:15px;color:var(--muted);max-width:780px;margin:0 0 26px;line-height:1.7}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.meta div{background:var(--paper);padding:11px 14px}
+.meta dt{font-size:11px;color:var(--hint);letter-spacing:.05em;margin:0 0 3px}
+.meta dd{margin:0;font-size:13px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
+.chip{font-size:11.5px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);
+  background:var(--paper);color:var(--muted)}
+.chip.g{background:var(--mint);border-color:var(--mint-2);color:var(--green)}
+.chip.a{background:var(--amber);border-color:var(--amber-line);color:var(--amber-ink)}
+.chip.r{background:var(--red);border-color:var(--red-line);color:var(--red-ink)}
+
+.body{display:grid;grid-template-columns:216px minmax(0,1fr);gap:0}
+.toc{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;
+  padding:28px 18px 28px 24px;border-right:1px solid var(--line);background:#FCFCFA}
+.toc .t{font-size:11px;letter-spacing:.14em;color:var(--hint);font-weight:600;margin-bottom:12px}
+.toc a{display:block;font-size:12.5px;color:var(--muted);text-decoration:none;
+  padding:4px 8px;border-radius:5px;border-left:2px solid transparent;line-height:1.45}
+.toc a:hover{background:var(--mint);color:var(--green)}
+.toc a.on{color:var(--green);font-weight:600;border-left-color:var(--green-2);background:var(--mint)}
+.content{padding:36px 52px 64px;min-width:0}
+
+h2{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.015em;
+  margin:52px 0 6px;padding-top:22px;border-top:1px solid var(--line);line-height:1.35}
+h2:first-child{margin-top:0;padding-top:0;border-top:none}
+h2 .no{color:var(--green);margin-right:9px}
+h3{font-size:15.5px;font-weight:600;margin:30px 0 8px}
+h4{font-size:13.5px;font-weight:600;margin:20px 0 6px;color:var(--ink)}
+p{margin:0 0 11px}
+.lede{font-size:14px;color:var(--muted);margin-bottom:20px;max-width:760px}
+ul,ol{margin:8px 0 14px;padding-left:20px}
+li{margin-bottom:5px}
+code{font-family:var(--mono);font-size:12px;background:#F1EFE8;padding:1px 5px;border-radius:4px;
+  color:#3D3C38}
+
+table{width:100%;border-collapse:collapse;margin:14px 0 18px;font-size:12.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{background:#F1EFE8;color:#4A4944;font-weight:600;font-size:12px;white-space:nowrap}
+td.k{font-weight:600;color:var(--green);white-space:nowrap}
+td.no{color:var(--hint);font-variant-numeric:tabular-nums;white-space:nowrap;width:34px}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#FBFBF8}
+.tbl-note{font-size:11.5px;color:var(--hint);margin:-12px 0 20px;line-height:1.6}
+.tw{overflow-x:auto}
+
+.callout{border-left:3px solid var(--green);background:var(--mint);padding:12px 16px;
+  border-radius:0 8px 8px 0;margin:14px 0 18px;font-size:13px}
+.callout.amber{border-left-color:var(--amber-ink);background:var(--amber)}
+.callout.red{border-left-color:var(--red-ink);background:var(--red)}
+.callout.blue{border-left-color:var(--blue-ink);background:var(--blue)}
+.callout b{font-weight:600}
+.callout p:last-child{margin-bottom:0}
+.callout .h{display:block;font-weight:600;margin-bottom:4px;font-size:12.5px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:16px 0 20px}
+.card{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--paper)}
+.card .eyebrow{font-size:10.5px;letter-spacing:.09em;color:var(--hint);margin-bottom:6px}
+.card h4{margin:0 0 6px;font-size:14px}
+.card p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.65}
+.card.g{background:var(--mint);border-color:var(--mint-2)}
+.card.a{background:var(--amber);border-color:var(--amber-line)}
+.card.r{background:var(--red);border-color:var(--red-line)}
+
+.arch{margin:20px 0 8px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.layer{display:grid;grid-template-columns:118px minmax(0,1fr);border-bottom:1px solid var(--line)}
+.layer:last-child{border-bottom:none}
+.layer .lab{padding:13px 14px;background:#F1EFE8;font-size:11.5px;font-weight:600;
+  color:#4A4944;display:flex;align-items:center;letter-spacing:.02em}
+.layer .bd{padding:12px 16px}
+.layer .bd .t{font-size:13px;font-weight:600;margin-bottom:5px}
+.layer .bd .d{font-size:12.5px;color:var(--muted);line-height:1.7}
+.layer .bd .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{font-size:11px;padding:2px 7px;border-radius:4px;background:#F1EFE8;color:#5F5E5A}
+.tag.g{background:var(--mint);color:var(--green)}
+.tag.b{background:var(--blue);color:var(--blue-ink)}
+.tag.a{background:var(--amber);color:var(--amber-ink)}
+.tag.p{background:var(--purple);color:var(--purple-ink)}
+.layer.zm{background:#FCFCFA}
+.layer.llm{background:#FAFEFC}
+.layer.llm .lab{background:var(--mint);color:var(--green)}
+.layer.gate{background:#FFFCFC}
+.layer.gate .lab{background:var(--red);color:var(--red-ink)}
+
+.gates{counter-reset:g;margin:18px 0}
+.gate{border:1px solid var(--line);border-left:3px solid var(--green-2);border-radius:0 10px 10px 0;
+  padding:13px 16px 13px 18px;margin-bottom:9px;background:#FCFCFA;position:relative}
+.gate:before{counter-increment:g;content:"闸 " counter(g);position:absolute;left:-1px;top:-1px;
+  font-size:10px;font-weight:600;letter-spacing:.06em;background:var(--green-2);color:#fff;
+  padding:2px 7px;border-radius:0 0 6px 0}
+.gate h4{margin:12px 0 5px}
+.gate p{font-size:12.5px;color:var(--muted);margin:0 0 5px}
+.gate .stop{color:var(--red-ink);font-weight:600}
+
+.hard{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:9px;margin:16px 0 20px;
+  counter-reset:h}
+.hard div{border:1px solid var(--line);border-left:3px solid var(--green-2);border-radius:0 8px 8px 0;
+  padding:10px 13px;background:#FCFCFA;font-size:12.5px;line-height:1.6;position:relative}
+.hard div:before{counter-increment:h;content:counter(h);position:absolute;left:-1px;top:-1px;
+  font-size:10px;font-weight:600;background:var(--green-2);color:#fff;padding:1px 6px;border-radius:0 0 6px 0}
+.hard div b{color:var(--green)}
+
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:10px;margin:16px 0 20px}
+.kpi div{border-left:3px solid var(--green);background:var(--mint);padding:11px 13px;border-radius:0 9px 9px 0}
+.kpi div.a{border-left-color:var(--amber-ink);background:var(--amber)}
+.kpi .n{font-size:19px;font-weight:600;color:var(--green);letter-spacing:-.02em;line-height:1.2}
+.kpi div.a .n{color:var(--amber-ink)}
+.kpi .l{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+
+.foot{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:11.5px;color:var(--hint);line-height:1.8}
+.foot b{color:var(--muted)}
+
+@media(max-width:900px){
+  .body{grid-template-columns:1fr}
+  .toc{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:4px;padding:14px 18px}
+  .toc .t{width:100%}
+  .toc a{border-left:none;background:#F1EFE8}
+  .content{padding:26px 20px 48px}
+  .cover{padding:32px 20px 26px}
+  .cover h1{font-size:25px}
+  .layer{grid-template-columns:1fr}
+  .layer .lab{border-bottom:1px solid var(--line)}
+}
+@media print{
+  body{background:#fff;font-size:10.5px}
+  .wrap{border:none;max-width:none}
+  .toc{display:none}
+  .body{grid-template-columns:1fr}
+  .content{padding:0 8mm}
+  .cover{padding:0 8mm 14px}
+  h2{page-break-after:avoid;font-size:17px;margin-top:26px}
+  h3,h4{page-break-after:avoid}
+  table,.arch,.callout,.gate,.card,.hard div{page-break-inside:avoid}
+  @page{size:A4;margin:12mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="cover">
+  <div class="kicker">Technical Specification · Module 05</div>
+  <h1>病历生成智能体<br>技术参数说明书</h1>
+  <p class="sub">重庆市巴南区人民医院宫颈癌诊疗综合场景 AI 智能体及数据驾驶舱一体化建设项目<br>
+  对应招标文件「五、病历生成智能体应用」</p>
+  <dl class="meta">
+    <div><dt>文档版本</dt><dd>V1.0 · 技术交流稿</dd></div>
+    <div><dt>编制日期</dt><dd>2026-09-18</dd></div>
+    <div><dt>交付形态</dt><dd>自研产品 · 院内私有化部署</dd></div>
+    <div><dt>文档用途</dt><dd>信息科技术交流 / 接口与资源澄清</dd></div>
+  </dl>
+  <div class="chips">
+    <span class="chip g">全栈院内私有化</span>
+    <span class="chip g">AI 只到草稿，归档属于医师</span>
+    <span class="chip g">数值与固定段落不进模型</span>
+    <span class="chip a">一期不做语音采集</span>
+    <span class="chip r">本文件含 6 项阻塞待确认 · 1 项需求缺口</span>
+  </div>
+</header>
+
+<div class="body">
+
+<nav class="toc">
+  <div class="t">目录</div>
+  <a href="#s1">一、模块定位与需求溯源</a>
+  <a href="#s2">二、总体技术架构</a>
+  <a href="#s3">三、功能技术参数</a>
+  <a href="#s4">四、八条硬约束与六道闸门</a>
+  <a href="#s5">五、接口技术参数</a>
+  <a href="#s6">六、部署架构与资源要求</a>
+  <a href="#s7">七、性能指标与验收口径</a>
+  <a href="#s8">八、安全合规与权限体系</a>
+  <a href="#s9">九、交付物与质保</a>
+  <a href="#s10">十、待确认事项</a>
+  <a href="#s11">十一、与中台及其他模块的关系</a>
+</nav>
+
+<main class="content">
+
+<!-- ---------- 一 ---------- -->
+<h2 id="s1"><span class="no">一</span>模块定位与需求溯源</h2>
+
+<p class="lede">本模块解决一件事：把院内已有的业务数据，转成一份<b>每句有出处、缺口看得见</b>的病历初稿，交给医师修订。<b>系统不写诊断、不下结论、不自动归档。</b></p>
+
+<h3>1.1 招标条款响应总览</h3>
+<p>招标文件「五」共四项条款，拆解为 21 条可验证要求，逐条响应如下。其中第 21 条为<b>招标未明确的需求缺口</b>，已单独标出。</p>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:27%"><col style="width:48%"><col style="width:19%"></colgroup>
+<thead><tr><th>#</th><th>招标要求</th><th>技术响应</th><th>结论</th></tr></thead>
+<tbody>
+<tr><td class="no">1</td><td>部署于 AI 智能体中台之上</td><td>作为中台应用运行，复用中台算力调度、模型纳管、服务网关与审计体系，不单独建设推理服务</td><td class="k">满足</td></tr>
+<tr><td class="no">2</td><td>面向门诊、住院、手术、放化疗、随访场景</td><td>按场景配置文书类型与模板：门诊病历、入院记录、病程记录、手术记录、放化疗记录、随访记录</td><td class="k">满足</td></tr>
+<tr><td class="no">3</td><td>通过中台统一数据接口聚合多源业务数据</td><td>全部取数经中台网关，不单独直连业务库，不建立旁路通道</td><td class="k">满足</td></tr>
+<tr><td class="no">4</td><td>聚合 HIS、LIS、PACS、超声、手术记录等多源数据</td><td>按字段白名单近实时读取：患者与就诊信息、医嘱、检验结果、影像报告、超声报告、手术与麻醉记录</td><td class="k">满足</td></tr>
+<tr><td class="no">5</td><td>自动提取病史、体征、检验、影像、病理、治疗方案、随访信息</td><td>按文书类型映射字段，提取为事实条目，每条标注来源类型与证据等级</td><td class="k">满足</td></tr>
+<tr><td class="no">6</td><td>按照病历书写规范及临床指南生成</td><td>模板骨架遵循院内病历书写规范；指南符合性作为独立校验规则，不参与生成</td><td class="k">满足</td></tr>
+<tr><td class="no">7</td><td>生成入院记录初稿</td><td>支持。全身体格检查等固定段落走结构化勾选，不经模型</td><td class="k">满足</td></tr>
+<tr><td class="no">8</td><td>生成病程记录初稿</td><td>支持。支持病程链上下文复用，前次记录可继承</td><td class="k">满足</td></tr>
+<tr><td class="no">9</td><td>生成诊疗小结初稿</td><td>支持</td><td class="k">满足</td></tr>
+<tr><td class="no">10</td><td>生成随访记录初稿</td><td>支持，与模块八随访管理共用随访数据与方案库</td><td class="k">满足</td></tr>
+<tr><td class="no">11</td><td>区分必填与选填字段</td><td>按文书类型定义必填项清单；必填缺失即标缺口并阻断归档路径</td><td class="k">满足</td></tr>
+<tr><td class="no">12</td><td>提供医师人工编辑入口</td><td>全文可编辑，逐次编辑留痕，支持版本对比</td><td class="k">满足</td></tr>
+<tr><td class="no">13</td><td>AI 仅输出辅助初稿</td><td>产品硬约束，系统最高状态为「可复核草稿」</td><td class="k">满足</td></tr>
+<tr><td class="no">14</td><td>必须经医师审核修订后才可归档</td><td>系统不触发归档动作；归档在院内系统内由医师完成</td><td class="k">满足</td></tr>
+<tr><td class="no">15</td><td>完整记录 AI 生成内容</td><td>每次生成留快照，含句级事实映射，可回溯每句依据</td><td class="k">满足</td></tr>
+<tr><td class="no">16</td><td>完整记录人工修改痕迹</td><td>逐次编辑留快照，支持 diff 对比与回滚</td><td class="k">满足</td></tr>
+<tr><td class="no">17</td><td>全程可溯源审计</td><td>取数、生成、修改、回写全链路留痕，日志不可篡改</td><td class="k">满足</td></tr>
+<tr><td class="no">18</td><td>支持宫颈癌专科病历模板配置维护</td><td>专科模板库，科室可视化配置，支持新增、修改、停用</td><td class="k">满足</td></tr>
+<tr><td class="no">19</td><td>模板版本管控</td><td>模板变更留版本、可回滚；历史病历按生成时的模板版本回溯</td><td class="k">满足</td></tr>
+<tr><td class="no">20</td><td>支持临床术语库更新</td><td>术语库可视化维护，支持批量导入与版本管理</td><td class="k">满足</td></tr>
+<tr><td class="no">21</td><td><b>（需求缺口）</b>主诉、现病史、既往史等问诊信息的数据来源</td><td>招标未明确。HIS、LIS、PACS 等系统数据<b>不包含问诊内容</b>；若仅依赖系统数据，入院记录初稿将缺失主诉与现病史两大段</td><td style="color:var(--red-ink);font-weight:600">待明确</td></tr>
+</tbody>
+</table>
+</div>
+<p class="tbl-note">第 21 条不是偏离，是<b>需求本身存在空白</b>，详见下方说明。</p>
+
+<div class="callout red">
+  <span class="h">必须先厘清的需求缺口：入院记录的主诉与现病史从哪里来</span>
+  <p>招标「五（一）」列出的数据源是 HIS、LIS、PACS、超声、手术记录——<b>全部是系统记录，没有一项包含问诊内容</b>。而「五（二）」要求生成「入院记录」初稿，入院记录的主诉、现病史、既往史、个人史、家族史，临床上都来自问诊，系统里没有。</p>
+  <p style="margin-top:6px">三种处理方式，成本与效果差异明显，<b>需院方明确选哪一种</b>：</p>
+  <p style="margin-top:6px">① <b>医师结构化录入补充</b>（推荐）——医师在界面上按槽位填写问诊结果，系统负责组织成文。增加少量录入工作量，但完全可控，不引入新的合规问题。</p>
+  <p>② <b>引入语音采集</b>——复用模块七（超声语音报告）的院内 ASR 能力，医师口述问诊结果。效果最好，但超出「五」的招标范围，且需另行确认录音合规（伦理与医务处书面意见）。</p>
+  <p>③ <b>生成时留空</b>——初稿不含问诊段落，由医师在院内系统内补写。工作量最省，但入院记录初稿的价值大幅缩水，医师大概率会认为「还不如自己写」。</p>
+</div>
+
+<h3>1.2 系统定位与三条底线</h3>
+
+<div class="cards">
+  <div class="card g">
+    <div class="eyebrow">底线 01</div>
+    <h4>AI 只到草稿，归档属于医师</h4>
+    <p>系统最高状态为「可复核草稿」，仅回写院内系统草稿区。修订、审核、归档、签名全部由医师在院内系统内完成，系统不触发任何归档动作。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">底线 02</div>
+    <h4>数值与固定段落不进模型</h4>
+    <p>生命体征、检验值、剂量、单位走确定性槽位回填；全身体格检查、个人史、婚育史、家族史走结构化勾选。这些内容<b>不经过语言模型</b>。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">底线 03</div>
+    <h4>未提及不得改写为「正常」</h4>
+    <p>医师未勾选、系统未取到的内容，一律显示为缺口，不得改写为「未见异常」「否认」「阴性」等否定表述。缺什么就显示缺什么。</p>
+  </div>
+</div>
+
+<div class="callout red">
+  <span class="h">边界外声明（永久不做）</span>
+  <p><b>不做诊断与治疗建议生成。</b>系统不生成诊断结论、鉴别诊断、用药建议、治疗方案。一旦识别到此类生成意图，<b>停止文书流程</b>而非降级输出。</p>
+  <p style="margin-top:6px"><b>不做跨患者数据训练。</b>模型永远看不到其他患者的真实病历。院内数据用于模型训练需另行立项、另行授权。</p>
+  <p style="margin-top:6px"><b>不做自动归档、自动签名、代签。</b>这是产品形态的硬边界，不接受配置项开关。</p>
+</div>
+
+<div class="callout amber">
+  <span class="h">一期能力边界（可演进，非永久排除）</span>
+  <p><b>不做语音采集与转写。</b>招标「五」未要求语音输入，一期输入为「系统数据 + 医师结构化录入」。若院方希望引入语音（见 §1.1 第 21 条方案②），建议复用模块七的院内 ASR 能力，作为独立工作项另行确认，不并入本模块一期范围。</p>
+  <p style="margin-top:6px"><b>不做病历质控。</b>质控规则库、缺陷闭环管理属招标「六、病历质控智能体应用」范围，本模块仅向质控模块输出结构化数据。</p>
+</div>
+
+<!-- ---------- 二 ---------- -->
+<h2 id="s2"><span class="no">二</span>总体技术架构</h2>
+
+<p class="lede">架构分八层。核心设计是把「不能容错的内容」和「需要语言组织的内容」彻底分开——前者走模板与槽位，后者才交给模型，两者之间由独立校验层隔离。</p>
+
+<div class="arch">
+
+  <div class="layer">
+    <div class="lab">接入层</div>
+    <div class="bd">
+      <div class="t">多源数据接入</div>
+      <div class="d">全部取数经中台统一数据接口，按字段白名单近实时读取。不单独直连业务库，不建立旁路通道。医师结构化录入入口同层接入。</div>
+      <div class="tags"><span class="tag g">中台统一接口</span><span class="tag">字段白名单</span><span class="tag">按需取数</span></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="lab">身份锚定</div>
+    <div class="bd">
+      <div class="t">患者 · 就诊 · 文书类型 三方锁定</div>
+      <div class="d">三者任一缺失即阻断，禁止进入取数与生成环节。这是防止多患者病历同场的第一道闸，也是整套架构的前置条件。</div>
+      <div class="tags"><span class="tag r">缺一即阻断</span><span class="tag">session 绑定</span></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="lab">事实层</div>
+    <div class="bd">
+      <div class="t">统一事实账本</div>
+      <div class="d">每条事实含 fact_id、来源类型、证据等级（A/B/C）、确认状态、时间戳、原文切片。冲突保留为 conflict，不由模型抹平。事实账本是后续所有生成动作的唯一输入。</div>
+      <div class="tags"><span class="tag p">fact_id 可溯源</span><span class="tag">证据分级</span><span class="tag">冲突保留</span></div>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="lab">缺口层</div>
+    <div class="bd">
+      <div class="t">缺口检测与补问</div>
+      <div class="d">按文书类型必填项清单比对当前事实账本，输出缺口清单。补问每轮 3–7 个中性问题，<b>不提供候选答案</b>，允许回答「不详／未查／待回报」。</div>
+      <div class="tags"><span class="tag">必填项比对</span><span class="tag">最多两轮</span><span class="tag a">不给候选答案</span></div>
+    </div>
+  </div>
+
+  <div class="layer zm">
+    <div class="lab">零模型区</div>
+    <div class="bd">
+      <div class="t">模板引擎 + 确定性槽位回填</div>
+      <div class="d">生命体征、检验值、剂量、单位走槽位回填；全身体格检查、个人史、婚育史、家族史走结构化勾选。<b>这一段不经过任何语言模型。</b></div>
+      <div class="tags"><span class="tag">模板骨架</span><span class="tag">数值槽位</span><span class="tag">逐项勾选</span><span class="tag">零幻觉</span></div>
+    </div>
+  </div>
+
+  <div class="layer llm">
+    <div class="lab">受控生成区</div>
+    <div class="bd">
+      <div class="t">受控语言组织</div>
+      <div class="d">仅对已确认事实做语言组织，覆盖现病史、专科情况、诊疗经过、出院医嘱等需要时序与语言逻辑的段落。每句映射 fact_id，无法映射的句子不允许产出。</div>
+      <div class="tags"><span class="tag g">句级溯源</span><span class="tag g">不接受新事实</span><span class="tag g">数值禁写</span></div>
+    </div>
+  </div>
+
+  <div class="layer gate">
+    <div class="lab">校验层</div>
+    <div class="bd">
+      <div class="t">独立校验（上下文隔离）</div>
+      <div class="d">不带生成过程的对话历史，独立检查：无源陈述、事实冲突、诊断强度升级、左右侧／时间线／单位一致性。<b>生成模块不能自审</b>——自审等于没有校验。</div>
+      <div class="tags"><span class="tag r">上下文隔离</span><span class="tag r">诊断强度检查</span></div>
+    </div>
+  </div>
+
+  <div class="layer gate">
+    <div class="lab">交互与回写</div>
+    <div class="bd">
+      <div class="t">医师逐项确认 → 仅写草稿区</div>
+      <div class="d">医师逐项勾选确认（病史来源、查体、报告、诊断、计划、高风险事件）。存在冲突、关键缺口或未确认项时，<b>禁止回写</b>，走阻断出口。</div>
+      <div class="tags"><span class="tag r">逐项确认</span><span class="tag r">仅写草稿</span><span class="tag r">不触发归档</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="callout blue">
+  <span class="h">横切能力（贯穿全部层级）</span>
+  <p>权限管控 · 全操作审计 · 版本快照 · 模板与术语库版本 · 系统监控告警。这五项不归属单一层，但每一层都必须调用，缺失任一项即视为未完成交付。</p>
+</div>
+
+<!-- ---------- 三 ---------- -->
+<h2 id="s3"><span class="no">三</span>功能技术参数</h2>
+
+<h3>3.1 多源数据聚合</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:48%"><col style="width:32%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">取数方式</td><td>中台统一数据接口，字段白名单按需读取</td><td>禁止批量同步全量数据</td></tr>
+<tr><td class="k">数据源</td><td>HIS、LIS、PACS、超声系统、手术麻醉系统、EMR</td><td>实际可取的字段以院方授权为准</td></tr>
+<tr><td class="k">患者范围</td><td>严格限定当前患者 + 当前就诊</td><td>跨就诊数据需显式授权且单独标注</td></tr>
+<tr><td class="k">实时性</td><td>近实时（设计目标 ≤ 3 s 完成单次取数）</td><td>取决于院方接口响应能力</td></tr>
+<tr><td class="k">状态标记</td><td>每条数据附 <code>verified</code> / <code>preliminary</code> 状态与采集时间</td><td>只有 verified 数据可作为冲突判定锚</td></tr>
+<tr><td class="k">失败降级</td><td>超时重试 1 次；仍失败则降级为医师手工录入，该来源事实标 <code>unverified</code></td><td><b>unverified 事实不得作为冲突判定锚</b></td></tr>
+<tr><td class="k">取数审计</td><td>记录患者、就诊、字段、调用人、时间与结果状态</td><td>保存周期按院方要求</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.2 事实账本与证据分级</h3>
+<p>每条输入先标注来源与证据等级，再进入统一事实账本。<b>采集终端不能给事实的等级加分</b>——录音笔、麦克风、录入界面都只是入口，不改变证据等级。</p>
+<div class="tw">
+<table>
+<colgroup><col style="width:14%"><col style="width:26%"><col style="width:60%"></colgroup>
+<thead><tr><th>等级</th><th>来源</th><th>使用限制</th></tr></thead>
+<tbody>
+<tr><td class="k">A 级</td><td>HIS / LIS / PACS 等系统已核实记录</td><td>可作为冲突判定锚；可作为查体结果、检验结论直接引用</td></tr>
+<tr><td class="k">B 级</td><td>医师录入与医师陈述</td><td>可承载查体、判断、计划；数值须经确认后进入确定性槽位</td></tr>
+<tr><td class="k">C 级</td><td>患者与家属陈述</td><td><b>永不升格为查体结果或诊断</b>；仅用于丰富主诉与现病史</td></tr>
+</tbody>
+</table>
+</div>
+<h4>事实条目的字段构成</h4>
+<p>每条事实包含：<code>fact_id</code>、<code>content</code>、<code>source_type</code>、<code>evidence_level</code>（A/B/C）、<code>fact_status</code>、事件时间、原文切片。</p>
+<p><b>source_type</b>：患者陈述 / 家属陈述 / 医师查体 / 原始报告 / 医师评估 / 已执行操作 / 计划或医嘱 / 待回报结果。</p>
+<p><b>fact_status</b>：确认存在 / 确认不存在 / 未询问 / 不详 / 未检查 / 待回报 / 不适用 / <b>冲突</b> / 待医师确认。</p>
+<div class="callout">
+  <p><b>无法判定 source_type 时</b>，默认归入最低等级 C 并标记「待医师确认」，<b>禁止升格使用</b>。宁可按低等级处理，不可按高等级使用。</p>
+</div>
+
+<h3>3.3 缺口检测与补问</h3>
+<ul>
+  <li>输入：文书类型必填项清单 + 当前事实账本</li>
+  <li>输出：每轮 3–7 个中性问题，<b>不提供候选答案</b>——提供候选答案会把问诊变成勾选，诱导医师选「正常」</li>
+  <li>允许回答「不详 / 未查 / 待回报」，且这些回答本身就是有效答案</li>
+  <li><b>最多补问两轮</b>。两轮后仍有关键缺口，停止生成，状态保持「待复核」，禁止进入草稿回写</li>
+</ul>
+<div class="callout amber">
+  <p>补问上限是刻意设计的。开放式反复追问会把医师的耐心耗光，结果是医师开始敷衍勾选——那比不补问更危险。</p>
+</div>
+
+<h3>3.4 固定段落与数值的零模型处理</h3>
+<p>这是本模块最关键的技术判断，也是实测数据支撑最强的一条。</p>
+
+<div class="callout blue">
+  <span class="h">实测基线（来源：85 份真实脱敏住院病历语料）</span>
+  <p>全身体格检查段落<b>平均 857 字，占整份入院记录的 52%</b>，长度区间仅 837–907 字，68 份样本方差仅 70——几乎逐字相同。这说明它是<b>逐字复制的固定模板</b>，而不是需要语言组织的内容。</p>
+  <p style="margin-top:6px">这 857 个字不需要文采，需要的是<b>逐项勾选</b>。</p>
+</div>
+
+<div class="callout red">
+  <span class="h">最容易出事故的一处</span>
+  <p>若由模型自动生成「巩膜无黄染、双侧瞳孔等大等圆、心肺腹未见异常」而医师并未实际检查，<b>即为凭空生成查体记录</b>。这类错误读起来完全合理，肉眼极难发现，但属于病历造假范畴。</p>
+  <p style="margin-top:6px"><b>该段落必须走结构化勾选表单，逐项选择「正常 / 异常描述 / 未查」，禁止默认全部正常。</b></p>
+</div>
+
+<h4>零模型区覆盖范围</h4>
+<div class="tw">
+<table>
+<colgroup><col style="width:26%"><col style="width:38%"><col style="width:36%"></colgroup>
+<thead><tr><th>内容</th><th>处理方式</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">全身体格检查</td><td>逐项勾选：正常 / 异常描述 / 未查</td><td>禁止默认全部正常；选「未查」则生成时标缺口</td></tr>
+<tr><td class="k">生命体征</td><td>槽位回填（T / P / R / BP）</td><td>数值与单位由已确认数据填充</td></tr>
+<tr><td class="k">检验值与剂量</td><td>槽位回填</td><td>模型输出中不得出现任何数值</td></tr>
+<tr><td class="k">个人史 / 婚育史 / 家族史</td><td>结构化字段记录</td><td>按字段而非由模型补写</td></tr>
+<tr><td class="k">专科查体固定段</td><td>模板骨架 + 槽位</td><td>宫颈癌专科查体项按科室模板配置</td></tr>
+<tr><td class="k">诊断名称</td><td>引用已确认诊断，不由模型生成</td><td>诊断由医师录入，系统只做规范表述与一致性校验</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.5 受控语言生成</h3>
+<p>这是唯一使用语言模型的环节，约束如下：</p>
+<ul>
+  <li><b>输入受限</b>：模型只能看到事实账本中已确认的事实，看不到原始数据全量、看不到其他患者数据、看不到未确认的槽位</li>
+  <li><b>输出受限</b>：每个句子必须映射至少一个 fact_id；无法映射的句子不允许产出</li>
+  <li><b>数值禁写</b>：模型输出中不得出现任何数值，数值位以槽位占位符呈现，由确定性回填</li>
+  <li><b>不新增事实</b>：不得补充事实账本中没有的内容；缺口以「【待补充】」占位呈现</li>
+  <li><b>不改写否定</b>：未提及的内容不得改写为「未见异常」「否认」「阴性」</li>
+  <li><b>不产出诊断与治疗建议</b>：触发即停止文书流程</li>
+</ul>
+<h4>受控生成区覆盖的段落</h4>
+<p>现病史、专科情况、诊疗经过、病程记录叙事段、诊疗小结、出院医嘱、随访记录。</p>
+
+<h3>3.6 独立校验</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+<thead><tr><th>校验类别</th><th>校验内容</th></tr></thead>
+<tbody>
+<tr><td class="k">无源陈述</td><td>报告中是否存在无事实支撑的句子。发现任一即禁止回写</td></tr>
+<tr><td class="k">事实冲突</td><td>同一事实的多次记录是否存在矛盾。冲突保留并提示，<b>不自动抹平</b></td></tr>
+<tr><td class="k">诊断强度升级</td><td>是否存在把「考虑」写成「确诊」、把「待排」写成「除外」等强度升级</td></tr>
+<tr><td class="k">左右侧一致性</td><td>部位描述与检查记录中的左右侧是否一致</td></tr>
+<tr><td class="k">时间线一致性</td><td>症状起始、就诊、检查、用药的时序是否矛盾</td></tr>
+<tr><td class="k">单位一致性</td><td>检验值单位与参考范围是否匹配</td></tr>
+<tr><td class="k">必填项完整性</td><td>按文书类型校验必填字段</td></tr>
+<tr><td class="k">否定表述合规</td><td>是否存在未提及却写成「无 / 否认 / 正常」的段落</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout red">
+  <p><b>校验模块不携带生成过程的上下文。</b>生成模块不能自审——自审等于没有校验。这是架构级约束，不是配置项。</p>
+</div>
+
+<h3>3.7 医师逐项确认与回写</h3>
+<ul>
+  <li>医师逐项勾选确认，覆盖：病史来源、查体、报告、诊断、计划、高风险事件</li>
+  <li><b>无源句子不可勾选</b>；不得用一次性笼统确认替代逐项确认</li>
+  <li>确认完成后，以「草稿」状态回写院内系统草稿区，<b>非「已签署」</b></li>
+  <li>存在冲突、关键缺口未解决、或存在未确认项 → <b>禁止回写</b>，走阻断出口</li>
+  <li>系统不触发归档动作；医师在院内系统内的修改、复核、归档责任不可替代</li>
+</ul>
+
+<h3>3.8 模板与术语库管理</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:22%"><col style="width:48%"><col style="width:30%"></colgroup>
+<thead><tr><th>参数项</th><th>技术指标</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">模板结构</td><td>固定骨架 + 可变叙事段 + 槽位定义</td><td>骨架走模板引擎，叙事段走受控生成</td></tr>
+<tr><td class="k">模板范围</td><td>宫颈癌专科模板，按文书类型与场景配置</td><td>具体文书数量待确认（见 §10 选型项 B3）</td></tr>
+<tr><td class="k">维护方式</td><td>科室可视化配置，支持新增、修改、停用</td><td>无需开发介入</td></tr>
+<tr><td class="k">版本管控</td><td>模板变更留版本、可回滚</td><td>历史病历按生成时的模板版本回溯</td></tr>
+<tr><td class="k">术语库</td><td>可视化维护，支持批量导入与版本管理</td><td>临床术语、诊断名称、药品名称、检验项目</td></tr>
+<tr><td class="k">术语库更新</td><td>更新留版本，历史文书不受影响</td><td>已归档文书不随术语库变更而改写</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>3.9 痕迹留存与版本回溯</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:26%"><col style="width:74%"></colgroup>
+<thead><tr><th>留存对象</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">取数记录</td><td>谁在何时取了什么字段、结果状态</td></tr>
+<tr><td class="k">事实账本快照</td><td>生成时刻的事实集合，含每条事实的来源与状态</td></tr>
+<tr><td class="k">AI 生成稿</td><td>每次生成留快照，含<b>句级事实映射</b>，可回溯每句依据</td></tr>
+<tr><td class="k">医师修改稿</td><td>逐次编辑留快照，支持 diff 对比与回滚</td></tr>
+<tr><td class="k">确认记录</td><td>逐项确认的操作人与时间</td></tr>
+<tr><td class="k">回写记录</td><td>回写时间、目标系统、状态标记、操作人</td></tr>
+<tr><td class="k">模板与术语库版本</td><td>生成时使用的模板版本号，随文书一同留存</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ---------- 四 ---------- -->
+<h2 id="s4"><span class="no">四</span>八条硬约束与六道闸门</h2>
+
+<p class="lede">以下八条是不可妥协的产品约束，不接受配置项开关；六道闸门是它们的执行机制。</p>
+
+<h3>4.1 八条硬约束</h3>
+<div class="hard">
+  <div><b>数值不经过模型</b>，走确定性槽位回填</div>
+  <div><b>模型永远看不到其他患者的真实病历</b></div>
+  <div><b>不自动提交</b>，最高状态只到「可复核草稿」</div>
+  <div><b>不产出诊断与治疗建议</b>，触发即停止文书流程</div>
+  <div><b>患者陈述永不能升格</b>为查体结果或诊断</div>
+  <div><b>模型均本地部署</b>，不调用任何外部接口</div>
+  <div><b>未提及不得改写</b>为「无 / 否认 / 正常」</div>
+  <div><b>生成与校验必须上下文隔离</b>，不得自审</div>
+</div>
+
+<h3>4.2 六道闸门</h3>
+<div class="gates">
+
+  <div class="gate">
+    <h4>身份锚定：患者 · 就诊 · 文书类型</h4>
+    <p>三者任一缺失即阻断，禁止进入取数与生成环节。这是防止多患者病历同场的第一道闸，也是整套架构的前置条件。</p>
+    <p class="stop">未锚定时，取数、生成、录入入口全部拒绝接入。</p>
+  </div>
+
+  <div class="gate">
+    <h4>数值与固定段落不进模型</h4>
+    <p>生命体征、检验值、剂量、单位走槽位回填；全身体格检查、个人史、婚育史、家族史走结构化勾选。模型输出中不得出现任何数值。</p>
+    <p class="stop">数值无处可填时输出「【待补充】」占位，严禁自行填充或推断。</p>
+  </div>
+
+  <div class="gate">
+    <h4>证据等级不可升格</h4>
+    <p>患者陈述永不能升格为查体结果或诊断；无法判定来源类型时默认归入最低等级 C 并标记待确认。</p>
+    <p class="stop">禁止把 C 级事实按 B 级或 A 级使用，禁止升格后作为判定依据。</p>
+  </div>
+
+  <div class="gate">
+    <h4>生成与校验上下文隔离</h4>
+    <p>校验模块不携带生成过程的对话历史，独立判断句子是否有出处。生成模块不能自审。</p>
+    <p class="stop">发现任一无源陈述、冲突或诊断强度升级，禁止回写。</p>
+  </div>
+
+  <div class="gate">
+    <h4>医师逐项确认</h4>
+    <p>逐项勾选确认，覆盖病史来源、查体、报告、诊断、计划、高风险事件。无源句子不可勾选。</p>
+    <p class="stop">不得用一次性笼统确认替代逐项确认；存在未确认项时状态停在「待复核」。</p>
+  </div>
+
+  <div class="gate">
+    <h4>阻断而非降级</h4>
+    <p>存在冲突、关键缺口未解决、或未确认项时，禁止回写，走阻断出口。</p>
+    <p class="stop">阻断是产品能力，不是异常。该拦下来的没拦下来，才是失败。</p>
+  </div>
+
+</div>
+
+<!-- ---------- 五 ---------- -->
+<h2 id="s5"><span class="no">五</span>接口技术参数</h2>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:17%"><col style="width:20%"><col style="width:38%"><col style="width:25%"></colgroup>
+<thead><tr><th>对接对象</th><th>协议 / 方式</th><th>数据流向与内容</th><th>备注</th></tr></thead>
+<tbody>
+<tr><td class="k">HIS</td><td>HL7 v2.x / RESTful / 数据视图</td><td>取：患者、就诊、医嘱、手术、门诊记录。写：病历草稿</td><td>写入范围以院方授权为准</td></tr>
+<tr><td class="k">EMR 电子病历</td><td>RESTful / 数据库视图</td><td>写：病历草稿；供医师在院内系统内修订归档</td><td><b>需确认草稿区字段与状态标记方式</b></td></tr>
+<tr><td class="k">LIS</td><td>HL7 v2.x / RESTful</td><td>取：检验申请与结果（含参考范围与异常标记）</td><td>单位与参考范围须一并取回</td></tr>
+<tr><td class="k">PACS</td><td>DICOM / RESTful</td><td>取：影像检查信息与<b>已签发报告文本</b></td><td><b>图像不进推理链</b>，只用报告文本</td></tr>
+<tr><td class="k">超声系统</td><td>RESTful / 厂商接口</td><td>取：超声检查报告</td><td>与模块七共用取数通道</td></tr>
+<tr><td class="k">手术麻醉系统</td><td>RESTful / 数据视图</td><td>取：手术记录、麻醉记录、术中情况</td><td>按需</td></tr>
+<tr><td class="k">AI 智能体中台</td><td>中台服务网关</td><td>模型注册、算力调度、监控指标上报、审计日志归集</td><td>复用中台能力，不重复建设</td></tr>
+<tr><td class="k">病历质控模块（六）</td><td>中台数据接口</td><td>输出：结构化病历数据、必填项清单、缺口记录</td><td>供质控模块做规则校验</td></tr>
+<tr><td class="k">随访模块（八）</td><td>中台数据接口</td><td>取：随访方案与随访记录；写：随访记录草稿</td><td>随访数据双向共用</td></tr>
+<tr><td class="k">数据驾驶舱</td><td>中台数据接口</td><td>上报：文书生成量、采纳率、缺口数、校验拦截数</td><td>指标口径与驾驶舱模块统一</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>接口通用要求</h4>
+<ul>
+  <li>全部接口具备鉴权、限流、重试、异常处理与超时降级</li>
+  <li>接口调用全量留痕，日志含调用方、时间、参数摘要、结果状态</li>
+  <li>优先复用医院现有数据集成平台，不新建独立通道</li>
+  <li>所有对接服务统一纳入 AI 智能体中台网关管理</li>
+  <li>对接过程不干扰现有系统运行；上线前完成联调与压力测试，交付全套接口文档</li>
+</ul>
+
+<!-- ---------- 六 ---------- -->
+<h2 id="s6"><span class="no">六</span>部署架构与资源要求</h2>
+
+<h3>6.1 部署形态</h3>
+<ul>
+  <li><b>全栈容器化部署</b>，适配院内现有虚拟化与容器底座，充分利旧现有硬件</li>
+  <li><b>全栈院内私有化</b>：语言模型、服务、存储全部部署在院内网，无任何外部 API 调用</li>
+  <li>支持国产算力平台（鲲鹏 CPU / 昇腾 NPU），与中台统一算力池</li>
+  <li>服务无状态设计，可横向扩展</li>
+</ul>
+
+<h3>6.2 算力与资源（参考配置）</h3>
+<div class="callout">
+  <span class="h">算力归属（沿用项目已确认结论）</span>
+  <p>本模块算力<b>共用中台资源池，不单独采购 GPU 服务器</b>。病历生成的语言模型推理负载远低于通用对话场景，且对时延不敏感，单独采购性价比极低。</p>
+</div>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:24%"><col style="width:56%"></colgroup>
+<thead><tr><th>资源</th><th>参考规格</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">GPU（语言模型）</td><td>8–16 GB 显存（7B–14B 级，INT8 量化）</td><td>受控语言组织，推理负载轻；<b>共用中台资源池</b></td></tr>
+<tr><td class="k">CPU</td><td>8–16 核</td><td>服务层、模板引擎、槽位与校验逻辑</td></tr>
+<tr><td class="k">内存</td><td>32–64 GB</td><td>含模型加载与服务运行</td></tr>
+<tr><td class="k">存储</td><td>约 5–20 GB / 年（详见下）</td><td><b>本模块存储消耗极小</b></td></tr>
+<tr><td class="k">网络</td><td>院内千兆内网</td><td>不出院区，无需公网带宽</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout blue">
+  <span class="h">存储容量测算口径（供信息科核算）</span>
+  <p>单份入院记录约 3000 字 ≈ 6 KB（UTF-8）；计入事实账本、句级映射、多版本快照与审计日志，按 10 倍放大估算约 <b>60 KB / 份</b>。</p>
+  <p>按年 3 万份文书计算：<code>60 KB × 30,000 ≈ 1.8 GB / 年</code>。即使计入质控与驾驶舱的冗余副本，总量也在 20 GB / 年以内。</p>
+  <p><b>对比：</b>本模块无音频留存，存储消耗比模块七（超声语音，含音频）小两个数量级，不构成资源瓶颈。</p>
+</div>
+
+<!-- ---------- 七 ---------- -->
+<h2 id="s7"><span class="no">七</span>性能指标与验收口径</h2>
+
+<div class="kpi">
+  <div><div class="n">≤ 3 s</div><div class="l">单次取数耗时（设计目标）</div></div>
+  <div><div class="n">100%</div><div class="l">无源句子拦截率（硬约束）</div></div>
+  <div><div class="n">≥ 99.5%</div><div class="l">系统可用性（设计目标）</div></div>
+</div>
+
+<div class="tw">
+<table>
+<colgroup><col style="width:24%"><col style="width:22%"><col style="width:54%"></colgroup>
+<thead><tr><th>指标</th><th>设计目标</th><th>验收口径与前提</th></tr></thead>
+<tbody>
+<tr><td class="k">取数耗时</td><td>≤ 3 s</td><td>单次完整取数，诊室内网环境；取决于院方接口响应能力</td></tr>
+<tr><td class="k">无源句子拦截率</td><td><b>100%</b></td><td>硬约束，非性能指标。校验层发现任一即阻断回写</td></tr>
+<tr><td class="k">必填项缺口检出率</td><td><b>100%</b></td><td>硬约束。按文书类型必填项清单逐项比对</td></tr>
+<tr><td class="k">医师输入量</td><td>≤ 200 字 / 份</td><td>设计目标，指结构化录入与补充的字符数，不含确认操作。<b>需在试点期实测基线</b></td></tr>
+<tr><td class="k">草稿采纳率</td><td>试点期实测基线</td><td>定义待与科室共同确定（见 §10 验收项 C2）</td></tr>
+<tr><td class="k">系统可用性</td><td>≥ 99.5%</td><td>按院内运维窗口计算</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout red">
+  <span class="h">关于指标性质的声明</span>
+  <p>上表中标注「设计目标」的指标是方案设计口径，<b>不是承诺值</b>。建议在试点期用科室真实数据完成一轮标定，把实测结果写入验收标准。把未实测的数字写进合同，对双方都是风险。</p>
+  <p style="margin-top:6px"><b>另需说明：</b>本模块<b>不承诺初稿生成耗时与并发数指标</b>。中台算力（昇腾）尚未完成性能实测，无法给出可验证的吞吐口径；待算力实测标定后，可作为补充指标纳入验收。上表保留的均为取数时效、拦截率与可用性类指标，与算力吞吐无关。</p>
+  <p style="margin-top:6px"><b>另需说明：</b>§3.4 引用的「全身体格检查 857 字、占 52%」数据，来自 85 份<b>断指再植</b>专病语料的实测。该结论（固定段落是逐字复制的模板）跨专科稳定，但<b>宫颈癌专病语料的具体比例需重新实测</b>，不能直接引用。</p>
+</div>
+
+<!-- ---------- 八 ---------- -->
+<h2 id="s8"><span class="no">八</span>安全合规与权限体系</h2>
+
+<h3>8.1 三级账号权限</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:20%"><col style="width:44%"><col style="width:36%"></colgroup>
+<thead><tr><th>角色</th><th>权限范围</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td class="k">医师</td><td>本人接诊患者的取数、生成、编辑、确认、回写</td><td>仅可见本人接诊患者的病历草稿</td></tr>
+<tr><td class="k">审核医师</td><td>本科室病历查看、复核、模板与术语库维护</td><td>不可跨科室</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>8.2 安全措施</h3>
+<ul>
+  <li><b>传输加密</b>：全链路 HTTPS / TLS</li>
+  <li><b>存储加密</b>：病历草稿、事实账本、快照落盘加密</li>
+  <li><b>最小权限</b>：数据访问按角色与就诊关系控制，禁止越权访问患者数据</li>
+  <li><b>数据不出院</b>：模型推理、数据存储全部院内完成</li>
+  <li><b>去标识化</b>：数据导出执行审批流程，导出内容去标识化</li>
+  <li><b>审计不可篡改</b>：全操作日志，写入后不可修改</li>
+  <li><b>合规适配</b>：满足网络安全等级保护、数据安全法、个人信息保护法要求，适配电子病历分级评价；医疗 AI 相关功能遵循医疗器械监管相关政策</li>
+</ul>
+
+<h3>8.3 全操作审计范围</h3>
+<p>以下操作全部留痕，记录操作人、时间、对象、结果：取数、事实账本变更、缺口补问、生成、编辑、确认、驳回、回写、模板变更、术语库变更、权限变更、数据导出、日志查询。</p>
+
+<!-- ---------- 九 ---------- -->
+<h2 id="s9"><span class="no">九</span>交付物与质保</h2>
+
+<h3>9.1 交付物清单</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:30%"><col style="width:70%"></colgroup>
+<thead><tr><th>交付物</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td class="k">软件系统</td><td>病历生成智能体，容器化交付，含部署包与配置说明</td></tr>
+<tr><td class="k">需求规格说明书</td><td>功能清单、接口清单、性能指标、验收标准</td></tr>
+<tr><td class="k">系统部署手册</td><td>部署拓扑、环境要求、安装步骤、参数配置</td></tr>
+<tr><td class="k">运维手册</td><td>日常巡检、故障处理、备份恢复、扩容指引</td></tr>
+<tr><td class="k">接口文档</td><td>中台数据接口、HL7 / RESTful 接口说明与字段映射表</td></tr>
+<tr><td class="k">模板与术语库说明</td><td>模板结构定义、槽位字典、术语库维护指引</td></tr>
+<tr><td class="k">测试报告</td><td>功能测试、接口联调、性能压测、安全测试</td></tr>
+<tr><td class="k">用户操作手册</td><td>面向临床医师的操作指引</td></tr>
+<tr><td class="k">培训服务</td><td>面向临床科室、病案室、信息科的业务操作与系统运维培训</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>9.2 质保服务</h3>
+<ul>
+  <li>免费质保期不低于 <b>3 年</b>（按招标文件要求）</li>
+  <li>包含缺陷修复、系统调优、版本升级、远程技术支持</li>
+  <li>质保期内模板库、术语库、校验规则的常规维护包含在内</li>
+</ul>
+
+<!-- ---------- 十 ---------- -->
+<h2 id="s10"><span class="no">十</span>待确认事项</h2>
+
+<p class="lede">以下事项直接决定方案能否落地、报价能否出、验收怎么写。<b>A 组不确认无法开工</b>。</p>
+
+<h3>A 组 · 阻塞项（6 项，不确认无法开工）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:22%"><col style="width:46%"><col style="width:32%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">A1</td><td><b>主诉与现病史的数据来源</b></td><td>采用 §1.1 第 21 条的哪一种方案：医师结构化录入补充 / 引入语音 / 生成时留空</td><td><b>决定本模块的可用性与工作量</b>。若选「留空」，入院记录初稿价值大幅缩水，医师大概率不用</td></tr>
+<tr><td class="no">A2</td><td>HIS 等系统的字段白名单与取数权限</td><td>可取哪些字段、只读还是可写、接口实时性、审计字段要求</td><td>决定事实账本能建多完整，直接决定生成质量</td></tr>
+<tr><td class="no">A3</td><td>草稿区回写边界</td><td>写入哪张表 / 哪个接口、以什么状态写入、是否只写草稿区、医师在 EMR 内修改后能否读回</td><td>决定能否形成闭环，以及事实账本与正式病历是否一致</td></tr>
+<tr><td class="no">A4</td><td>文书类型范围</td><td>一期要覆盖哪些文书（入院记录 / 病程记录 / 诊疗小结 / 随访记录 / 门诊病历 / 手术记录 / 放化疗记录）</td><td><b>工作量最大变量</b>。每类文书的模板、槽位、必填项清单都要单独建设</td></tr>
+<tr><td class="no">A5</td><td>院内病历书写规范与现有模板库</td><td>能否提供院内病历书写规范、现有模板库、质控标准</td><td>可直接复用的越多，工作量越小；否则需逐份梳理</td></tr>
+<tr><td class="no">A6</td><td>归档流程与责任界定</td><td>AI 草稿 → 医师修订 → 归档的留痕要求；病案室对 AI 参与病历的接受度与记录要求</td><td><b>合规前置条件</b>。病案室态度不明确，上线后可能被要求回退</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>B 组 · 影响方案选型（4 项）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:22%"><col style="width:46%"><col style="width:32%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">B1</td><td>是否引入语音采集</td><td>若采用 §1.1 方案②，是否复用模块七的院内 ASR 能力</td><td>复用则增量成本低；独立建设则需单独立项</td></tr>
+<tr><td class="no">B2</td><td>门诊与住院的优先级</td><td>一期先做住院文书还是门诊病历</td><td>住院文书结构固定、模板化程度高，更适合先行</td></tr>
+<tr><td class="no">B3</td><td>宫颈癌专科模板数量</td><td>需要多少套专科模板，是否已有院内版本</td><td>直接决定模板库建设工作量</td></tr>
+<tr><td class="no">B4</td><td>临床术语库来源</td><td>院内是否已有标准术语库（诊断名称、药品、检验项目）</td><td>有则可直接导入，无则需建设</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>C 组 · 影响验收口径（4 项）</h3>
+<div class="tw">
+<table>
+<colgroup><col style="width:34px"><col style="width:22%"><col style="width:46%"><col style="width:32%"></colgroup>
+<thead><tr><th>#</th><th>事项</th><th>需要确认的内容</th><th>影响</th></tr></thead>
+<tbody>
+<tr><td class="no">C1</td><td>生成质量验收方式</td><td>按缺口检出率、无源句子拦截率，还是抽样人工评分；语料由谁提供</td><td>决定验收标准写法</td></tr>
+<tr><td class="no">C2</td><td>草稿采纳率定义</td><td>「采纳」的判定标准：原文采用 / 修改后采用 / 生成即算</td><td>影响效果指标口径</td></tr>
+<tr><td class="no">C3</td><td>医师输入量基线</td><td>以哪一类文书的医师平均输入字数为基线</td><td>决定「≤200 字/份」是否成立</td></tr>
+<tr><td class="no">C4</td><td>并发规模</td><td>实际同时使用的医师数量与峰值时段</td><td>决定资源规格与冗余配置</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ---------- 十一 ---------- -->
+<h2 id="s11"><span class="no">十一</span>与中台及其他模块的关系</h2>
+
+<p>本模块不是独立系统，而是运行在 AI 智能体中台之上的应用之一。复用关系如下：</p>
+
+<div class="cards">
+  <div class="card g">
+    <div class="eyebrow">复用 · 中台</div>
+    <h4>算力与模型管理</h4>
+    <p>语言模型注册在中台统一纳管，算力从资源池分配，版本升级由中台统一调度，不单独建设推理服务。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">复用 · 中台</div>
+    <h4>数据接口与审计</h4>
+    <p>全部取数经中台统一数据接口，不单独直连业务库；审计日志归集到中台，与质控、超声模块共用同一套审计体系。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">复用 · 底层引擎</div>
+    <h4>事实账本与安全机制</h4>
+    <p>事实账本、证据分级、槽位回填、生成校验隔离、逐句确认这套底层机制与模块七（超声语音）<b>共用同一套引擎</b>，差异在输入形态与模板库。</p>
+  </div>
+  <div class="card g">
+    <div class="eyebrow">输出 · 驾驶舱</div>
+    <h4>运行指标</h4>
+    <p>文书生成量、采纳率、缺口数、校验拦截数上报数据驾驶舱「AI 应用运行监控主题」。</p>
+  </div>
+</div>
+
+<h4>与其他模块的边界</h4>
+<div class="tw">
+<table>
+<colgroup><col style="width:24%"><col style="width:76%"></colgroup>
+<thead><tr><th>模块</th><th>关系</th></tr></thead>
+<tbody>
+<tr><td class="k">六、病历质控</td><td>本模块向质控模块输出结构化病历数据、必填项清单与缺口记录；<b>质控规则库与缺陷闭环归模块六</b>，本模块不重复建设</td></tr>
+<tr><td class="k">七、超声语音报告</td><td>共用事实账本引擎与安全机制；若本模块引入语音（§1.1 方案②），复用模块七的院内 ASR 能力。两者的模板库与槽位定义各自独立</td></tr>
+<tr><td class="k">八、随访与体检指引</td><td>随访记录生成需要随访方案与随访数据，由模块八提供；本模块负责把随访数据组织成随访记录初稿</td></tr>
+<tr><td class="k">九、高质量数据集</td><td>本模块产生的结构化病历数据可沉淀为数据集来源之一；<b>但用于模型训练需另行立项、另行授权</b>，不在本模块范围</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+  <span class="h">分期建设的关键：底层复用</span>
+  <p>本模块与模块七共用同一套底层引擎（事实账本、证据分级、槽位回填、生成校验隔离、逐句确认），差异只在输入形态、模板库与槽位定义。<b>这是分期建设中成本可控的关键</b>——第二个模块的边际成本远低于第一个。</p>
+</div>
+
+<div class="foot">
+  <p><b>文档性质：</b>本文件为技术交流稿，所载指标中标注「设计目标」的为方案设计口径，需在试点期以科室真实数据实测标定后转为验收指标。接口范围、权限边界、合规条款均以院方书面授权为准。</p>
+  <p><b>下一步建议：</b>本次交流优先闭环 §10 的 A 组 6 项阻塞项，其中 <b>A1（主诉与现病史数据来源）是需求缺口，建议当面定方案</b>——它决定这个模块做出来医师会不会用；A4（文书类型范围）是工作量最大变量，直接决定报价。A 组确认后即可出具带工作量口径的实施与报价方案。</p>
+  <p style="margin-top:12px">病历生成智能体 · 技术参数说明书 V1.0 · 2026-09-18 · 技术交流稿</p>
+</div>
+
+</main>
+</div>
+</div>
+
+<script>
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var targets = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function refresh(){
+    var pos = window.scrollY + 140, active = 0;
+    targets.forEach(function(el, i){ if(el && el.offsetTop <= pos) active = i; });
+    links.forEach(function(a, i){ a.className = i === active ? 'on' : ''; });
+  }
+  window.addEventListener('scroll', refresh, {passive:true});
+  window.addEventListener('resize', refresh);
+  refresh();
+})();
+</script>
+</body>
+</html>

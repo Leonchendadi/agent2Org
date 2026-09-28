@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>巴南区人民医院 AI 智能体平台 · 部署规划 v0.1</title>
+<style>
+  :root{
+    --ink:#2D2A32; --ink-2:#5A5560;
+    --paper:#FAF7F2; --card:#FFFFFF;
+    --red:#B03050; --red-soft:#F6E3E8;
+    --purple:#8E7CC3; --purple-soft:#EFEAF7;
+    --green:#4E7A5E; --green-soft:#E6F0E8;
+    --amber:#8A6A2F; --amber-soft:#FBF0DC;
+    --line:#E8E2D9;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--paper); color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    line-height:1.65; padding:32px 16px;}
+  .wrap{max-width:1100px; margin:0 auto;}
+  header{border-left:6px solid var(--red); padding-left:18px; margin-bottom:8px;}
+  h1{font-size:26px; letter-spacing:.5px;}
+  .meta{color:var(--ink-2); font-size:13px; margin-top:6px;}
+  nav{margin:18px 0 26px; display:flex; gap:10px; flex-wrap:wrap;}
+  nav a{text-decoration:none; font-size:13px; padding:6px 14px; border-radius:999px;
+    background:var(--purple-soft); color:#5D4B8C;}
+  nav a:hover{background:var(--purple); color:#fff;}
+  h2{font-size:19px; margin:36px 0 12px; padding-bottom:8px; border-bottom:2px solid var(--line);
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  h2 .tag{font-size:12px; font-weight:normal; color:#fff; padding:2px 10px; border-radius:999px;}
+  .tag-block{background:var(--red);}
+  .tag-plan{background:var(--purple);}
+  .tag-money{background:var(--amber);}
+  .tag-risk{background:#8E2440;}
+  h3{font-size:15px; margin:22px 0 8px; color:#4A4440;}
+  p{margin-bottom:10px;}
+  table{width:100%; border-collapse:collapse; background:var(--card); font-size:13.5px;
+    border:1px solid var(--line); border-radius:10px; overflow:hidden; margin-bottom:12px;}
+  th{background:#F1ECE4; text-align:left; padding:10px 12px; font-size:13px; color:#4A4440;
+    border-bottom:2px solid var(--line);}
+  td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#FBF4F6;}
+  td.id{font-weight:bold; white-space:nowrap; color:var(--red);}
+  td.pname{font-weight:bold;}
+  .pill{display:inline-block; font-size:12px; padding:1px 8px; border-radius:4px; white-space:nowrap;}
+  .p-block{background:var(--red-soft); color:#8E2440;}
+  .p-warn{background:var(--amber-soft); color:var(--amber);}
+  .p-ok{background:var(--green-soft); color:var(--green);}
+  .p-mid{background:#F0EBE4; color:#7A6A58;}
+  .muted{color:var(--ink-2); font-size:12.5px;}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; margin:14px 0;}
+  .card{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--purple);
+    border-radius:10px; padding:14px 16px; font-size:13.5px;}
+  .card b{color:var(--red);}
+  .card.warn{border-left-color:var(--red);}
+  .card.good{border-left-color:var(--green);}
+  .note{background:var(--purple-soft); border-radius:10px; padding:14px 18px; font-size:13.5px; margin:12px 0;}
+  .note b{color:#5D4B8C;}
+  .note.red{background:var(--red-soft);}
+  .note.red b{color:var(--red);}
+  .note.green{background:var(--green-soft);}
+  .note.green b{color:var(--green);}
+  .note.amber{background:var(--amber-soft);}
+  .note.amber b{color:var(--amber);}
+  pre{background:#2D2A32; color:#EDEAF2; border-radius:10px; padding:14px 16px;
+    font-size:12.5px; line-height:1.6; overflow-x:auto; margin:10px 0;
+    font-family:"Cascadia Mono",Consolas,monospace;}
+  pre .c{color:#9B94A8;}
+  code{font-family:"Cascadia Mono",Consolas,monospace; font-size:12.5px;
+    background:#F1ECE4; padding:1px 5px; border-radius:4px;}
+  ol,ul{margin:0 0 12px 20px; font-size:13.5px;}
+  li{margin-bottom:5px;}
+  .topo{background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:12px; margin:14px 0;}
+  .topo svg{display:block; width:100%; height:auto;}
+  footer{margin-top:40px; color:var(--ink-2); font-size:12px; border-top:1px solid var(--line); padding-top:14px;}
+  @media print{
+    body{background:#fff; padding:0;}
+    nav{display:none;}
+    table{page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>巴南区人民医院 AI 智能体平台 · 部署规划</h1>
+  <div class="meta">版本 v0.1（待澄清稿）· 编制 2026-09-18 · 技术底座 Octop（腾讯云开源）+ 昇腾本地推理 · <b>共 23 项待甲方确认，其中 6 项为阻塞项</b></div>
+</header>
+
+<nav>
+  <a href="#clarify">一、待澄清清单</a>
+  <a href="#topo">二、候选拓扑</a>
+  <a href="#spec">三、组件与资源规格</a>
+  <a href="#steps">四、实施步骤</a>
+  <a href="#effort">五、工作量口径</a>
+  <a href="#risk">六、风险地雷</a>
+</nav>
+
+<div class="note red">
+<b>为什么先澄清再定方案：</b>你给的场景（医院增购昇腾显卡 + 华为服务器，配合原机房联想服务器）恰好是<b>成本最低的一种组合</b>——联想 x86 服务器直接跑官方 amd64 镜像，零改造；昇腾那台只做推理。但里面有一个可能把整个方案推翻的变量：<b>那台华为服务器是裸机还是虚拟机</b>。如果是虚拟化平台且需要把昇腾卡直通给虚拟机，配置复杂度和失败风险都上一个台阶，且部分卡型不支持。这一条没问清之前，下面所有规格都是假设。
+</div>
+
+<h2 id="clarify">一、待甲方澄清清单 <span class="tag tag-block">先做这一步</span></h2>
+
+<p class="muted">下表可直接带去调研会逐条确认。阻塞项（<span class="pill p-block">阻塞</span>）不确认则无法定方案；关注项（<span class="pill p-warn">关注</span>）影响工作量与报价。</p>
+
+<h3>1.1 硬件资源</h3>
+<table>
+  <tr><th style="width:52px">编号</th><th style="width:250px">问题</th><th>影响什么</th><th style="width:86px">级别</th></tr>
+  <tr>
+    <td class="id">H1</td>
+    <td>华为服务器的<b>具体型号</b>？是 TaiShan 200（鲲鹏 ARM64）还是 2288H V5/V6（Intel x86）？</td>
+    <td>决定 Octop 是否需要自建 arm64 镜像（+1–2 人日）。华为既有鲲鹏机也有 x86 机，型号不问清无法判断</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">H2</td>
+    <td>昇腾卡的<b>型号与数量</b>？Atlas 300I Duo / 300V Pro / 800I A2（910B）？显存多大？</td>
+    <td>决定能跑多大的模型、并发多少。也决定是走 MindIE 还是 vLLM-Ascend</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">H3</td>
+    <td>联想服务器的型号、CPU 核数、内存、<b>可用磁盘空间</b>？</td>
+    <td>Octop 需要 ≥4C8G（含浏览器自动化建议 8C16G）+ 100GB 磁盘。原机房服务器可能已被其他系统占用</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">H4</td>
+    <td>是否有共享存储 / NAS / 备份一体机？</td>
+    <td>决定数据卷与 PG 备份方案。医院通常有备份一体机，能复用就省事</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">H5</td>
+    <td>是否有 UPS、机房是否有独立机柜空间与供电余量？</td>
+    <td>昇腾卡功耗高（300W+），机柜供电与散热需确认</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+</table>
+
+<h3>1.2 平台与操作系统</h3>
+<table>
+  <tr><th style="width:52px">编号</th><th style="width:250px">问题</th><th>影响什么</th><th style="width:86px">级别</th></tr>
+  <tr>
+    <td class="id">S1</td>
+    <td>两台服务器的<b>操作系统与版本</b>？（openEuler 20.03/22.03、麒麟 V10 SP3、统信 UOS、CentOS 7/8、Ubuntu 22.04）</td>
+    <td>昇腾 HDK 对不同 OS 有对应的包；CentOS 7 内核过旧可能装不了新版 CANN</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">S2</td>
+    <td>容器引擎是什么？Docker（版本？）/ containerd / <b>iSulad</b>？是否已有 K8s？</td>
+    <td>openEuler 默认引擎可能是 iSulad，我们的 docker compose 方案不通用，需改造成本 +2–3 人日</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">S3</td>
+    <td>服务器是<b>裸机</b>还是跑在虚拟化平台上（FusionCompute / VMware / 深信服）？</td>
+    <td><b>本条最关键。</b>见 1.3</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">S4</td>
+    <td>是否已安装昇腾 HDK / CANN？<b>版本号</b>是多少？谁装的？</td>
+    <td>CANN 与内核、固件强绑定。已有环境要适配，不能假设可以从零装</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">S5</td>
+    <td>是否已安装 Ascend Docker Runtime（<code>ascend-docker-runtime</code>）？</td>
+    <td>昇腾容器跑起来的前提。没有则需要装 + 重启 dockerd，涉及停机窗口</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">S6</td>
+    <td>是否有国产化 / 信创强制要求？招标文件里是否写明"必须运行在国产 CPU 上"？</td>
+    <td>决定 Octop 可以跑联想 x86（省 1–2 人日）还是必须迁到鲲鹏。这一条直接改方案</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+</table>
+
+<h3>1.3 虚拟化与设备直通 <span class="pill p-block">高危</span></h3>
+<table>
+  <tr><th style="width:52px">编号</th><th style="width:250px">问题</th><th>影响什么</th><th style="width:86px">级别</th></tr>
+  <tr>
+    <td class="id">V1</td>
+    <td>华为服务器上的昇腾卡是<b>物理直连</b>给操作系统，还是要 PCIe 直通（passthrough）给某台虚拟机？</td>
+    <td>若需直通：要在 BIOS 开 IOMMU / ACS，配置 vfio-pci 绑定，<b>部分昇腾卡型对虚拟化直通支持有限甚至不支持</b>。这是能把方案推翻的一条</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">V2</td>
+    <td>虚拟化平台的 NPU 直通有没有<b>现成的成功案例</b>？能否让华为原厂确认支持？</td>
+    <td>如果没做过，建议直接改用裸机部署推理服务，别在虚拟化上冒险</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">V3</td>
+    <td>联想服务器上是否也要跑在虚拟机里？</td>
+    <td>Octop 跑虚拟机没问题（普通容器，不需要设备直通），只是性能略降，可接受</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+</table>
+
+<h3>1.4 网络与安全合规</h3>
+<table>
+  <tr><th style="width:52px">编号</th><th style="width:250px">问题</th><th>影响什么</th><th style="width:86px">级别</th></tr>
+  <tr>
+    <td class="id">N1</td>
+    <td>两台服务器是否<b>同网段互通</b>？中间有没有防火墙策略需要报备开通端口？</td>
+    <td>Octop 要访问推理服务的 HTTP 端点（通常 8000/1025 端口）。跨网段需走变更审批，可能拖 1–2 周</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">N2</td>
+    <td>院内网<b>能否访问公网</b>？是否有出口白名单机制？</td>
+    <td><b>影响两件事：</b>① 镜像与依赖如何交付（决定是否需要离线导入，+0.5 人日）；② IM 通道（飞书/钉钉/企业微信）需要公网长连接，内网隔离则<b>IM 集成直接不可用</b></td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">N3</td>
+    <td>需要哪些 IM 通道？如果内网不能出网，是否接受只用 Web 控制台？</td>
+    <td>IM 通道是 Octop 的核心卖点之一。若不可用，需求范围与报价都要改，且要提前告知客户，不能到验收才发现</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">N4</td>
+    <td>等保等级是几级？有没有安全加固基线要求（如禁止 root 运行、要求日志留存 180 天）？</td>
+    <td>决定加固工作量（+2–3 人日）。我们的加固包已做非 root 运行、capability 收敛，可复用作整改材料</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">N5</td>
+    <td>是否有堡垒机 / 准入系统 / 日志审计平台需要接入？</td>
+    <td>接入审计平台通常有额外开发或配置工作量</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">N6</td>
+    <td>系统的<b>使用终端</b>是什么？院内 PC 浏览器版本？有没有国产 OS 终端？</td>
+    <td>Octop 前端是 React SPA，需现代浏览器。若终端是 IE 或老旧国产浏览器，需要额外适配</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+</table>
+
+<h3>1.5 模型与推理服务归属</h3>
+<table>
+  <tr><th style="width:52px">编号</th><th style="width:250px">问题</th><th>影响什么</th><th style="width:86px">级别</th></tr>
+  <tr>
+    <td class="id">M1</td>
+    <td>要跑<b>哪个模型</b>？DeepSeek-V4-Flash 还是别的？模型权重由谁提供？</td>
+    <td>决定显存需求与推理服务选型。权重来源不明则无法估算部署工作量</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">M2</td>
+    <td>推理服务（MindIE / vLLM-Ascend）的部署<b>是否包含在我们的交付范围</b>？还是华为原厂 / 其他集成商负责？</td>
+    <td><b>直接决定报价。</b>推理服务部署 5–15 人日，且强依赖昇腾生态经验。若不在我们范围内，只需对方提供一个 OpenAI 兼容端点即可</td>
+    <td><span class="pill p-block">阻塞</span></td>
+  </tr>
+  <tr>
+    <td class="id">M3</td>
+    <td>模型权重的<b>商用许可</b>由谁负责？医院是否已有采购凭证？</td>
+    <td>合规风险。医院场景一旦涉及患者数据，模型许可与数据使用条款要留痕</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">M4</td>
+    <td>是否允许调用外部云端大模型 API 作为兜底？</td>
+    <td>患者数据出院是红线。若允许，需要脱敏方案与合同条款；若不允许，全部走院内推理</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+</table>
+
+<h3>1.6 业务与规模</h3>
+<table>
+  <tr><th style="width:52px">编号</th><th style="width:250px">问题</th><th>影响什么</th><th style="width:86px">级别</th></tr>
+  <tr>
+    <td class="id">B1</td>
+    <td>使用人数与并发？峰值时段（早交班？）预计多少人同时用？</td>
+    <td>决定服务器规格与推理卡数量。Octop 单副本，需按峰值内存规划</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">B2</td>
+    <td>要哪些具体能力？文档处理 / 浏览器自动化 / 定时任务 / 知识库 RAG？</td>
+    <td>浏览器自动化需在容器内预装 Chromium，内存需求从 8G 提到 16G</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">B3</td>
+    <td>是否需要接 <b>HIS / EMR / LIS</b> 等院内系统？接口由谁提供、走什么协议？</td>
+    <td><b>典型成本地雷。</b>HIS 接口往往需要厂商配合，周期不可控，可能成为整个项目的关键路径。本条必须单独立项评估</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">B4</td>
+    <td>数据范围：是否涉及患者隐私数据？是否需要脱敏？</td>
+    <td>影响安全设计与等保材料</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+</table>
+
+<h3>1.7 运维责任边界</h3>
+<table>
+  <tr><th style="width:52px">编号</th><th style="width:250px">问题</th><th>影响什么</th><th style="width:86px">级别</th></tr>
+  <tr>
+    <td class="id">O1</td>
+    <td>昇腾驱动 / CANN / 固件的<b>升级与故障处理</b>由谁负责？</td>
+    <td>CANN ↔ 内核 ↔ 固件强绑定，内核一升级驱动就得重装。这是长期成本，必须在合同里写清责任方</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">O2</td>
+    <td>服务器硬件维保由谁承担？是否在保？</td>
+    <td>影响故障响应时间承诺（SLA）</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+  <tr>
+    <td class="id">O3</td>
+    <td>运维期长度（1 年 / 3 年 / 5 年）？响应时限要求？</td>
+    <td><b>影响报价结构。</b>Octop 是 MIT 开源项目、上游 <code>harness-*</code> 依赖未开源，维保能力需要我们自己兜</td>
+    <td><span class="pill p-warn">关注</span></td>
+  </tr>
+</table>
+
+<h2 id="topo">二、候选拓扑 <span class="tag tag-plan">两个方案</span></h2>
+
+<h3>方案 A：异构分离（推荐）</h3>
+<p>Octop 跑在联想 x86 服务器上（用官方 amd64 镜像，零改造），昇腾华为服务器只做推理服务，两者内网 HTTP 互联。</p>
+
+<div class="topo">
+<svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect x="20" y="20" width="380" height="250" rx="16" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="40" y="46" font-family="Microsoft YaHei,sans-serif" font-size="13" font-weight="bold" fill="#2C2C2A">联想服务器（原机房 · x86）</text>
+
+  <rect x="44" y="66" width="332" height="52" rx="8" fill="#E6F1FB" stroke="#185FA5" stroke-width="0.5"/>
+  <text x="210" y="85" font-family="Microsoft YaHei,sans-serif" font-size="14" font-weight="bold" fill="#042C53" text-anchor="middle">nginx 前置</text>
+  <text x="210" y="103" font-family="Microsoft YaHei,sans-serif" font-size="12" fill="#185FA5" text-anchor="middle">TLS · 端口 443/8088</text>
+
+  <rect x="44" y="132" width="332" height="60" rx="8" fill="#CECBF6" stroke="#534AB7" stroke-width="1"/>
+  <text x="210" y="155" font-family="Microsoft YaHei,sans-serif" font-size="14" font-weight="bold" fill="#26215C" text-anchor="middle">Octop 容器（官方 amd64 镜像）</text>
+  <text x="210" y="175" font-family="Microsoft YaHei,sans-serif" font-size="12" fill="#534AB7" text-anchor="middle">单副本 · 非 root · 无需设备直通</text>
+
+  <rect x="44" y="206" width="160" height="50" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="124" y="225" font-family="Microsoft YaHei,sans-serif" font-size="13" font-weight="bold" fill="#04342C" text-anchor="middle">PostgreSQL</text>
+  <text x="124" y="242" font-family="Microsoft YaHei,sans-serif" font-size="12" fill="#0F6E56" text-anchor="middle">pgvector · 控制面</text>
+
+  <rect x="216" y="206" width="160" height="50" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="296" y="225" font-family="Microsoft YaHei,sans-serif" font-size="13" font-weight="bold" fill="#04342C" text-anchor="middle">数据卷</text>
+  <text x="296" y="242" font-family="Microsoft YaHei,sans-serif" font-size="12" fill="#0F6E56" text-anchor="middle">/data/.octop</text>
+
+  <path d="M400 160L500 160" fill="none" stroke="#888780" stroke-width="1.5" marker-end="url(#a1)"/>
+  <text x="450" y="148" font-family="Microsoft YaHei,sans-serif" font-size="12" fill="#5F5E5A" text-anchor="middle">内网 HTTP</text>
+
+  <rect x="500" y="20" width="380" height="250" rx="16" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="520" y="46" font-family="Microsoft YaHei,sans-serif" font-size="13" font-weight="bold" fill="#2C2C2A">华为服务器（昇腾 · 裸机优先）</text>
+
+  <rect x="524" y="66" width="332" height="52" rx="8" fill="#FAEEDA" stroke="#854F0B" stroke-width="0.5"/>
+  <text x="690" y="85" font-family="Microsoft YaHei,sans-serif" font-size="14" font-weight="bold" fill="#412402" text-anchor="middle">昇腾 HDK / CANN</text>
+  <text x="690" y="103" font-family="Microsoft YaHei,sans-serif" font-size="12" fill="#854F0B" text-anchor="middle">宿主级安装 · 与内核绑定</text>
+
+  <rect x="524" y="132" width="332" height="60" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+  <text x="690" y="155" font-family="Microsoft YaHei,sans-serif" font-size="14" font-weight="bold" fill="#04342C" text-anchor="middle">推理服务容器</text>
+  <text x="690" y="175" font-family="Microsoft YaHei,sans-serif" font-size="12" fill="#0F6E56" text-anchor="middle">MindIE / vLLM-Ascend · --runtime=ascend</text>
+
+  <rect x="524" y="206" width="332" height="50" rx="8" fill="#FCEBEB" stroke="#A32D2D" stroke-width="0.5"/>
+  <text x="690" y="225" font-family="Microsoft YaHei,sans-serif" font-size="13" font-weight="bold" fill="#501313" text-anchor="middle">对外提供 OpenAI 兼容端点</text>
+  <text x="690" y="242" font-family="Microsoft YaHei,sans-serif" font-size="12" fill="#A32D2D" text-anchor="middle">交付边界：这一侧归谁，见 M2</text>
+</svg>
+</div>
+
+<table>
+  <tr><th>维度</th><th>方案 A：异构分离</th><th>方案 B：全信创同构</th></tr>
+  <tr><td class="pname">Octop 部署位置</td><td>联想 x86 服务器</td><td>华为鲲鹏服务器（ARM64）</td></tr>
+  <tr><td class="pname">镜像</td><td><span class="pill p-ok">官方 amd64 直接可用</span></td><td><span class="pill p-warn">需自建 arm64（+1–2 人日）</span></td></tr>
+  <tr><td class="pname">容器引擎风险</td><td>低（x86 上 Docker 生态成熟）</td><td>中（openEuler 可能是 iSulad，+2–3 人日）</td></tr>
+  <tr><td class="pname">NPU 耦合</td><td>零</td><td>零（Octop 仍不碰 NPU）</td></tr>
+  <tr><td class="pname">国产化合规</td><td>可能不满足强制信创要求</td><td>满足</td></tr>
+  <tr><td class="pname">适用条件</td><td>招标文件未强制"必须运行在国产 CPU"</td><td>招标文件强制国产化，或客户明确要求</td></tr>
+</table>
+
+<div class="note green">
+<b>建议：</b>默认按方案 A 报价，把方案 B 作为"若甲方强制信创"的增项。理由是方案 A 把 Octop 与昇腾生态彻底解耦——昇腾那侧出任何问题（驱动、CANN、模型适配）都不会阻塞应用层交付，风险敞口最小。<b>但方案 A 成立的前提是 S6 澄清结果：招标文件没有强制国产 CPU。</b>
+</div>
+
+<h2 id="spec">三、组件与资源规格 <span class="tag tag-plan">按方案 A</span></h2>
+
+<h3>3.1 联想服务器（Octop 侧）</h3>
+<table>
+  <tr><th>项目</th><th>最低</th><th>推荐</th><th>说明</th></tr>
+  <tr><td class="pname">CPU</td><td>4 核</td><td>8 核</td><td>Octop 单进程，IO 型负载</td></tr>
+  <tr><td class="pname">内存</td><td>8 GB</td><td>16 GB</td><td>启用浏览器自动化（Chromium）或文档解析时取 16G</td></tr>
+  <tr><td class="pname">磁盘</td><td>100 GB</td><td>200 GB SSD</td><td>镜像约 2 GB，其余为数据卷、文档语料、日志、备份</td></tr>
+  <tr><td class="pname">OS</td><td colspan="2">Linux（Ubuntu 22.04 / openEuler x86 / 麒麟 x86）</td><td>不建议 Windows Server 跑 Docker</td></tr>
+  <tr><td class="pname">容器引擎</td><td colspan="2">Docker Engine 24+ / Compose v2</td><td>需支持 cgroup v2 与 overlayfs</td></tr>
+</table>
+
+<h3>3.2 华为服务器（推理侧，规格待 H1/H2 澄清）</h3>
+<table>
+  <tr><th>项目</th><th>说明</th></tr>
+  <tr><td class="pname">NPU</td><td>昇腾卡型号与数量决定可承载的模型规模与并发，待 H2 确认</td></tr>
+  <tr><td class="pname">宿主软件</td><td>HDK（driver + firmware）→ CANN → Ascend Docker Runtime，三层版本需与内核匹配</td></tr>
+  <tr><td class="pname">推理引擎</td><td>MindIE（华为官方）或 vLLM-Ascend（开源路线），需与 CANN 版本对齐</td></tr>
+  <tr><td class="pname">对外接口</td><td>OpenAI 兼容 HTTP 端点，Octop 只需这一个契约，不关心底层实现</td></tr>
+  <tr><td class="pname">部署形态</td><td><b>强烈建议裸机</b>。虚拟化 + PCIe 直通的失败风险远大于收益，见 V1</td></tr>
+</table>
+
+<h3>3.3 软件栈清单（Octop 侧）</h3>
+<pre><span class="c"># 已生成在 octop-deploy/ 目录</span>
+nginx                  <span class="c">TLS 终止、IP 白名单、反向代理</span>
+octop-hospital:1.0.0   <span class="c">官方镜像 + 加固层（Chromium、非 root、修 P0 初始化判据）</span>
+pgvector/pgvector:pg16 <span class="c">控制面 + 记忆 + 向量</span>
+数据卷 /srv/octop/data <span class="c">配置、workspace、密钥、日志</span>
+<span class="c"># 备份：数据卷 + pg_dump，建议每日增量 / 每周全量，复用院内备份一体机</span></pre>
+
+<h2 id="steps">四、实施步骤 <span class="tag tag-plan">五阶段</span></h2>
+
+<table>
+  <tr><th style="width:60px">阶段</th><th style="width:170px">内容</th><th>交付物 / 验收标准</th><th style="width:100px">前置条件</th></tr>
+  <tr>
+    <td class="pname">P0<br>澄清</td>
+    <td>调研会逐条确认 23 项；现场看服务器与机房</td>
+    <td>澄清清单签字版；确认方案 A / B；确认交付边界（尤其 M2）</td>
+    <td><span class="pill p-ok">当前</span></td>
+  </tr>
+  <tr>
+    <td class="pname">P1<br>环境准备</td>
+    <td>服务器系统与容器引擎就绪；开通网络端口；镜像离线导入</td>
+    <td><code>docker run hello-world</code> 通过；两机 HTTP 互通；镜像已 load</td>
+    <td>P0 完成</td>
+  </tr>
+  <tr>
+    <td class="pname">P2<br>平台部署</td>
+    <td>部署 PG + Octop + nginx；初始化管理员；接通推理端点</td>
+    <td><code>/api/health</code> 返回正常；能登录控制台；能与模型对话</td>
+    <td>P1 完成</td>
+  </tr>
+  <tr>
+    <td class="pname">P3<br>场景配置</td>
+    <td>按 B2 配置 Agent、知识库、技能；IM 通道（若 N2/N3 允许）；定时任务</td>
+    <td>按业务场景逐项演示通过</td>
+    <td>P2 完成</td>
+  </tr>
+  <tr>
+    <td class="pname">P4<br>加固与验收</td>
+    <td>等保整改项落实；备份策略上线；文档与培训；验收测试</td>
+    <td>等保整改确认；备份可恢复演练通过；培训记录；验收报告签字</td>
+    <td>P3 完成</td>
+  </tr>
+</table>
+
+<div class="note amber">
+<b>关键路径提醒：</b>P1 的"开通网络端口"和"离线镜像导入"通常受医院信息科流程制约，实际耗时可能远超技术工作量。建议在合同签订后<b>立刻</b>发起网络变更申请，不要等部署阶段才发现要走两周审批。
+</div>
+
+<h2 id="effort">五、工作量口径 <span class="tag tag-money">估算</span></h2>
+
+<table>
+  <tr><th>工作项</th><th style="width:100px">人日</th><th>说明</th></tr>
+  <tr><td class="pname">Octop 容器化部署（方案 A）</td><td>2–3</td><td>镜像构建、compose 编排、初始化、健康检查、日志轮转</td></tr>
+  <tr><td class="pname">Octop 与推理服务联调</td><td>1</td><td>对接 OpenAI 兼容端点，验证模型可用性</td></tr>
+  <tr><td class="pname">备份与恢复方案</td><td>1</td><td>数据卷 + PG 备份脚本、恢复演练</td></tr>
+  <tr><td class="pname">等保加固与文档</td><td>2–3</td><td>非 root、capability 收敛、日志留存、安全材料</td></tr>
+  <tr><td class="pname">场景配置与调试</td><td>2–4</td><td>取决于 B2 场景数量</td></tr>
+  <tr><td class="pname">培训与验收</td><td>2</td><td>管理员培训 + 验收测试</td></tr>
+  <tr><td class="pname" style="color:#4E7A5E">Octop 侧小计</td><td style="color:#4E7A5E"><b>10–14</b></td><td>不含硬件、不含推理服务</td></tr>
+  <tr><td class="pname" style="color:#8A6A2F">增项：arm64 自建镜像（方案 B）</td><td style="color:#8A6A2F">+1–2</td><td>若 S6 强制信创</td></tr>
+  <tr><td class="pname" style="color:#8A6A2F">增项：iSulad 适配（方案 B）</td><td style="color:#8A6A2F">+2–3</td><td>若 S2 是 iSulad</td></tr>
+  <tr><td class="pname" style="color:#8A6A2F">增项：IM 通道打通</td><td style="color:#8A6A2F">+1–3</td><td>若 N2 内网受限，需出口白名单审批</td></tr>
+  <tr><td class="pname" style="color:#8A6A2F">增项：HIS/EMR 接口对接</td><td style="color:#8A6A2F">单独立项</td><td>取决于 B3，周期不可控</td></tr>
+  <tr><td class="pname" style="color:#B03050">不在范围内：推理服务部署</td><td style="color:#B03050">5–15</td><td>MindIE / vLLM-Ascend + 模型适配，强依赖昇腾生态经验。见 M2</td></tr>
+</table>
+
+<div class="note red">
+<b>报价前必须锁死的两条边界：</b><br>
+① <b>推理服务是否在我们范围内</b>（M2）。这 5–15 人日和 Octop 侧的 10–14 人日是两种完全不同的能力，混在一起报价会失真。<br>
+② <b>IM 通道是否可用</b>（N2/N3）。如果内网不能出网，Octop 的 IM 集成能力（飞书/钉钉/企微）全部作废，产品价值要重新向客户说明——这不是技术问题，是需求边界问题，必须提前谈。
+</div>
+
+<h2 id="risk">六、风险地雷 <span class="tag tag-risk">按致命度排序</span></h2>
+
+<table>
+  <tr><th style="width:44px">序</th><th style="width:210px">风险</th><th>后果</th><th style="width:120px">应对</th></tr>
+  <tr>
+    <td class="id">1</td>
+    <td><b>虚拟化平台 + 昇腾卡直通</b>（V1）</td>
+    <td>直通配置失败或卡型不支持，推理服务无法部署，整个项目卡在起点</td>
+    <td>坚持裸机部署推理服务；若必须虚拟化，要求华为原厂书面确认支持</td>
+  </tr>
+  <tr>
+    <td class="id">2</td>
+    <td><b>内网不出网导致 IM 通道不可用</b>（N2/N3）</td>
+    <td>Octop 的核心交互入口失效，客户预期落空，验收纠纷</td>
+    <td>P0 阶段明确告知并写进需求确认书；备选方案为纯 Web 控制台</td>
+  </tr>
+  <tr>
+    <td class="id">3</td>
+    <td><b>HIS/EMR 接口依赖第三方厂商</b>（B3）</td>
+    <td>周期不可控，成为关键路径，拖垮整体交付</td>
+    <td>单独立项、单独报价；合同中明确"接口依赖甲方协调"</td>
+  </tr>
+  <tr>
+    <td class="id">4</td>
+    <td><b>CANN ↔ 内核 ↔ 固件版本绑定</b>（S4/O1）</td>
+    <td>一次内核升级就可能导致推理服务不可用，且修复需要原厂介入</td>
+    <td>合同写清驱动运维责任方；升级前先在测试环境验证</td>
+  </tr>
+  <tr>
+    <td class="id">5</td>
+    <td><b>Octop 单副本无高可用</b></td>
+    <td>容器故障即服务中断，恢复依赖重启 + 数据卷完整</td>
+    <td>接受该约束并告知客户；配置自动重启 + 定期备份 + 恢复演练</td>
+  </tr>
+  <tr>
+    <td class="id">6</td>
+    <td><b>上游依赖未开源</b>（harness-*）</td>
+    <td>深层故障无法定位到源码，只能依赖上游响应，而项目无商业 SLA</td>
+    <td>维保报价中预留风险系数；优先使用官方镜像与官方路径，减少自研改动</td>
+  </tr>
+  <tr>
+    <td class="id">7</td>
+    <td><b>网络端口审批周期</b>（N1）</td>
+    <td>技术就绪但卡在流程，实际工期被拉长</td>
+    <td>合同签订后立刻发起变更申请，不等部署阶段</td>
+  </tr>
+</table>
+
+<footer>
+编制依据：Octop v1.0.0 源码核实（<code>_ref/Octop</code>，2026-09-18）+ GHCR 官方镜像实测 + 依赖树 aarch64 可行性实测（241 包逐个查 PyPI）+ 昇腾部署边界分析。<br>
+本文档为 v0.1 待澄清稿，23 项澄清结果将直接改变拓扑选型、资源规格与工作量估算。澄清完成后出 v1.0 定稿。<br>
+配套交付件：<code>Octop容器化评估-2026-09-18.html</code>（技术评估）、<code>octop-deploy/</code>（加固部署包）。
+</footer>
+
+</div>
+</body>
+</html>

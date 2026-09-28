@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>病历 AI 影子写手 · 每句有出处的病历生产线</title>
+<style>
+:root{
+  --paper:#FFFFFF;
+  --canvas:#F5F5F1;
+  --ink:#222220;
+  --muted:#686761;
+  --hint:#8C8A83;
+  --line:#DEDCD4;
+  --line-strong:#BEBBB2;
+  --mint:#E1F5EE;
+  --mint-2:#B8E7D5;
+  --green:#0F6E56;
+  --green-2:#1D9E75;
+  --amber:#FAEEDA;
+  --amber-ink:#854F0B;
+  --red:#FCEBEB;
+  --red-ink:#A32D2D;
+  --blue:#E6F1FB;
+  --blue-ink:#185FA5;
+  --serif:"Noto Serif SC","Songti SC","STSong",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+.deck{max-width:1540px;margin:0 auto;background:var(--paper)}
+.slide{min-height:100vh;scroll-snap-align:start;position:relative;overflow:hidden;padding:clamp(30px,5vw,72px) clamp(32px,7vw,112px) 54px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;justify-content:center}
+.slide.alt{background:#FBFBF8}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:clamp(22px,4vh,42px)}
+.section{font-size:12px;line-height:1;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:var(--green)}
+.section-num{font-size:12px;color:var(--hint);font-variant-numeric:tabular-nums}
+h1,h2,h3,p{margin:0}
+h1{max-width:960px;font-family:var(--serif);font-size:clamp(38px,5.4vw,76px);font-weight:600;letter-spacing:-.045em;line-height:1.08}
+h2{font-family:var(--serif);font-size:clamp(31px,4.1vw,54px);font-weight:600;letter-spacing:-.035em;line-height:1.14;max-width:940px}
+h3{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.em{color:var(--green)}
+.lede{font-size:clamp(15px,1.7vw,20px);line-height:1.75;color:var(--muted);max-width:800px;margin-top:20px}
+.caption{font-size:12px;color:var(--hint);line-height:1.6}
+.rule{height:3px;width:48px;border-radius:3px;background:var(--green-2);margin:28px 0}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:34px}
+.pill{padding:5px 10px;border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--muted);background:var(--paper)}
+.pill.green{border-color:var(--mint-2);background:var(--mint);color:var(--green)}
+.pill.amber{border-color:#F0D89B;background:var(--amber);color:var(--amber-ink)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,82px);align-items:center}
+.cols.tight{gap:20px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:14px;padding:19px 20px;background:var(--paper)}
+.card p{font-size:13px;color:var(--muted);line-height:1.65;margin-top:8px}
+.card .eyebrow{font-size:11px;color:var(--hint);letter-spacing:.08em;margin-bottom:7px}
+.card.green{background:var(--mint);border-color:var(--mint-2)}
+.card.amber{background:var(--amber);border-color:#F0D89B}
+.card.red{background:var(--red);border-color:#F1C5C5}
+.hero-mark{margin-top:42px;border:1px solid var(--line);border-radius:16px;padding:20px 24px;max-width:970px;background:#FCFCFA}
+.hero-mark .title{font-size:12px;color:var(--hint);margin-bottom:9px}
+.sentence{font-family:var(--serif);font-size:clamp(19px,2.2vw,29px);line-height:1.55;letter-spacing:-.01em}
+.under{border-bottom:3px solid var(--mint-2)}
+.src-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.src{font-size:11px;border-radius:5px;padding:3px 7px;background:var(--mint);color:var(--green)}
+.src.b{background:var(--blue);color:var(--blue-ink)}
+.src.c{background:var(--amber);color:var(--amber-ink)}
+.metric-stack{display:grid;gap:12px}
+.metric{border-left:3px solid var(--green);background:var(--mint);padding:17px 18px;border-radius:0 12px 12px 0}
+.metric.red{border-left-color:var(--red-ink);background:var(--red)}
+.metric.amber{border-left-color:var(--amber-ink);background:var(--amber)}
+.metric .num{font-size:clamp(28px,4vw,45px);font-weight:600;letter-spacing:-.04em;line-height:1;color:var(--green)}
+.metric.red .num{color:var(--red-ink)}
+.metric.amber .num{color:var(--amber-ink)}
+.metric .label{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.45}
+.compare{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:24px}
+.compare .side{padding:22px 24px;min-height:255px}
+.compare .side:first-child{border-right:1px solid var(--line);background:#FAFAF8}
+.compare .side h3{margin-bottom:14px}
+.compare ul{list-style:none;padding:0;margin:0}
+.compare li{font-size:13px;color:var(--muted);padding:9px 0;border-bottom:1px solid var(--line)}
+.compare li:last-child{border-bottom:none}
+.compare .bad li:before{content:"×";display:inline-block;width:18px;color:var(--red-ink);font-weight:600}
+.compare .good li:before{content:"✓";display:inline-block;width:18px;color:var(--green);font-weight:600}
+.source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:28px}
+.source{border:1px solid var(--line);border-radius:14px;padding:20px;min-height:222px;background:var(--paper)}
+.source .grade{font-size:12px;font-weight:600;color:var(--green);margin-bottom:14px;letter-spacing:.06em}
+.source.b .grade{color:var(--blue-ink)}
+.source.c .grade{color:var(--amber-ink)}
+.source h3{font-size:17px}
+.source p{font-size:13px;color:var(--muted);line-height:1.65;margin-top:9px}
+.source .limit{font-size:12px;margin-top:15px;padding-top:12px;border-top:1px solid var(--line);color:var(--ink);font-weight:600}
+.ledger{margin-top:24px;border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:#FCFCFA;display:flex;gap:16px;align-items:flex-start}
+.ledger .dot{width:11px;height:11px;border-radius:50%;background:var(--green);margin-top:5px;flex:0 0 auto}
+.ledger b{font-size:14px}.ledger p{font-size:13px;color:var(--muted);margin-top:4px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:28px}
+.zone{border-radius:16px;padding:24px;min-height:315px;border:1px solid var(--line)}
+.zone.template{background:#F1EFE8}
+.zone.llm{background:var(--mint);border-color:var(--mint-2)}
+.zone .tag{font-size:11px;letter-spacing:.11em;font-weight:600;color:var(--muted)}
+.zone.llm .tag{color:var(--green)}
+.zone h3{font-size:22px;margin-top:12px}
+.zone p{font-size:14px;color:var(--muted);margin-top:10px;max-width:37ch}
+.zone ul{list-style:none;margin:18px 0 0;padding:0}
+.zone li{font-size:13px;margin-bottom:7px;padding-left:16px;position:relative;color:var(--ink)}
+.zone li:before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:50%;background:var(--line-strong)}
+.zone.llm li:before{background:var(--green-2)}
+.numeric{border:1px solid #F0D89B;background:var(--amber);border-radius:12px;padding:13px 16px;font-size:13px;color:var(--amber-ink);margin-top:15px}
+.chain{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:28px}
+.chain-step{position:relative;border:1px solid var(--line);border-radius:14px;padding:18px 16px;min-height:183px;background:var(--paper)}
+.chain-step .no{font-size:12px;color:var(--green);font-weight:600}.chain-step h3{font-size:16px;margin-top:11px}.chain-step p{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:8px}
+.chain-step:after{content:"→";position:absolute;right:-21px;top:50%;transform:translateY(-50%);z-index:1;color:var(--green-2);font-size:20px;background:var(--paper);width:22px;text-align:center}
+.chain-step:last-child:after{display:none}
+.stop{display:flex;align-items:center;gap:12px;margin-top:20px;padding:12px 15px;border:1px solid #F1C5C5;border-radius:10px;background:var(--red);font-size:13px;color:var(--red-ink)}
+.stop .x{font-size:20px;font-weight:600}.stop b{color:var(--red-ink)}
+.roi{display:grid;grid-template-columns:.85fr 1.15fr;gap:34px;align-items:start;margin-top:28px}
+.roi-formula{background:var(--mint);border:1px solid var(--mint-2);border-radius:16px;padding:24px}
+.roi-formula .formula{font-family:var(--serif);font-size:22px;line-height:1.55;color:var(--green);margin-top:14px}
+.roi-formula p{font-size:13px;color:var(--muted);margin-top:13px}
+.account{display:grid;gap:12px}
+.account-row{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.account-row:last-child{border-bottom:none}.account-row b{font-size:14px}.account-row p{font-size:13px;color:var(--muted);line-height:1.65}
+.roadmap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:30px;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.road{padding:25px 23px;min-height:240px;background:var(--paper);border-right:1px solid var(--line)}
+.road:last-child{border-right:none;background:var(--mint)}
+.road .phase{font-size:12px;font-weight:600;color:var(--green);letter-spacing:.09em}.road h3{font-size:19px;margin-top:13px}.road p{font-size:13px;color:var(--muted);line-height:1.7;margin-top:9px}
+.ask{margin-top:28px;border-radius:14px;padding:19px 22px;background:var(--ink);color:#fff}.ask b{font-size:15px}.ask p{font-size:13px;opacity:.8;line-height:1.7;margin-top:5px}
+.footer{position:absolute;left:clamp(32px,7vw,112px);right:clamp(32px,7vw,112px);bottom:18px;display:flex;justify-content:space-between;gap:16px;font-size:11px;color:var(--hint)}
+.nav{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:grid;gap:9px;z-index:10}.nav button{width:9px;height:9px;border-radius:50%;border:none;background:#C6C4BD;padding:0;cursor:pointer;transition:transform .18s,background .18s}.nav button.on{background:var(--green);transform:scale(1.55)}
+@media(max-width:820px){
+  html{scroll-snap-type:none}.slide{min-height:auto;padding:54px 24px 58px}.topline{margin-bottom:28px}.cols,.roi{grid-template-columns:1fr;gap:24px}.cards,.source-grid,.chain,.roadmap{grid-template-columns:1fr}.cards{gap:10px}.compare,.split{grid-template-columns:1fr}.compare .side:first-child{border-right:none;border-bottom:1px solid var(--line)}.chain-step{min-height:auto}.chain-step:after{content:"↓";right:auto;left:50%;top:auto;bottom:-23px;transform:translateX(-50%);background:var(--paper);height:24px;line-height:24px}.chain-step:last-child:after{display:none}.road{min-height:auto;border-right:none;border-bottom:1px solid var(--line)}.road:last-child{border-bottom:none}.account-row{grid-template-columns:92px 1fr}.nav{display:none}.footer{position:static;margin-top:28px;font-size:10px}.hero-mark{margin-top:28px}
+}
+@media print{html{scroll-snap-type:none}body{background:#fff}.deck{max-width:none}.slide{min-height:100vh;page-break-after:always;break-after:page}.nav{display:none}}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<section class="slide" id="s1">
+  <div class="topline"><div class="section">AI Clinical Documentation</div><div class="section-num">01 / 07</div></div>
+  <div class="cols">
+    <div>
+      <h1>让 AI 进入<br><span class="em">病历生产线</span>，<br>不进入临床判断。</h1>
+      <p class="lede">病历影子写手不是聊天润色框。它只使用当前患者、当前就诊、当前文书里有出处的事实，在院内生成一份草稿，然后等医生确认。</p>
+      <div class="pills">
+        <span class="pill green">院内私有化部署</span>
+        <span class="pill green">HIS 近实时事实取数</span>
+        <span class="pill">本地语音转写</span>
+        <span class="pill">仅回写 HIS 草稿区</span>
+      </div>
+    </div>
+    <div class="hero-mark" aria-label="病历句子与事实来源的关联示意">
+      <div class="title">一条能进草稿的病历句子，长这样</div>
+      <div class="sentence">"<span class="under">专科情况已见于当次查体记录</span>，相关检验指标以已签发报告为准。"</div>
+      <div class="src-row">
+        <span class="src">来源 A · HIS 已核实记录</span>
+        <span class="src b">来源 B · 医生口述</span>
+        <span class="src c">来源 C · 患者陈述，仅作陈述</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><span>断指再植专病试点 · 影子写手产品构想</span><span>每句有出处，缺口看得见</span></div>
+</section>
+
+<section class="slide alt" id="s2">
+  <div class="topline"><div class="section">Why / The real problem</div><div class="section-num">02 / 07</div></div>
+  <div class="cols">
+    <div>
+      <h2>真正危险的，<br>不是 AI 文笔不好，<br>而是它会把<span class="em">信息缺口</span>写得很顺。</h2>
+      <div class="rule"></div>
+      <p class="lede">错别字谁都能看出来。难审的是另一种错误：体征、数值、时间写得临床上完全合理，却没有任何出处。</p>
+      <div class="compare">
+        <div class="side bad">
+          <h3>普通"生成式病历"</h3>
+          <ul>
+            <li>把病历和检索片段一起交给模型</li>
+            <li>缺字段时按常识自动补全</li>
+            <li>不同患者的相似病例可能同场出现</li>
+            <li>生成后难以回答：这句话从哪里来？</li>
+          </ul>
+        </div>
+        <div class="side good">
+          <h3>影子写手</h3>
+          <ul>
+            <li>先锁定患者、就诊、文书类型</li>
+            <li>先建事实账本，再组织语言</li>
+            <li>缺口显示为缺口，不改写为"正常"</li>
+            <li>患者特异性句子逐句映射事实 ID</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="metric-stack">
+      <div class="metric red"><div class="num">10 / 10</div><div class="label">裸 RAG 且患者字段缺失时，10 次测试均出现串抄或编造。<br>这是最危险的真实失效路径。</div></div>
+      <div class="metric amber"><div class="num">7 / 10</div><div class="label">多个相似患者记录同时在场时，原始 top-3 召回发生跨患者污染。</div></div>
+      <div class="metric"><div class="num">0 / 10</div><div class="label">在已测对抗场景中，加入脱敏、字段白名单、数值槽位三道闸后，未检出污染或编造。</div></div>
+      <p class="caption">测试条件：Qwen3.8-27B-AWQ-INT4，每组 n=10。0/10 表示该组测试未检出，并非泛化安全承诺。</p>
+    </div>
+  </div>
+  <div class="footer"><span>写得快，大模型都能做到</span><span>句句有出处，才是这套系统存在的理由</span></div>
+</section>
+
+<section class="slide" id="s3">
+  <div class="topline"><div class="section">How / Three sources</div><div class="section-num">03 / 07</div></div>
+  <h2>三类输入，<br>先分等级，再进账本。</h2>
+  <p class="lede">每条输入先标注来源与证据等级，再进入统一事实账本。录音笔和麦克风只是采集终端，不能给事实的等级加分。</p>
+  <div class="source-grid">
+    <div class="source">
+      <div class="grade">A · 系统锚点</div>
+      <h3>HIS / EMR 已核实事实</h3>
+      <p>当前患者、当前就诊、当前文书所需字段按白名单近实时读取。检验、医嘱、护理生命体征、已签发报告均需带状态。</p>
+      <div class="limit">只有 <code>verified</code> 数据可作为冲突判定锚</div>
+    </div>
+    <div class="source b">
+      <div class="grade">B · 医生陈述</div>
+      <h3>医生单人口述</h3>
+      <p>由录音笔、领夹麦或工作站麦克风采集，院内 ASR 转写。它可以承载查体、判断、计划，但必须保留语义标签。</p>
+      <div class="limit">数值先确认，再进入确定性槽位</div>
+    </div>
+    <div class="source c">
+      <div class="grade">C · 患方陈述</div>
+      <h3>医患对话</h3>
+      <p>患者与家属陈述可丰富主诉与现病史，也可暴露事实冲突；但它始终只是患者或家属的陈述。</p>
+      <div class="limit">永不升格为查体结果或诊断</div>
+    </div>
+  </div>
+  <div class="ledger">
+    <div class="dot"></div><div><b>统一事实账本，而非把所有内容塞进提示词</b><p>每条事实包含 fact_id、source_type、fact_status、事件时间与原文切片；冲突保留为 <code>conflict</code>，不由模型悄悄"抹平"。</p></div>
+  </div>
+  <p class="caption" style="margin-top:13px">影像边界：PACS 图像仅作展示引用；进入事实账本的是放射科已签发报告，不让模型读片下诊断。接口字段、时延与权限以院方正式授权为准。</p>
+  <div class="footer"><span>A 级做判定锚，B 级承载叙事，C 级永远只是陈述</span><span>证据等级，决定每条事实能用在哪里</span></div>
+</section>
+
+<section class="slide alt" id="s4">
+  <div class="topline"><div class="section">How / Right engine, right job</div><div class="section-num">04 / 07</div></div>
+  <div class="cols tight">
+    <div>
+      <h2>不是所有病历文字，<br>都应该经过大模型。</h2>
+      <div class="rule"></div>
+      <p class="lede">实测 68 份断指再植入院记录：全身体格检查平均 857 字，占整份 52%，长度区间只有 837 到 907 字，几乎逐字相同。这 857 个字不需要文采，需要的是逐项勾选。</p>
+    </div>
+    <div class="card amber"><div class="eyebrow">产品原则</div><h3>把模型放在它擅长的地方</h3><p>模型负责整理已确认事实、形成医生可读的叙事；规则、模板与槽位负责不能容错的内容。幻觉源消除了，高价值的语言组织才真正留给 AI。</p></div>
+  </div>
+  <div class="split">
+    <div class="zone template">
+      <div class="tag">ZERO MODEL ZONE</div>
+      <h3>结构化事实 + 模板引擎</h3>
+      <p>全身体检、个人史、婚育史、家族史等内容，按字段记录而非由模型"补写"。</p>
+      <ul>
+        <li>逐项选择：正常 / 异常描述 / 未查</li>
+        <li>禁止默认"全部正常"</li>
+        <li>模板填充，不产生语言模型幻觉</li>
+      </ul>
+    </div>
+    <div class="zone llm">
+      <div class="tag">CONTROLLED LLM ZONE</div>
+      <h3>事实账本 + 受控组织生成</h3>
+      <p>现病史、专科情况、诊疗经过、出院医嘱等需要时序与语言组织的部分，才使用 LLM。</p>
+      <ul>
+        <li>每句患者特异陈述映射事实 ID</li>
+        <li>缺口、冲突、待回报显示在正文之外</li>
+        <li>生成后进入独立校验 agent</li>
+      </ul>
+      <div class="numeric">生命体征、检验值、剂量、单位不经过模型，全部由已确认数据槽位回填。</div>
+    </div>
+  </div>
+  <div class="footer"><span>让模板干模板的活</span><span>让模型干模型的活</span></div>
+</section>
+
+<section class="slide" id="s5">
+  <div class="topline"><div class="section">How / Safety workflow</div><div class="section-num">05 / 07</div></div>
+  <h2>一份草稿进入 HIS 前，<br>必须通过四道不能绕过的关。</h2>
+  <div class="chain">
+    <div class="chain-step"><div class="no">01</div><h3>身份锚定</h3><p>先锁定患者、就诊、文书类型。未锚定，HIS 取数、语音、图像均拒绝接入。</p></div>
+    <div class="chain-step"><div class="no">02</div><h3>事实与缺口</h3><p>先按字段白名单取 HIS，再采集口述与对话。系统只问当前缺什么，最多补问两轮。</p></div>
+    <div class="chain-step"><div class="no">03</div><h3>生成与校验隔离</h3><p>生成 agent 只写有事实支持的正文；校验 agent 不带生成对话历史，独立检查出处、时序、左右侧、数值与诊断强度。</p></div>
+    <div class="chain-step"><div class="no">04</div><h3>医生确认与草稿回写</h3><p>医生逐项确认后，仅回写 HIS 草稿区。正式修改、复核、签署始终在 HIS 内完成。</p></div>
+  </div>
+  <div class="stop"><div class="x">×</div><div><b>阻断不是异常，是产品能力。</b>任何 conflict、关键缺口、待回报或未确认的高风险事实存在时，状态只能停在 <code>needs_review</code>，禁止进入草稿回写。</div></div>
+  <div class="cards" style="margin-top:24px">
+    <div class="card"><div class="eyebrow">取数审计</div><h3>谁在何时取了什么</h3><p>患者、就诊、字段、调用人、时间与结果状态全程留痕，保存周期按院方规则执行。</p></div>
+    <div class="card"><div class="eyebrow">生成审计</div><h3>哪句话用到了哪些事实</h3><p>每句与 fact_id 的映射可回溯，便于医生在复核时快速定位原始依据。</p></div>
+    <div class="card"><div class="eyebrow">回写审计</div><h3>AI 只到草稿，不到签名</h3><p>系统不自动提交正式病历；医生在正式系统的修改与签署责任不可替代。</p></div>
+  </div>
+  <div class="footer"><span>三道审计全程留痕：取数、生成、回写</span><span>AI 只到草稿，签名永远属于医生</span></div>
+</section>
+
+<section class="slide alt" id="s6">
+  <div class="topline"><div class="section">ROI / Show the math</div><div class="section-num">06 / 07</div></div>
+  <h2>这笔账，<br>我们<span class="em">当面算</span>。</h2>
+  <p class="lede">所有假设摆在明处，可以当场改。试点结束后，全部换成科室自己的实测数据。这页上的每个数字，都要经得起主任、病案室和信息科的共同追问。</p>
+  <div class="roi">
+    <div class="roi-formula">
+      <div class="section">一笔明账 · 量级估算</div>
+      <div class="formula">每份省 10 分钟 × 月 640 份<br>= 107 小时/月，约 13 个工作日<br>≈ 1.6 万元/月，约 19 万元/年</div>
+      <p>假设：月 80 台手术，单次住院 AI 参与约 8 份文书，人力按 150 元/小时。这是量级估算，不是报价；试点 4 周后，用实测数据替换全部假设。</p>
+    </div>
+    <div class="account">
+      <div class="account-row"><b>医生账</b><p>从启动文书到拿到可审草稿，花了多少时间、改了几轮、最终采纳多少。它回答：医生的写作负担真的轻了吗？</p></div>
+      <div class="account-row"><b>质量账</b><p>无源句子拦下多少、冲突捕获多少、缺口闭环率，以及文书时效与返修情况。它回答：风险在进正式病历前被拦下了吗？</p></div>
+      <div class="account-row"><b>数据账</b><p>可复用的事实字段、专病随访口径、规则覆盖度。它回答：一次书写，能不能沉淀成科室自己的临床数据资产？</p></div>
+      <div class="account-row"><b>投入账</b><p>算力按院内资源池包年，软件赠予、不作独立采购项；接口一次性实施，不改 HIS 核心；等保与审计按院方既有要求执行。</p></div>
+    </div>
+  </div>
+  <p class="caption" style="margin-top:22px">计价与试点分开谈：算力按院内资源池包年配置，具体金额与接口范围以商务方案为准。试点前冻结基线口径，试点后由临床、病案、信息三方共同复盘；本页数字均为量级估算，最终以试点实测为准。</p>
+  <div class="footer"><span>先把基线量出来，再谈收益</span><span>断指再植是样板间，算力规模在全院</span></div>
+</section>
+
+<section class="slide" id="s7">
+  <div class="topline"><div class="section">Path / From proof to platform</div><div class="section-num">07 / 07</div></div>
+  <h2>先在一件最难的事上做深，<br>再把能力带到全院。</h2>
+  <div class="roadmap">
+    <div class="road"><div class="phase">PHASE 1 · 专病验证</div><h3>断指再植影子写手</h3><p>用三源事实、事实账本、语音与草稿回写跑通一个高风险高复杂度专病。目标是证明：事实可溯、缺口可见、医生愿意用。</p></div>
+    <div class="road"><div class="phase">PHASE 2 · 科室复制</div><h3>手外 / 骨科高频文书</h3><p>将证据规则、字段映射、零模型模板与校验逻辑复制到病程、查房、交接、出院等更高频文书。</p></div>
+    <div class="road"><div class="phase">PHASE 3 · 医院能力</div><h3>全院病历生产与质控</h3><p>面向多科室日常文书与批量质控建设院内 AI 资源池。专病积累的规则与审计能力成为全院底座。</p></div>
+  </div>
+  <div class="ask"><b>试点启动，需要院方共同确认三件事</b><p>1. 当前患者、当前就诊、当前文书的 HIS 字段白名单与草稿区回写边界； 2. 医患录音知情与院内 ASR 部署边界； 3. 一条病区路径、一类文书、一个可冻结的试点基线。</p></div>
+  <div class="pills" style="margin-top:18px"><span class="pill green">专病先行</span><span class="pill green">规则沉淀</span><span class="pill green">全院扩展</span><span class="pill amber">所有接口与合规项以院方书面授权为准</span></div>
+  <div class="footer"><span>影子写手不替医生写病历</span><span>它把医生已经知道的事实，变成可追溯、可复核的草稿</span></div>
+</section>
+
+</div>
+<div class="nav" id="nav" aria-label="页面导航"></div>
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var nav = document.getElementById('nav');
+  var buttons = [];
+  slides.forEach(function(slide, index){
+    var button = document.createElement('button');
+    button.setAttribute('aria-label', '跳转至第 ' + (index + 1) + ' 页');
+    button.addEventListener('click', function(){ slide.scrollIntoView({behavior:'smooth', block:'start'}); });
+    nav.appendChild(button);
+    buttons.push(button);
+  });
+  function refresh(){
+    var middle = window.scrollY + window.innerHeight * 0.5;
+    var active = 0;
+    slides.forEach(function(slide, index){ if(slide.offsetTop <= middle){ active = index; } });
+    buttons.forEach(function(button, index){ button.className = index === active ? 'on' : ''; });
+  }
+  window.addEventListener('scroll', refresh, {passive:true});
+  window.addEventListener('resize', refresh);
+  document.addEventListener('keydown', function(event){
+    if(event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    var middle = window.scrollY + window.innerHeight * 0.5;
+    var current = 0;
+    slides.forEach(function(slide, index){ if(slide.offsetTop <= middle){ current = index; } });
+    var next = event.key === 'ArrowDown' ? Math.min(current + 1, slides.length - 1) : Math.max(current - 1, 0);
+    if(next !== current){ event.preventDefault(); slides[next].scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
+  refresh();
+})();
+</script>
+</body>
+</html>
